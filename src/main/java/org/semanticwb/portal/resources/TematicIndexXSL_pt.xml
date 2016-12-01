@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xslfile>admresource.xslt</xslfile>
+    <form name="frmIndiceTematicoXSL" action="true" method="POST" enctype="multipart/form-data">
+        <admdbconnmgr defconn="true"/>
+        <fieldset>
+            <input type="file" name="template" label="Modelo (xsl, xslt):" filetype="xsl|xslt" jsrequired="false" showfile="true" isshowfiletype="true" isremovefile="true" showmsg="Ver modelo..." editmsg="Editar modelo..." removemsg="Remover modelo" msg="Modelo atual: " bydefault="{@webpath}/swbadmin/xsl/TematicIndexXSL/indiceTematicoXSL.xslt" msgbydefault="Modelo padrão: " />
+            <input type="text" name="pageBase" label="Pai página:" promptMessage="Identificador da página pai" />            
+        </fieldset>
+        
+        <fieldset>
+            <input type="submit" value="Salvar" />
+            <input type="reset"  value="Restablecer" />
+        </fieldset>
+    </form>
+</admresource>

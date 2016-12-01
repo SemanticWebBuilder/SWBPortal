@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xslfile>admresource.xslt</xslfile>
+    
+    <form name="frmAdmRes" action="true" method="post" enctype="multipart/form-data" jsframework="dojo" >
+        <admdbconnmgr defconn="true"/>
+        <fieldset legend="Aparência">
+            <input type="file" name="template" label="Modelo (xsl, xslt)" filetype="xsl|xslt" jsrequired="false" showfile="true" isshowfiletype="true" isremovefile="true" showmsg="Ver modelo..." editmsg="Editar modelo..." removemsg="Remover modelo" msg="Modelo atual: " bydefault="{@webpath}/swbadmin/xsl/WBSiteMap/WBSiteMap.xsl" msgbydefault="Modelo padrão: " />
+            <input type="text" name="title" label="Título:" maxlength="60" promptMessage="Título" />
+            <input type="text" name="level" label="Nível de implantação:" value="1" maxlength="3" jsvaltype="js_numbers" invalidMessage="Nível deve ser um valor numérico" promptMessage="Nivel de despliegue" />
+            <input type="text" name="home" label="ID da seção inicial:" maxlength="50" promptMessage="ID da seção inicial do mapa"/>
+        </fieldset>
+
+        <fieldset legend="Configuração da estratégia">
+            <statictext name="txtTarget">¿Como você quiser acessar o site de recursos mapa?:</statictext>
+            <input type="text" name="lnktexto" label="Texto da Liga:" maxlength="50" promptMessage="Text link" />
+            <input type="text" name="btntexto" label="Button label:" maxlength="50" promptMessage="Button label" />
+            <input type="file" name="img" label="Imagem (gif, jpg, jpeg, png):" filetype="jpg|jpeg|gif|png" showfile="true" isshowfiletype="true" isremovefile="true" removemsg="Remover imagem" />
+            <input type="text" name="alt" label="Texto alternativo:" maxlength="50" promptMessage="Texto alternativo. Acessibilidade Orientação" />
+
+            <statictext name="note">
+            <![CDATA[
+                <font style="color: #428AD4; font-family: Verdana; font-size:10px;">
+                * Os dados necessários
+                </font>
+            ]]>
+            </statictext>
+        </fieldset>
+
+        <fieldset>
+            <input type="submit" value="Salvar" onclick="jsValida(this.form)" />
+            <input type="reset"  value="Restabelecer"/>
+        </fieldset>
+    </form>
+
+    <script type="text/javascript">
+        <![CDATA[
+        function jsValida(frm) {
+            if( !frm.lnktexto.value && !frm.btntexto.value && !frm.img.value  && !dojo.byId('wbNoFile_img') ) {
+                alert('Fornecer o mecanismo para acessar o site de recursos mapa.');
+                frm.lnktexto.focus();
+                return false;
+            }
+            if( frm.img.value && !frm.alt.value ) {
+                alert('Digite o texto alternativo para a imagem.');
+                frm.alt.focus();
+                return false;
+            }
+            return true;
+        }
+        ]]>
+    </script>
+</admresource>

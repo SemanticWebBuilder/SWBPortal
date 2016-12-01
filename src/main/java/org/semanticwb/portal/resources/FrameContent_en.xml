@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xslfile>admresource.xslt</xslfile>
+    <form name="frmAdmRes" action="true" method="post" jsframework="dojo" >
+        <admdbconnmgr defconn="true"/>
+        <fieldset legend="Content Settings">
+            <input type="text" name="url" label="Web address" promptMessage="Web address" jsrequired="true"/>
+        </fieldset>
+
+        <fieldset>
+            <input type="submit" name="btnSave" id="btnSave" value="Save" />
+            <input type="reset"  name="btnReset" id="btnReset" value="Reset" />
+        </fieldset>
+    </form>
+</admresource>

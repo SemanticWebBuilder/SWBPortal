@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xslfile>admresource.xslt</xslfile>
+    <form name="frmLanguage" action="true" method="POST" enctype="multipart/form-data">
+        <admdbconnmgr defconn="true"/>
+        <fieldset legend="Settings">
+            <input type="file" name="template" label="Template (xsl, xslt)" filetype="xsl|xslt" jsrequired="false" showfile="true" isshowfiletype="true" isremovefile="true" showmsg="Show template..." editmsg="Edit template..." removemsg="Remove template" msg="Current template: " bydefault="{@webpath}/swbadmin/xsl/Language/Language.xslt" msgbydefault="Default template: " />
+        </fieldset>
+        
+        <fieldset>
+            <input type="submit" value="Save" />
+            <input type="reset" value="Reset" />
+        </fieldset>
+    </form>
+</admresource>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xslfile>admresource.xslt</xslfile>
+
+    <form name="frmMenuMap" action="true" method="post" enctype="multipart/form-data" jsframework="dojo">
+        <admdbconnmgr defconn="true"/>
+        <fieldset legend="Look &amp; Feel">
+            <input type="file" name="template" label="Template (xsl, xslt):" filetype="xsl|xslt" jsrequired="false" showfile="true" isshowfiletype="true" isremovefile="true" showmsg="Show template..." editmsg="Edit template..." removemsg="Remove template"  msg="Current template: " bydefault="{@webpath}/swbadmin/xsl/WBMenuMap/WBMenuMap.xslt" msgbydefault="Default template: " />
+        </fieldset>
+
+        <fieldset legend="Setting Strategy">
+            <input type="text" id="basetopic" name="basetopic" label="Base section:" promptMessage="Section ID that serves as home or base" />
+            <input type="text" id="nini" name="nini" label="Show the menu to be at this level:" promptMessage="Show menu map from this level. For example, home is located at Level 1" />
+            <input type="checkbox" name="bro" label="Hide sibblings" value="false" promptMessage="Check this option to hide the sections of the same level" />
+            <input type="checkbox" name="bro4ch" label="If no children show sibblings" value="true" promptMessage="Check this option to display the same level sections" />
+            <input type="text" name="nsup" label="Show the menu to this level:" maxlength="3" jsvaltype="js_numbers" invalidMessage="Boundary invalid" promptMessage="Show up to this level counting from top to bottom" />
+            <input type="text" name="ninf" label="Boundary lower levels:" maxlength="3" jsvaltype="js_numbers" invalidMessage="Boundary invalid" promptMessage="Show up to this level counting from bottom to top" />
+        </fieldset>
+
+        <fieldset>
+            <input type="submit" value="Save" />
+            <input type="reset"  value="Reset"/>
+        </fieldset>
+    </form>
+</admresource>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xslfile>admresource.xslt</xslfile>
+    <form name="frmAdmRes" action="true" method="post" enctype="multipart/form-data" jsframework="dojo" >
+    <admdbconnmgr defconn="true"/>
+    <fieldset legend="Configurações de Conteúdo">
+        <input type="file" id="audio" name="audio" label="Áudio (au, wav, rm, mp3, wma):" showfile="true" filetype="au|wav|rm|mp3|wma" isshowfiletype="true" isremovefile="true" removemsg="Remover áudio" size="40" />
+        <statictext name="auto">Iniciar automaticamente</statictext>
+        <input type="radio" id="automatic0" name="automatic" label="Se" value="true" />
+        <input type="radio" id="automatic1" name="automatic" label="Não" value="false" checked="true" />
+        <statictext name="cntrls">Show Controls</statictext>
+        <input type="radio" id="controls0" name="controls" label="Se" value="true" checked="true" />
+        <input type="radio" id="controls1" name="controls" label="Não" value="false" />
+        <statictext name="lp">Continuous Play</statictext>
+        <input type="radio" id="loop0" name="loop" label="Se" value="true" />
+        <input type="radio" id="loop1" name="loop" label="Não" value="false" checked="true" />
+    </fieldset>
+
+    <fieldset legend="Aspecto">
+        <input type="text" id="width"  name="width" label="Largura" maxlength="9" regExp="\d{1,6}" invalidMessage="Inválido larga" promptMessage="Largura da imagem. Exemplos: 320" />
+        <input type="text" id="height" name="height" label="Altura" maxlength="9" regExp="\d{1,6}" invalidMessage="Altura inválido" promptMessage="Altura da imagem. Exemplos: 280" />
+
+        <select name="align" label="Alinhar">
+            <option value="left">Esquerda</option>
+            <option value="right">Direito</option>
+            <option value="center">Centro</option>
+        </select>
+    </fieldset>
+
+    <fieldset>
+        <input type="submit" name="btnSave" id="btnSave" value="Guardar" onclick="return jsValida(this.form)" />
+        <input type="reset"  name="btnReset" id="btnReset" value="Reset" />
+    </fieldset>
+    </form>
+
+    <script type="text/javascript">
+        <![CDATA[
+        function jsValida(frm) {
+            if( isEmpty(dojo.byId('audio').value) && !dojo.byId('wbNoFile_audio') ) {
+                alert('Especifique um arquivo de áudio');
+                dojo.byId('audio').focus();
+                return false;
+            }
+            return true;
+        }
+        ]]>
+    </script>
+</admresource>

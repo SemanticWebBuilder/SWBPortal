@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xslfile>admresource.xslt</xslfile>
+
+    <form name="frmAdmRes" id="frmAdmRes" action="true" method="post" enctype="multipart/form-data" jsframework="dojo">
+    <admdbconnmgr defconn="true"/>    
+    
+    <fieldset>
+        <input type="file" name="template" label="Plantilla (xsl, xslt):" filetype="xsl|xslt" jsrequired="false" showfile="true" isshowfiletype="true" 
+               isremovefile="true" showmsg="Ver plantilla..." editmsg="Editar plantilla..." removemsg="Quitar plantilla" msg="Plantilla actual: " 
+               bydefault="{@webpath}/swbadmin/xsl/Contact/Contact.xsl" msgbydefault="Plantilla por defecto: " />
+        
+        <input type="text" name="instruction1" label="Instrucción telefónica"  maxlength="512" jsrequired="true" 
+               value="Muchas gracias por su interés. Puede contactarnos enviándonos un mensaje de correo, proporcionando la información solicitada. Por teléfono, comuníquese al número "
+               promptMessage="Instrucciones para contactarnos por teléfono" />
+        
+        <input type="text" name="instruction2" label="Instrucción de correo"  maxlength="512" jsrequired="true" 
+               value="Envíenos un correo electrónico proporcionando la siguiente información:"
+               promptMessage="Instrucciones para envío de correo" />
+    </fieldset>
+    
+    <fieldset legend="Configuración de contenido">
+        <statictext name="txtTarget">¿Cómo desea mostrar el recurso de contacto?</statictext>
+        <input type="radio" name="modal" label="Modal" value="true"/>
+        <input type="radio" name="modal" label="No Modal" value="false" checked="true" />
+    </fieldset>
+
+    <div title="Estrategia" open="false">
+    <fieldset legend="Configuración de estrategia">
+        <statictext name="txtTarget">¿Cómo desea acceder al recurso de contacto?</statictext>
+        <input type="text" name="link" label="Texto de la liga" maxlength="50" promptMessage="Texto de la liga" />
+
+        <input type="text" name="label" label="Etiqueta del botón" maxlength="50" promptMessage="Etiqueta del botón" />
+
+        <input type="file" name="image" label="Imagen (gif, jpg, jpeg, png)" showfile="true" filetype="jpg|jpeg|gif|png" isshowfiletype="true" isremovefile="true" removemsg="Quitar imagen" size="40"/>
+        <input type="text" name="alt" label="Texto alterno" maxlength="50" promptMessage="Texto alterno de la imagen" />
+    </fieldset>
+    </div>
+
+    <div title="Contacto" open="false">
+    <fieldset legend="Datos del contacto">
+        <input type="text" name="name" label="Nombre del contacto"  maxlength="40" jsrequired="true" promptMessage="Nombre completo del contacto" />
+        <input type="text" name="email" label="Correo electrónico del contacto" maxlength="40" jsrequired="false" regExp="^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" promptMessage="Correo electrónico del contacto" invalidMessage="Correo electrónico inválido" />
+        <input type="text" name="degree" label="Cargo o puesto" maxlength="40" jsrequired="true" promptMessage="Cargo o puesto del contacto" />
+        <input type="text" name="phone" label="Teléfono del contacto" maxlength="12" jsrequired="false" promptMessage="Número telefónico del contacto" />
+        <input type="text" name="address" label="Domicilio del contacto o de la razón social" maxlength="60" promptMessage="Domicilio del contact o de la razón social" />
+    </fieldset>
+    </div>
+
+    <div title="Dimensiones" open="false">
+    <fieldset legend="Aspecto">
+        <input type="text" name="title" label="Título" maxlength="40" jsrequired="false" promptMessage="Razón social" />
+        <input type="text" id="width"  name="width" value="360" label="Ancho" maxlength="4" regExp="\d{1,4}" invalidMessage="Ancho inválido" promptMessage="Ancho del cuadro de diálogo. Este valor se considera en pixeles" jsrequired="true" />
+        <input type="text" id="height" name="height" value="420" label="Alto" maxlength="4" regExp="\d{1,4}" invalidMessage="Altura inválida" promptMessage="Altura del cuadro de diálogo. Este valor se considera en pixeles" jsrequired="true" />
+
+        <statictext name="note">
+        <![CDATA[
+            <font style="color: #428AD4; font-family: Verdana; font-size:10px;">
+            * Dato requerido
+            </font>
+        ]]>
+        </statictext>
+    </fieldset>
+    </div>
+
+    <fieldset>
+        <input type="submit" name="btnSave" value="Guardar" onclick="return jsValida(this.form)" />
+        <input type="reset"  name="btnReset" value="Restablecer" />
+    </fieldset>
+    </form>
+
+    <script type="text/javascript">
+        <![CDATA[
+        if(!document.frmAdmRes.modal[0].checked && !document.frmAdmRes.modal[1].checked)
+                document.frmAdmRes.modal[1].checked=true;
+
+        var regemail = new RegExp('^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+.)+([a-zA-Z0-9]{2,4})+$');
+
+        function jsValida(frm) {
+            if( !frm.name.value ) {
+                alert('Indique el nombre del contacto.');
+                frm.name.focus();
+                return false;
+            }
+            if( !regemail.test(frm.email.value) ) {
+                alert('La dirección de correo electrónico del contacto es incorrecta.');
+                frm.email.focus();
+                return false;
+            }
+            if( !frm.title.value ) {
+                alert('Indique el título o cargo del contacto o razón social.');
+                frm.title.title();
+                return false;
+            }
+            if( !frm.phone.value ) {
+                alert('Indique el teléfono del contacto o razón social.');
+                frm.phone.focus();
+                return false;
+            }
+            if( frm.modal[1].checked&&!frm.secid.value ) {
+                alert('Indique el identificador de la sección que muestra el formulario de contacto.');
+                frm.secid.focus();
+                return false;
+            }
+
+            if( !frm.link.value && !frm.label.value && !frm.image.value  && !dojo.byId('wbNoFile_image') ) {
+                alert('Indique el mecanismo para acceder al recurso de contacto.');
+                frm.link.focus();
+                return false;
+            }
+            if( frm.image.value && !frm.alt.value ) {
+                alert('Indique el texto alterno para la imagen.');
+                frm.alt.focus();
+                return false;
+            }
+            if( !frm.width.value ) {
+                alert('Indique la anchura del cuadro de diálogo.');
+                frm.width.focus();
+                return false;
+            }
+            if( !frm.height.value ) {
+                alert('Indique la altura del cuadro de diálogo.');
+                frm.width.focus();
+                return false;
+            }
+
+            return true;
+        }
+        ]]>
+    </script>
+</admresource>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<!--
+ * VirtualResource.xml.xml
+ *
+ * Created on 24 de enero de 2005, 07:27 PM
+ *
+ * @author  Javier Solis
+ -->
+    <xslfile>admresource.xslt</xslfile>
+    <form name="frmAdmRes" action="true" method="post" jsframework="dojo" >
+        <admdbconnmgr defconn="true"/>
+        <fieldset legend="Configuración">
+            <input type="text" id="tmid" name="tmid" label="Identificador do site" maxlength="60" promptMessage="Identificador do site" jsrequired="true" />
+            <input type="text" id="resid" name="resid" label="Identificador do recurso" maxlength="9" regExp="\d{1,9}" invalidMessage="Identificador incorrecto" promptMessage="Identificador do recurso" jsrequired="true" />
+        </fieldset>
+
+        <fieldset>
+            <input type="submit" name="btnSave" id="btnSave" value="Salvar" onclick="return jsValida(this.form)" />
+            <input type="reset"  name="btnReset" id="btnReset" value="Restablecer" />
+        </fieldset>
+    </form>
+</admresource>

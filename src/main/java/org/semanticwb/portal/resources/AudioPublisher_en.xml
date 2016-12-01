@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xslfile>admresource.xslt</xslfile>
+    <form name="frmAdmRes" action="true" method="post" enctype="multipart/form-data" jsframework="dojo" >
+    <admdbconnmgr defconn="true"/>
+    <fieldset legend="Content Settings">
+        <input type="file" id="audio" name="audio" label="Audio (au, wav, rm, mp3, wma):" showfile="true" filetype="au|wav|rm|mp3|wma" isshowfiletype="true" isremovefile="true" removemsg="Remove audio" size="40" />
+        <statictext name="auto">Automatically start</statictext>
+        <input type="radio" id="automatic0" name="automatic" label="Yes" value="true" />
+        <input type="radio" id="automatic1" name="automatic" label="No" value="false" checked="true" />
+        <statictext name="cntrls">Show controls</statictext>
+        <input type="radio" id="controls0" name="controls" label="Yes" value="true" checked="true" />
+        <input type="radio" id="controls1" name="controls" label="No" value="false" />
+        <statictext name="lp">Continuous Play</statictext>
+        <input type="radio" id="loop0" name="loop" label="Yes" value="true" />
+        <input type="radio" id="loop1" name="loop" label="Yes" value="false" checked="true" />
+    </fieldset>
+
+    <fieldset legend="Aspect">
+        <input type="text" id="width"  name="width" label="Width" maxlength="9" regExp="\d{1,6}" invalidMessage="Invalid wide" promptMessage="Image width. Examples: 320" />
+        <input type="text" id="height" name="height" label="Height" maxlength="9" regExp="\d{1,6}" invalidMessage="Height invalid" promptMessage="Image height. Examples: 280" />
+
+        <select name="align" label="Align">
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+            <option value="center">Center</option>
+        </select>
+    </fieldset>
+
+    <fieldset>
+        <input type="submit" name="btnSave" id="btnSave" value="Save" onclick="return jsValida(this.form)" />
+        <input type="reset"  name="btnReset" id="btnReset" value="Reset" />
+    </fieldset>
+    </form>
+
+    <script type="text/javascript">
+        <![CDATA[
+        function jsValida(frm) {
+            if( isEmpty(dojo.byId('audio').value) && !dojo.byId('wbNoFile_audio') ) {
+                alert('Specify an audio file');
+                dojo.byId('audio').focus();
+                return false;
+            }
+            return true;
+        }
+        ]]>
+    </script>
+</admresource>
