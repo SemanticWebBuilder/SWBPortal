@@ -891,7 +891,7 @@ public class SWBPortal {
         admFiles = new ConcurrentHashMap();
         try {
             log.debug("Loading admin Files from: /WEB-INF/lib/SWBAdmin.jar");
-            String zipPath = SWBUtils.getApplicationPath() + "/WEB-INF/lib/SWBAdmin.jar";
+            String zipPath = SWBUtils.getApplicationPath() + "/WEB-INF/lib/SWBAdmin-5.0-SNAPSHOT.jar";
             ZipFile zf = new ZipFile(zipPath);
             Enumeration e = zf.entries();
             while (e.hasMoreElements()) {
