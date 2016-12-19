@@ -86,7 +86,7 @@ public class SWBASiteLog extends GenericResource {
         out.println(" </thead>");
         out.println(" <tbody>");
         int cont = 0;
-        final String sql = "select distinct log_objuri, log_date, log_action, log_propid from swb_admlog where log_user='" + user.getURI() + "' group by log_objuri order by log_date desc";
+        final String sql = "select distinct log_objuri, log_date, log_action, log_propid from swb_admlog where log_user='" + user.getURI() + "' group by log_objuri, log_date, log_action, log_propid order by log_date desc";
         Connection con = SWBUtils.DB.getDefaultConnection("SiteLog:doView");
         SemanticObject sobj;
         SemanticClass scls;
