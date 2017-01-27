@@ -15,25 +15,29 @@
                     <include>**/*.xslt</include>
                 </includes>
             </resource>
-        </resources>        
+        </resources>
     </build>
     <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
         <repository>
             <id>SWBExternalDeps</id>
             <name>SWBExternalDeps</name>
             <url>https://github.com/SemanticWebBuilder/SWBExternalDeps/raw/master/</url>
-        </repository>  
-    </repositories>      
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.github.SemanticWebBuilder</groupId>
             <artifactId>SWBTripleStore</artifactId>
-            <version>${project.version}</version>
+            <version>jitpack-dependencies-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.github.SemanticWebBuilder</groupId>
             <artifactId>SWBModel</artifactId>
-            <version>${project.version}</version>
+            <version>jitpack-dependencies-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -74,7 +78,7 @@
             <groupId>org.semanticwb.external</groupId>
             <artifactId>fileupload-ext</artifactId>
             <version>1.0.0</version>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
