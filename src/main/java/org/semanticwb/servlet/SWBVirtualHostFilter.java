@@ -60,7 +60,6 @@ import org.semanticwb.servlet.internal.RobotFile;
 import org.semanticwb.servlet.internal.ShowFile;
 import org.semanticwb.servlet.internal.TreeSelectFormElement;
 import org.semanticwb.servlet.internal.Work;
-//import cn.bluejoe.elfinder.servlet.SWBConnectorServlet;
 
 /* MAPS74 Dynamic Tracing - Requires Java SDK 7.0 y Solaris* /
 import com.sun.tracing.ProviderFactory;
@@ -530,12 +529,11 @@ public class SWBVirtualHostFilter implements Filter
             InternalServlet FCKEditorConnector = new SWBConnectorServlet();
             intServlets.put("FCKEditorConnector", FCKEditorConnector);
             FCKEditorConnector.init(filterConfig.getServletContext());
-            
-            InternalServlet elFinderConnector = new SWBConnectorServlet();
+*/            
+            InternalServlet elFinderConnector = new cn.bluejoe.elfinder.servlet.SWBConnectorServlet();
             intServlets.put("elFinderConnector", elFinderConnector);
             elFinderConnector.init(filterConfig.getServletContext());
-*/
-            
+
             InternalServlet frmprocess = new FrmProcess();
             intServlets.put("frmprocess", frmprocess);
             frmprocess.init(filterConfig.getServletContext());
