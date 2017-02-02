@@ -643,8 +643,8 @@ public class SWBPortal {
 //            }
             UserRepository urep = SWBContext.getAdminRepository();
             if (urep == null) {
-                
-                
+
+
                 File nt=new File(SWBUtils.getApplicationPath()+"/swbadmin/rdf/uradm.nt");
                 if(nt.exists())
                 {
@@ -696,9 +696,9 @@ public class SWBPortal {
                     grp2.setModifiedBy(user);
                     grp2.setUndeleteable(true);
                     grp2.setParent(grp1);
-                    user.addUserGroup(grp1);                    
+                    user.addUserGroup(grp1);
                 }
-                
+
                 try {
                     site = SWBContext.getWebSite("demo");
                     if (site == null) {
@@ -716,8 +716,8 @@ public class SWBPortal {
             //Check for GlobalWebSite
             site = SWBContext.getGlobalWebSite();
             if (site == null) {
-                
-                
+
+
                 File file = new File(getWorkPath() + "/sitetemplates/"+SWBContext.WEBSITE_GLOBAL+".zip");
                 //System.out.println(file);
                 if (file.exists()) {
@@ -749,7 +749,7 @@ public class SWBPortal {
     //            dns.setDescription("DNS por default", "es");
     //            dns.setDescription("Default DNS", "en");
     //            dns.setDefault(true);
-    //            dns.setWebPage(home);                    
+    //            dns.setWebPage(home);
                 }
             }
 
@@ -891,7 +891,7 @@ public class SWBPortal {
         admFiles = new ConcurrentHashMap();
         try {
             log.debug("Loading admin Files from: /WEB-INF/lib/SWBAdmin.jar");
-            String zipPath = SWBUtils.getApplicationPath() + "/WEB-INF/lib/SWBAdmin-5.0-SNAPSHOT.jar";
+            String zipPath = SWBUtils.getApplicationPath() + "/WEB-INF/lib/SWBAdmin.jar";
             ZipFile zf = new ZipFile(zipPath);
             Enumeration e = zf.entries();
             while (e.hasMoreElements()) {
@@ -2901,7 +2901,7 @@ public class SWBPortal {
                                         SWBResource res = ((SWBResource) SWBPortal.getResourceMgr().convertOldWBResource(cls.newInstance()));
                                         if (res != null) {
                                             res.install(resourceType);
-                                        } 
+                                        }
                                     }
                                 } catch (Exception e) {
                                     log.error("" + resourceType, e);
@@ -3245,7 +3245,7 @@ public class SWBPortal {
 
 //    /**
 //     * Gets the file upload ctrl string.
-//     * 
+//     *
 //     * @param name the name
 //     * @param request the request
 //     * @return the file upload ctrl string
