@@ -28,6 +28,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.semanticwb.Logger;
@@ -59,7 +62,7 @@ import org.semanticwb.portal.api.SWBResourceURL;
 public class SWBATemplateEdit extends GenericResource {
 
     /** The log. */
-    private Logger log = SWBUtils.getLogger(SWBATemplateEdit.class);
+    private org.semanticwb.Logger log = SWBUtils.getLogger(SWBATemplateEdit.class);
     
     /** The webpath. */
     String webpath = SWBPlatform.getContextPath();
@@ -271,99 +274,115 @@ public class SWBATemplateEdit extends GenericResource {
      */
     @Override
     public void doEdit(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        response.setContentType("text/html; charset=ISO-8859-1");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Pragma", "no-cache");
-        base = getResourceBase();
-        log.debug("doEdit");
-        User user = paramRequest.getUser();
-        String action = request.getParameter("act");
-        String id = request.getParameter("suri");
-        String idvi = request.getParameter("sobj");
-        String vnum = request.getParameter("vnum");
-        SemanticObject so = null;
-        PrintWriter out = response.getWriter();
-        SWBFormMgr fm = null;
-
-        if (action.equals("newversion")) {
-
-            SemanticObject soref = ont.getSemanticObject(id);
-            SWBResourceURL urla = paramRequest.getActionUrl();
-            urla.setAction("newversion");
-
-            //WBFormElement sfe = new SWBFormElement(so);
-
-            fm = new SWBFormMgr(Versionable.swb_VersionInfo, soref, null);
-            fm.addHiddenParameter("suri", id);
-            fm.addHiddenParameter("psuri", id);
-            if (vnum != null) {
-                fm.addHiddenParameter("vnum", vnum);
-            }
-            //fm.addHiddenParameter("sobj", so.getURI());
-            fm.setAction(urla.toString());
-            out.println("<div class=\"swbform\">");
-            out.println("<form id=\"" + id + "/" + idvi + "/" + base.getId() + "/FVIComment\" action=\"" + urla + "\" method=\"post\" onsubmit=\"submitForm('" + id + "/" + idvi + "/" + base.getId() + "/FVIComment');return false;\">");
-            out.println("<input type=\"hidden\" name=\"suri\" value=\"" + id + "\">");
-            //System.out.println("VNUM comment: " + vnum);
-            if (vnum != null) {
-                out.println("<input type=\"hidden\" name=\"vnum\" value=\"" + vnum + "\">");
-            }
-            out.println("<fieldset>");
-            out.println("<table>");
-            out.println("<tbody>");
-            out.println("<tr>");
-            out.println("<td>");
-            out.println(fm.renderElement(request, VersionInfo.swb_versionComment.getLabel()) != null ? fm.renderElement(request, VersionInfo.swb_versionComment.getLabel()) : "Comment");
-            out.println("</td>");
-            out.println("<td>");
-            out.println(fm.renderElement(request, VersionInfo.swb_versionComment, SWBFormMgr.MODE_EDIT));
-            out.println("</td>");
-            out.println("</tr>");
-            out.println("</tbody>");
-            out.println("</table>");
-            out.println("</filedset>");
-            out.println("<filedset>");
-            //out.println("<hr noshade>");
-            out.println("<button dojoType=\"dijit.form.Button\" type=\"submit\" >Guardar</button>"); //_onclick=\"submitForm('"+id+"/"+idvi+"/"+base.getId()+"/FVIComment');return false;\"
-            //out.println("<button dojoType=\"dijit.form.Button\">Favoritos</button>");
-            //out.println("<button dojoType=\"dijit.form.Button\">Eliminar</button>");
-            SWBResourceURL urlb = paramRequest.getRenderUrl();
-            urlb.setMode(SWBResourceURL.Mode_VIEW);
-            urlb.setParameter("act", "");
-            urlb.setParameter("suri", id);
-            out.println("<button dojoType=\"dijit.form.Button\" onclick=\"hideDialog(); return false;\">Cancelar</button>"); //submitUrl('" + urlb + "',this.domNode); hideDialog();
-            out.println("</filedset>");
-            out.println("</form>");
-            out.println("</div>");
-
-        } else if (action.equals("edit")) {
-
-            SWBResourceURL urla = paramRequest.getActionUrl();
-            urla.setAction("update");
-            log.debug("VI id:" + idvi);
-            so = ont.getSemanticObject(idvi);
-            fm = new SWBFormMgr(so, null, SWBFormMgr.MODE_EDIT);
-            fm.addHiddenParameter("suri", id);
-            fm.addHiddenParameter("psuri", id);
-            fm.addHiddenParameter("sobj", so.getURI());
-            fm.setAction(urla.toString());
-
-            out.println(fm.renderForm(request));
-        } else if (action.equals("edit_temp")) {
-            //System.out.println("VNUM: " + vnum);
+    	String action = request.getParameter("act");
+    	String id = request.getParameter("suri");
+    	
+    	if ("edit_temp".equals(action)) {
+    		//System.out.println("VNUM: " + vnum);
             SemanticObject obj = SemanticObject.createSemanticObject(id);
+            String jsp = "/swbadmin/jsp/SWBATemplateEdit/templateEdit.jsp";
             if (obj != null) {
+            	RequestDispatcher rd = request.getRequestDispatcher(jsp);
+            	
+            	try {
+            		request.setAttribute("webSiteId", obj.getModel().getName());
+            		request.setAttribute("templateId", obj.getId());
+            		request.setAttribute("verNum", Integer.parseInt(request.getParameter("vnum")));
+            		rd.include(request, response);
+            	} catch (Exception ex) {
+            		log.error("Error iuncluding templateEditor", ex);
+            	}
+            	//PrintWriter out = response.getWriter();
                 //User user=SWBPortal.getSessionUser();
-                out.println("<div class=\"applet\">");
-                SWBAEditor.getTemplateApplet(new java.io.PrintWriter(out), obj.getModel().getName(), obj.getId(), Integer.parseInt(vnum), user, request.getSession().getId());
-                SWBResourceURL urlb = paramRequest.getRenderUrl();
-                urlb.setMode(SWBResourceURL.Mode_VIEW);
-                urlb.setParameter("act", "");
-                urlb.setParameter("suri", id);
+                //out.println("<div class=\"applet\">");
+                //SWBAEditor.getTemplateApplet(new java.io.PrintWriter(out), obj.getModel().getName(), obj.getId(), Integer.parseInt(request.getParameter("vnum")), paramRequest.getUser(), request.getSession().getId());
+                //SWBResourceURL urlb = paramRequest.getRenderUrl();
+                //urlb.setMode(SWBResourceURL.Mode_VIEW);
+                //urlb.setParameter("act", "");
+                //urlb.setParameter("suri", id);
                 //out.println("<button dojoType=\"dijit.form.Button\" onclick=\"submitUrl('" + urlb + "',this.domNode); return false;\">Cancelar</button>");
-                out.println("</div>");
+                //out.println("</div>");
             }
-        }
+    	} else {
+	    	response.setContentType("text/html; charset=ISO-8859-1");
+	        response.setHeader("Cache-Control", "no-cache");
+	        response.setHeader("Pragma", "no-cache");
+	        Resource base = getResourceBase();
+	        //log.debug("doEdit");
+	        User user = paramRequest.getUser();
+	        
+	        String idvi = request.getParameter("sobj");
+	        String vnum = request.getParameter("vnum");
+	        SemanticObject so = null;
+	        PrintWriter out = response.getWriter();
+	        SWBFormMgr fm = null;
+	
+	        if (action.equals("newversion")) {
+	
+	            SemanticObject soref = ont.getSemanticObject(id);
+	            SWBResourceURL urla = paramRequest.getActionUrl();
+	            urla.setAction("newversion");
+	
+	            //WBFormElement sfe = new SWBFormElement(so);
+	
+	            fm = new SWBFormMgr(Versionable.swb_VersionInfo, soref, null);
+	            fm.addHiddenParameter("suri", id);
+	            fm.addHiddenParameter("psuri", id);
+	            if (vnum != null) {
+	                fm.addHiddenParameter("vnum", vnum);
+	            }
+	            //fm.addHiddenParameter("sobj", so.getURI());
+	            fm.setAction(urla.toString());
+	            out.println("<div class=\"swbform\">");
+	            out.println("<form id=\"" + id + "/" + idvi + "/" + base.getId() + "/FVIComment\" action=\"" + urla + "\" method=\"post\" onsubmit=\"submitForm('" + id + "/" + idvi + "/" + base.getId() + "/FVIComment');return false;\">");
+	            out.println("<input type=\"hidden\" name=\"suri\" value=\"" + id + "\">");
+	            //System.out.println("VNUM comment: " + vnum);
+	            if (vnum != null) {
+	                out.println("<input type=\"hidden\" name=\"vnum\" value=\"" + vnum + "\">");
+	            }
+	            out.println("<fieldset>");
+	            out.println("<table>");
+	            out.println("<tbody>");
+	            out.println("<tr>");
+	            out.println("<td>");
+	            out.println(fm.renderElement(request, VersionInfo.swb_versionComment.getLabel()) != null ? fm.renderElement(request, VersionInfo.swb_versionComment.getLabel()) : "Comment");
+	            out.println("</td>");
+	            out.println("<td>");
+	            out.println(fm.renderElement(request, VersionInfo.swb_versionComment, SWBFormMgr.MODE_EDIT));
+	            out.println("</td>");
+	            out.println("</tr>");
+	            out.println("</tbody>");
+	            out.println("</table>");
+	            out.println("</filedset>");
+	            out.println("<filedset>");
+	            //out.println("<hr noshade>");
+	            out.println("<button dojoType=\"dijit.form.Button\" type=\"submit\" >Guardar</button>"); //_onclick=\"submitForm('"+id+"/"+idvi+"/"+base.getId()+"/FVIComment');return false;\"
+	            //out.println("<button dojoType=\"dijit.form.Button\">Favoritos</button>");
+	            //out.println("<button dojoType=\"dijit.form.Button\">Eliminar</button>");
+	            SWBResourceURL urlb = paramRequest.getRenderUrl();
+	            urlb.setMode(SWBResourceURL.Mode_VIEW);
+	            urlb.setParameter("act", "");
+	            urlb.setParameter("suri", id);
+	            out.println("<button dojoType=\"dijit.form.Button\" onclick=\"hideDialog(); return false;\">Cancelar</button>"); //submitUrl('" + urlb + "',this.domNode); hideDialog();
+	            out.println("</filedset>");
+	            out.println("</form>");
+	            out.println("</div>");
+	
+	        } else if (action.equals("edit")) {
+	
+	            SWBResourceURL urla = paramRequest.getActionUrl();
+	            urla.setAction("update");
+	            log.debug("VI id:" + idvi);
+	            so = ont.getSemanticObject(idvi);
+	            fm = new SWBFormMgr(so, null, SWBFormMgr.MODE_EDIT);
+	            fm.addHiddenParameter("suri", id);
+	            fm.addHiddenParameter("psuri", id);
+	            fm.addHiddenParameter("sobj", so.getURI());
+	            fm.setAction(urla.toString());
+	
+	            out.println(fm.renderForm(request));
+	        }
+    	}
     }
 
     /* (non-Javadoc)
