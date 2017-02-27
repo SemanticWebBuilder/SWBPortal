@@ -285,6 +285,7 @@ public class SWBATemplateEdit extends GenericResource {
             	RequestDispatcher rd = request.getRequestDispatcher(jsp);
             	
             	try {
+            		request.setAttribute("paramRequest", paramRequest);
             		request.setAttribute("webSiteId", obj.getModel().getName());
             		request.setAttribute("templateId", obj.getId());
             		request.setAttribute("verNum", Integer.parseInt(request.getParameter("vnum")));
