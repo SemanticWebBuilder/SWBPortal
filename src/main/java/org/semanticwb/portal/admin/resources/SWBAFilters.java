@@ -263,9 +263,10 @@ public class SWBAFilters extends GenericResource {
      * @param root Nodo raíz para mantener la jerarquía
      * @throws JSONException 
      */
-    private void addSemanticObjectFilter(ArrayList<JSONObject> ret, SemanticObject obj, User user, JSONObject root) throws JSONException {
+    private void addSemanticObjectFilter(ArrayList<JSONObject> ret, SemanticObject obj, User user, JSONObject root, String topicmapId) throws JSONException {
         JSONObject node = createNodeObject(obj.getURI(), obj.getDisplayName(user.getLanguage()), "getSemanticObject."+obj.getURI(), root.getString(TreenodeFields.UID));
         node.put(TreenodeFields.PATH,root.get(TreenodeFields.PATH)+"|"+obj.getURI());
+        node.put(TreenodeFields.TOPICMAP, topicmapId);
         ret.add(node);
         if (obj.getSemanticClass().listHerarquicalNodes().hasNext()) {
             addHierarchicalNodes(ret, obj, user, node);
@@ -277,7 +278,7 @@ public class SWBAFilters extends GenericResource {
             while (it.hasNext()) {
                 SemanticObject ch = it.next();
                 if (ch.instanceOf(FilterableNode.swb_FilterableNode)) {
-                    addSemanticObjectFilter(ret, ch, user, node);
+                    addSemanticObjectFilter(ret, ch, user, node, topicmapId);
                 }
             }
         }
@@ -313,7 +314,8 @@ public class SWBAFilters extends GenericResource {
         while (it.hasNext()) {
             WebSite site = it.next();
             if (!site.isDeleted()) {
-                addSemanticObjectFilter(elements, site.getSemanticObject(), user, server);
+                addSemanticObjectFilter(elements, site.getSemanticObject(), user, server, site.getURI());
+                //addSemanticObjectFilter(elements, site.getSemanticObject(), user, server);
             }
         }
 
@@ -322,7 +324,7 @@ public class SWBAFilters extends GenericResource {
         while (it2.hasNext()) {
             UserRepository urep = it2.next();
             if (urep.getParentWebSite() == null) {
-                addSemanticObjectFilter(elements, urep.getSemanticObject(), user, server);
+                addSemanticObjectFilter(elements, urep.getSemanticObject(), user, server, urep.getURI());
             }
         }
         
@@ -479,7 +481,7 @@ public class SWBAFilters extends GenericResource {
             //Add root object
             JSONObject root = createNodeObject(_root.getURI(), "Menus", "getTopic." + _root.getWebSiteId()+"."+_root.getId(), null);
             root.put(TreenodeFields.PATH, _root.getURI());
-            root.put(TreenodeFields.TOPICMAP, map.getURI());
+            root.put(TreenodeFields.TOPICMAP, map.getId());
             ret.put(root);
             
             JSONArray childs = getWebPageChilds(root, user, true, false);
@@ -786,6 +788,14 @@ public class SWBAFilters extends GenericResource {
         String jsp = "/swbadmin/jsp/SWBAFilters/view.jsp";
         GenericObject gobj = SWBPlatform.getSemanticMgr().getOntology().getGenericObject(request.getParameter("suri"));
         if (null != gobj && gobj instanceof AdminFilter) {
+            AdminFilter af = (AdminFilter)gobj;
+            if (null == af.getXml() || af.getXml().isEmpty()) {
+                Document docres = SWBUtils.XML.getNewDocument();
+                Element res = docres.createElement("res");
+                docres.appendChild(res);
+                af.setXml(SWBUtils.XML.domToXml(docres));
+            }
+            
             jsp = "/swbadmin/jsp/SWBAFilters/edit.jsp";
         }
 
@@ -850,8 +860,12 @@ public class SWBAFilters extends GenericResource {
      */
     private String getXMLFilterData(JSONObject treeData) throws JSONException {
         Document ret = SWBUtils.XML.getNewDocument();
+        Element res = ret.createElement("res");
         Element root = ret.createElement("filter");
+        root.setAttribute("id", treeData.optString("id"));
+        root.setAttribute("topicmap", "uradm");
         
+        ret.appendChild(res);
         //Obtener comportamientos. Siempre son WebPages
         Element eleNode = ret.createElement("elements");
         JSONArray nodes = treeData.optJSONArray("elements");
@@ -904,7 +918,7 @@ public class SWBAFilters extends GenericResource {
         }
         root.appendChild(dirNode);
         
-        ret.appendChild(root);
+        res.appendChild(root);
         return SWBUtils.XML.domToXml(ret);
     }
     
