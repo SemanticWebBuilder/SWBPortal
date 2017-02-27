@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xslfile>admresource.xslt</xslfile>
+    <form name="frmAdmRes" action="true" method="post" enctype="multipart/form-data" jsframework="dojo" >
+        <admdbconnmgr defconn="true"/>
+
+        <fieldset legend="Configuración básica">
+            <input type="text" id="elapsedDays" name="elapsedDays" label="Días transcurridos" maxlength="2" regExp="\d{1,2}" invalidMessage="Valor inválido" promptMessage="Número de días a mostrar" jsrequired="true" value="7"/>
+            <input type="text" id="sb" name="sb" label="Tamaño del tablero" maxlength="1" regExp="\d{1}" invalidMessage="Tamaño inválido" promptMessage="Número de gráficas" jsrequired="true" value="2"/>
+        </fieldset>
+        
+        <fieldset>
+            <input type="submit" name="btnSave" id="btnSave" value="Guardar" />
+            <input type="reset"  name="btnReset" id="btnReset" value="Restablecer" />
+        </fieldset>
+    </form>
+
+    <script type="text/javascript">
+        <![CDATA[
+        dojo.require("dijit.form.Button");
+        dojo.require("dijit.form.ValidationTextBox");
+
+        function jsValida(frm) {
+            if(isEmpty(dojo.byId('img').value) && isEmpty(dojo.byId('code').value) && !dojo.byId('wbNoFile_img')) {
+                alert('Defina una configuración básica');
+                dojo.byId('img').focus();
+                return false;
+            }
+            /*if(!isEmpty(dojo.byId('url').value) && isEmpty(dojo.byId('img').value) && !dojo.byId('wbNoFile_img')) {*/
+            if(isEmpty(dojo.byId('img').value) && !dojo.byId('wbNoFile_img')) {
+                alert('Especifique una imagen para el banner');
+                dojo.byId('img').focus();
+                return false;
+            }
+            return true;
+        }
+        ]]>
+    </script>
+</admresource>

@@ -30,7 +30,7 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,8 +85,10 @@ public class SWBASiteLog extends GenericResource {
         out.println("  <th align=\"left\">"+paramRequest.getLocaleString("date")+"</th>");
         out.println(" </thead>");
         out.println(" <tbody>");
-        int cont = 0;
-        final String sql = "select distinct log_objuri, log_date, log_action, log_propid from swb_admlog where log_user='" + user.getURI() + "' group by log_objuri, log_date, log_action, log_propid order by log_date desc";
+        final String sql = "select log_objuri, log_date, log_action "
+        + "from swb_admlog where log_user='" + user.getURI() + "' "
+        + "order by log_date desc";
+
         Connection con = SWBUtils.DB.getDefaultConnection("SiteLog:doView");
         SemanticObject sobj;
         SemanticClass scls;
@@ -94,26 +96,30 @@ public class SWBASiteLog extends GenericResource {
         String fecha;
         String strObj;
         if (con != null) {
+            HashMap<String,String> unique = new HashMap();
             try {
                 Statement st = con.createStatement();
                 st.setFetchSize(10);
                 ResultSet rs = st.executeQuery(sql);
-                for(int i=0; i<10 && rs.next();  i++) {
-                //while(rs.next()) {
-                    sobj = SemanticObject.createSemanticObject(rs.getString("log_objuri"));
+                String uri;
+                for(int i=0; unique.size()<10 && rs.next();  i++) {
+                    uri = rs.getString("log_objuri");
+                    if(uri == null) continue;
+                    if(unique.containsKey(uri)) continue;
+                    unique.put(uri, uri);
+                    
+                    sobj = SemanticObject.createSemanticObject(uri);
                     if(sobj == null) continue;
+                    if(sobj.getDisplayName()==null) continue;
                     fecha = ""+rs.getTimestamp("log_date");
-                    strObj = "";
-                    if(sobj!=null && sobj.getDisplayName()!="null")
-                        strObj=sobj.getDisplayName();
+                    strObj = sobj.getDisplayName();
                     if(fecha.lastIndexOf(" ")>0) 
                         fecha=fecha.substring(0,fecha.lastIndexOf(" "));
                     try {
-                        //date = sdf.parse(fecha);
                         fecha = dateFmt.format(sdf.parse(fecha));
                     }catch(ParseException pe) {
+                        continue;
                     }
-
                     out.println("<tr>");
                     //out.println("  <td class=\"mov-recurso\">" + rs.getString("log_action") + "</td>");
                     scls=sobj.getSemanticClass();
@@ -131,10 +137,6 @@ public class SWBASiteLog extends GenericResource {
                     //out.println("  <td class=\"mov-recurso\">" + ont.getSemanticProperty(rs.getString("log_propid")).getDisplayName(user.getLanguage()) + "</td>");
                     out.println("  <td class=\"mov-fecha\">" + fecha + "</td>");
                     out.println("</tr>");
-                    cont++;
-                    /*if (cont >= 10) {
-                        break;
-                    }*/
                 }
                 rs.close();
                 st.close();

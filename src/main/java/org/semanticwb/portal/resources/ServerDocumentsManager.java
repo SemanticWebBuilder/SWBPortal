@@ -94,7 +94,7 @@ public class ServerDocumentsManager extends GenericResource {
         htmlCode.append("css/theme.css\">\n");
         htmlCode.append("    <script src=\"");
         htmlCode.append(jsBasePath);
-        htmlCode.append("js/elfinder.min.js\"></script>\n");
+        htmlCode.append("js/elfinder.min.js\"></script>\n");  //
         htmlCode.append("    <script type=\"text/javascript\" charset=\"utf-8\">\n");
         htmlCode.append("      $(document).ready(function() {\n");
         htmlCode.append("        $('#elfinder').elfinder({\n");
