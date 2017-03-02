@@ -28,6 +28,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.UUID;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -39,10 +44,14 @@ import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.GenericObject;
 import org.semanticwb.model.Resource;
+import org.semanticwb.model.ResourceSubType;
+import org.semanticwb.model.ResourceType;
+import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.Template;
 import org.semanticwb.model.User;
 import org.semanticwb.model.VersionInfo;
 import org.semanticwb.model.Versionable;
+import org.semanticwb.model.WebSite;
 import org.semanticwb.platform.SemanticClass;
 import org.semanticwb.platform.SemanticObject;
 import org.semanticwb.platform.SemanticOntology;
@@ -73,6 +82,34 @@ public class SWBATemplateEdit extends GenericResource {
     /** The ont. */
     SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
 
+    
+    private void doAddResource(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
+    	Template tpl = null;
+    	String jsp = "/swbadmin/jsp/SWBATemplateEdit/addResourceDialog.jsp";
+    	String templateId = (String) request.getParameter("templateId");
+    	String websiteId = (String) request.getParameter("webSiteId");
+    	int verNum = Integer.parseInt(request.getParameter("verNum"));
+    	
+    	WebSite site = SWBContext.getWebSite(websiteId);
+    	if (null != site) {
+    		tpl = Template.ClassMgr.getTemplate(templateId, site);
+    	}
+    	
+        if (null != tpl) {
+        	RequestDispatcher rd = request.getRequestDispatcher(jsp);
+        	
+        	try {
+        		request.setAttribute("paramRequest", paramRequest);
+        		request.setAttribute("webSiteId", websiteId);
+        		request.setAttribute("templateId", templateId);
+        		request.setAttribute("verNum", verNum);
+        		rd.include(request, response);
+        	} catch (Exception ex) {
+        		log.error("Error iuncluding addResourceDialog", ex);
+        	}
+        }
+    }
+    
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#doView(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
      */
@@ -266,6 +303,97 @@ public class SWBATemplateEdit extends GenericResource {
 //            }
         }
         return ver;
+    }
+    
+    private void getResourceList(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
+    	response.setContentType("application/json");
+    	PrintWriter out = response.getWriter();
+    	StringBuilder treeData = new StringBuilder();
+    	String templateId = (String) request.getParameter("templateId");
+    	String websiteId = (String) request.getParameter("webSiteId");
+    	int verNum = Integer.parseInt(request.getParameter("verNum"));
+    	WebSite site = SWBContext.getWebSite(websiteId);
+    	User user = paramRequest.getUser();
+    	
+    	SortedMap<String, HashMap<String, String>> elements = new TreeMap();
+    	HashMap<String, String> root = new HashMap<>();
+    	root.put("name", "Recursos");
+    	root.put("uuid", "rootNode");
+    	elements.put("rootNode", root);
+    	
+    	Iterator<ResourceType> rtypes = site.listResourceTypes();
+    	while(rtypes.hasNext()) {
+    		ResourceType rtype = rtypes.next();
+    		if (user.haveAccess(rtype) && rtype.getResourceMode() == ResourceType.MODE_STRATEGY || rtype.getResourceMode() == ResourceType.MODE_SYSTEM) {
+    			//Add parent entry
+    			String uid = UUID.randomUUID().toString();
+    			String rtypeTitle = rtype.getTitle();
+    			HashMap<String, String> entry = new HashMap<>();
+    			entry.put("uuid", uid);
+    			entry.put("name", rtypeTitle);
+    			entry.put("id", rtype.getId());
+    			entry.put("parent", "rootNode");
+    			elements.put(rtypeTitle+"-"+uid, entry);
+    			
+    			Iterator<ResourceSubType> rsubtypes = rtype.listSubTypes();
+    			if (rsubtypes.hasNext()) {
+    				//Add child entries
+    				while (rsubtypes.hasNext()) {
+        				ResourceSubType rsubtype = rsubtypes.next();
+        				
+        				if (user.haveAccess(rtype)) {
+        					String childuid = UUID.randomUUID().toString();
+        					String rsubtypeTitle = rsubtype.getTitle();
+                			HashMap<String, String> childentry = new HashMap<>();
+                			childentry.put("id", rsubtype.getId());
+                			childentry.put("uuid", childuid);
+                			childentry.put("name", rsubtypeTitle);
+                			childentry.put("parent", uid);
+                			childentry.put("subtype", "true");
+                			elements.put(rsubtypeTitle+"-"+childuid, childentry);
+        				}
+        			}
+    			}
+    		}
+    	}
+    	
+    	treeData.append("[");
+    	Iterator<HashMap<String, String>> it = elements.values().iterator();
+    	while(it.hasNext()) {
+    		HashMap<String, String> entry = it.next();
+    		treeData.append("{");
+    		
+    		Iterator<String> objKeys = entry.keySet().iterator();
+    		while(objKeys.hasNext()) {
+    			String key = objKeys.next();
+    			String val = entry.get(key);
+    			
+    			treeData.append("\"").append(key).append("\":");
+    			if (!"subtype".equals(key)) treeData.append("\"");
+    			treeData.append(val);
+				if (!"subtype".equals(key)) treeData.append("\"");
+				
+				if (objKeys.hasNext()) treeData.append(",");
+    		}
+    		
+    		treeData.append("}");
+    		if (it.hasNext()) treeData.append(",");
+    	}
+    	treeData.append("]");
+    	
+    	out.println(treeData.toString());
+    }
+    
+    @Override
+    public void processRequest(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	String mode = paramRequest.getMode();
+    	if ("getResourceList".equals(mode)) {
+    		getResourceList(request, response, paramRequest);
+    	} else if ("addResource".equals(mode)) {
+    		doAddResource(request, response, paramRequest);
+    	} else {
+    		super.processRequest(request, response, paramRequest);
+    	}
     }
 
     // Edición de la VersionInfo dependiendo el SemanticObject relacionado
