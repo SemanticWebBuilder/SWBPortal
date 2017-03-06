@@ -349,7 +349,7 @@ public class SWBATemplateEdit extends GenericResource {
                 			childentry.put("uuid", childuid);
                 			childentry.put("name", rsubtypeTitle);
                 			childentry.put("parent", uid);
-                			childentry.put("subtype", "true");
+                			childentry.put("parenttype", rtype.getId());
                 			elements.put(rsubtypeTitle+"-"+childuid, childentry);
         				}
         			}
