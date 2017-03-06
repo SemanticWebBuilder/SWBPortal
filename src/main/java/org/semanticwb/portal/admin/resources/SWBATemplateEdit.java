@@ -24,10 +24,12 @@ package org.semanticwb.portal.admin.resources;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.SortedMap;
@@ -81,34 +83,6 @@ public class SWBATemplateEdit extends GenericResource {
     
     /** The ont. */
     SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
-
-    
-    private void doAddResource(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
-    	Template tpl = null;
-    	String jsp = "/swbadmin/jsp/SWBATemplateEdit/addResourceDialog.jsp";
-    	String templateId = (String) request.getParameter("templateId");
-    	String websiteId = (String) request.getParameter("webSiteId");
-    	int verNum = Integer.parseInt(request.getParameter("verNum"));
-    	
-    	WebSite site = SWBContext.getWebSite(websiteId);
-    	if (null != site) {
-    		tpl = Template.ClassMgr.getTemplate(templateId, site);
-    	}
-    	
-        if (null != tpl) {
-        	RequestDispatcher rd = request.getRequestDispatcher(jsp);
-        	
-        	try {
-        		request.setAttribute("paramRequest", paramRequest);
-        		request.setAttribute("webSiteId", websiteId);
-        		request.setAttribute("templateId", templateId);
-        		request.setAttribute("verNum", verNum);
-        		rd.include(request, response);
-        	} catch (Exception ex) {
-        		log.error("Error iuncluding addResourceDialog", ex);
-        	}
-        }
-    }
     
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#doView(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
@@ -305,6 +279,13 @@ public class SWBATemplateEdit extends GenericResource {
         return ver;
     }
     
+    /**
+     * Builds a JSON String containing resources data to build resource Tree
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws IOException
+     */
     private void getResourceList(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
     	response.setContentType("application/json");
     	PrintWriter out = response.getWriter();
@@ -389,10 +370,36 @@ public class SWBATemplateEdit extends GenericResource {
     	String mode = paramRequest.getMode();
     	if ("getResourceList".equals(mode)) {
     		getResourceList(request, response, paramRequest);
-    	} else if ("addResource".equals(mode)) {
-    		doAddResource(request, response, paramRequest);
+    	} else if ("getTemplateContent".equals(mode)) {
+    		getTemplateContent(request, response, paramRequest);
     	} else {
     		super.processRequest(request, response, paramRequest);
+    	}
+    }
+    
+    /**
+     * Gets content from a template file.
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
+    private void getTemplateContent(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	response.setContentType("text/html; charset=ISO-8859-1"); //TODO: Revisar por qué debe ser ISO y no UTF-8
+    	String templateId = (String) request.getParameter("templateId");
+    	String websiteId = (String) request.getParameter("webSiteId");
+    	int verNum = Integer.parseInt(request.getParameter("verNum"));
+    	WebSite site = SWBContext.getWebSite(websiteId);
+    	User user = paramRequest.getUser();
+    	Template tpl = site.getTemplate(templateId);
+    	
+    	String templatePath = SWBPortal.getWorkPath() + tpl.getWorkPath() + "/" + verNum + "/" + URLEncoder.encode(tpl.getFileName(verNum));
+    	
+    	if (null != tpl && user.haveAccess(tpl)) {
+    		FileInputStream fis = new FileInputStream(templatePath);
+    		SWBUtils.IO.copyStream(fis, response.getOutputStream());
+    		fis.close();
     	}
     }
 
