@@ -386,7 +386,7 @@ public class SWBATemplateEdit extends GenericResource {
      * @throws IOException
      */
     private void getTemplateContent(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-    	response.setContentType("text/html; charset=ISO-8859-1"); //TODO: Revisar por qué debe ser ISO y no UTF-8
+    	response.setContentType("text/html; charset=UTF-8");
     	String templateId = (String) request.getParameter("templateId");
     	String websiteId = (String) request.getParameter("webSiteId");
     	int verNum = Integer.parseInt(request.getParameter("verNum"));
