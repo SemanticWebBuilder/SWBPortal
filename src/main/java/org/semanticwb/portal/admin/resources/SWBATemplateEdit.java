@@ -37,14 +37,15 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.semanticwb.Logger;
-import org.semanticwb.SWBPlatform;
+
 import org.semanticwb.SWBPortal;
+import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBUtils;
-import org.semanticwb.model.GenericObject;
+import org.semanticwb.platform.SemanticObject;
+import org.semanticwb.platform.SemanticClass;
+import org.semanticwb.platform.SemanticOntology;
 import org.semanticwb.model.Resource;
 import org.semanticwb.model.ResourceSubType;
 import org.semanticwb.model.ResourceType;
@@ -54,9 +55,7 @@ import org.semanticwb.model.User;
 import org.semanticwb.model.VersionInfo;
 import org.semanticwb.model.Versionable;
 import org.semanticwb.model.WebSite;
-import org.semanticwb.platform.SemanticClass;
-import org.semanticwb.platform.SemanticObject;
-import org.semanticwb.platform.SemanticOntology;
+import org.semanticwb.model.GenericObject;
 import org.semanticwb.portal.SWBFormMgr;
 import org.semanticwb.portal.api.GenericResource;
 import org.semanticwb.portal.api.SWBActionResponse;
@@ -83,6 +82,28 @@ public class SWBATemplateEdit extends GenericResource {
     
     /** The ont. */
     SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
+    
+
+    public void doFileExplorer(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	String id = request.getParameter("suri");
+        SemanticObject obj = SemanticObject.createSemanticObject(id);
+        
+        String jsp = "/swbadmin/jsp/SWBATemplateEdit/fileManager.jsp";
+        if (obj != null) {
+        	RequestDispatcher rd = request.getRequestDispatcher(jsp);
+        	
+        	try {
+        		request.setAttribute("paramRequest", paramRequest);
+        		request.setAttribute("webSiteId", obj.getModel().getName());
+        		request.setAttribute("templateId", obj.getId());
+        		request.setAttribute("verNum", Integer.parseInt(request.getParameter("vnum")));
+        		rd.include(request, response);
+        	} catch (Exception ex) {
+        		log.error("Error iuncluding fileManager", ex);
+        	}
+        }
+    }
+    
     
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#doView(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
@@ -372,6 +393,8 @@ public class SWBATemplateEdit extends GenericResource {
     		getResourceList(request, response, paramRequest);
     	} else if ("getTemplateContent".equals(mode)) {
     		getTemplateContent(request, response, paramRequest);
+    	} else if ("fileManager".equals(mode)) {
+    		doFileExplorer(request, response, paramRequest);
     	} else {
     		super.processRequest(request, response, paramRequest);
     	}
