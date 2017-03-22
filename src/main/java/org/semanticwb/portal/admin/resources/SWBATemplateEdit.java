@@ -84,6 +84,34 @@ public class SWBATemplateEdit extends GenericResource {
     SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
     
 
+    /**
+     * Handles HTML content parsing to replace paths on loaded templates.
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
+    public void doParseHTML(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	response.setContentType("text/html; charset=UTF-8");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Pragma", "no-cache");
+    	
+    	PrintWriter out = response.getWriter();
+    	String in = SWBUtils.IO.readInputStream(request.getInputStream(), "UTF-8");
+    	String ret = SWBPortal.UTIL.parseHTML(in, "images/");
+    	
+    	out.print(ret);
+    }
+    
+    /**
+     * Handles fileExplorer mode for TemplateEditor
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
     public void doFileExplorer(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
     	String id = request.getParameter("suri");
         SemanticObject obj = SemanticObject.createSemanticObject(id);
@@ -395,6 +423,8 @@ public class SWBATemplateEdit extends GenericResource {
     		getTemplateContent(request, response, paramRequest);
     	} else if ("fileManager".equals(mode)) {
     		doFileExplorer(request, response, paramRequest);
+    	} else if ("parseHTML".equals(mode)) {
+    		doParseHTML(request, response, paramRequest);
     	} else {
     		super.processRequest(request, response, paramRequest);
     	}
