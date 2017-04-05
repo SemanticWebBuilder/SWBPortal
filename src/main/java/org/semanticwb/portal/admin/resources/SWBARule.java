@@ -22,8 +22,13 @@
  */
 package org.semanticwb.portal.admin.resources;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
@@ -32,18 +37,37 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.semanticwb.*;
-import org.semanticwb.model.*;
+import org.semanticwb.Logger;
+import org.semanticwb.SWBPlatform;
+import org.semanticwb.SWBUtils;
+import org.semanticwb.model.Country;
+import org.semanticwb.model.Device;
+import org.semanticwb.model.DisplayProperty;
+import org.semanticwb.model.Language;
+import org.semanticwb.model.Role;
+import org.semanticwb.model.Rule;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.SWBRuleMgr;
+import org.semanticwb.model.User;
+import org.semanticwb.model.UserGroup;
+import org.semanticwb.model.UserRepository;
+import org.semanticwb.model.WebPage;
+import org.semanticwb.model.WebSite;
 import org.semanticwb.platform.SemanticOntology;
 import org.semanticwb.platform.SemanticProperty;
-import org.semanticwb.portal.api.*;
-import org.w3c.dom.*;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceModes;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class SWBARule.
+ * Admin resource to manage and edit SWBRules.
  * 
  * @author juan.fernandez
+ * @author Hasdai Pacheco
  */
 public class SWBARule extends GenericResource {
 
@@ -69,62 +93,12 @@ public class SWBARule extends GenericResource {
     String xmlAttr = null;
 
     /**
-     * Creates a new instance of Rules.
+     * Creates a new instance of SWBARule resource.
      */
-    public SWBARule() {
-    }
+    public SWBARule() {}
 
     /**
-     * User view, creates the rules.
-     * 
-     * @param request input parameters
-     * @param response an answer to the request
-     * @param paramRequest a list of objects (WebPage, user, action, ...)
-     * @return the applet
-     * @throws SWBResourceException an SWB Resource Exception
-     * @throws IOException an IO Exception
-     */
-
-    private String getApplet(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        StringBuffer ret = new StringBuffer();
-        String suri = request.getParameter("suri");
-        log.debug("getApplet: " + suri);
-        SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
-        Rule rRule = (Rule) ont.getGenericObject(suri);
-        WebPage tp = paramRequest.getWebPage();
-        String tmparam = request.getParameter("tm");
-        if (tmparam == null) {
-            tmparam = paramRequest.getWebPage().getWebSiteId();
-        }
-        if (request.getParameter("tm") != null && request.getParameter("tp") != null) {
-            tp = SWBContext.getWebSite(request.getParameter("tm")).getWebPage(request.getParameter("tp"));
-            tmparam = request.getParameter("tm");
-        }
-        ret.append("\n<div class=\"applet\">");
-        ret.append("\n<applet id=\"rulesApplet\" name=\"rulesApplet\" code=\"applets.rules.RuleApplet.class\" codebase=\"" + SWBPlatform.getContextPath() + "/\"  ARCHIVE=\"swbadmin/lib/SWBAplModeler.jar, swbadmin/lib/SWBAplCommons.jar, swbadmin/lib/SWBAplRules.jar\" width=\"100%\" height=\"500\">");  //ARCHIVE=\"wbadmin/lib/SWBAplGenericTree.jar, wbadmin/lib/SWBAplCommons.jar\"
-        SWBResourceURL urlapp = paramRequest.getRenderUrl();
-        urlapp.setMode("gateway");
-        urlapp.setCallMethod(urlapp.Call_DIRECT);
-        urlapp.setParameter("id", suri);
-        urlapp.setParameter("suri", suri);
-        ret.append("\n<param name=\"jsess\" value=\""+request.getSession().getId()+"\">");
-        ret.append("\n<param name =\"cgipath\" value=\"" + urlapp + "\">");
-        ret.append("\n<param name =\"tm\" value=\"" + rRule.getWebSite().getId() + "\">");
-        if (null != request.getParameter("suri")) {
-            ret.append("\n<param name =\"id\" value=\"" + rRule.getId() + "\">");
-            ret.append("\n<param name =\"suri\" value=\"" + rRule.getId() + "\">");
-        } else {
-            ret.append("\n<param name =\"id\" value=\"0\">");
-        }
-        ret.append("\n<param name =\"act\" value=\"edit\">");
-        ret.append("\n<param name =\"locale\" value=\"" + paramRequest.getUser().getLanguage() + "\">");
-        ret.append("\n</applet>");
-        ret.append("\n</div>");
-        return ret.toString();
-    }
-
-    /**
-     * Add, update or removes rules.
+     * Add, update or remove rules.
      * 
      * @param request input parameters
      * @param response an answer to the request
@@ -133,7 +107,6 @@ public class SWBARule extends GenericResource {
      */
     @Override
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
-
         String accion = request.getParameter("act");
         String id = request.getParameter("id");
         User user = response.getUser();
@@ -236,17 +209,135 @@ public class SWBARule extends GenericResource {
      */
     @Override
     public void processRequest(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        if (paramRequest.getMode().equals("gateway")) {
+    	String mode = paramRequest.getMode();
+    	if (mode.equals("gateway")) {
             doGateway(request, response, paramRequest);
-        } else if ("editRule".equals(paramRequest.getMode())) {
+        } else if ("editRule".equals(mode)) {
         	doEditRule(request, response, paramRequest);
-        } else if ("getRuleFilters".equals(paramRequest.getMode())) {
+        } else if ("getRuleFilters".equals(mode)) {
         	doGetRuleFilters(request, response, paramRequest);
+        } else if ("updateRuleDefinition".equals(mode)) {
+        	doUpdateRuleDefinition(request, response, paramRequest);
         } else {
             super.processRequest(request, response, paramRequest);
         }
     }
+
+    /**
+     * Processes requests to update rule definition object
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
+    public void doUpdateRuleDefinition(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	response.setContentType("text/html; charset=UTF-8");
+    	PrintWriter out = response.getWriter();
+    	User admUser = SWBContext.getAdminUser();
+    	int callm = paramRequest.getCallMethod();
+		
+		if (callm != SWBResourceModes.Call_DIRECT || null == admUser) { //Can only be used with direct call and by admin user
+			out.println("{\"status\":\"error\", \"msg\":\"permission denied\"}");
+			return;
+		}
+		
+		String tmparam = request.getParameter("tm");
+		String ruleId = request.getParameter("id");
+		WebSite site = SWBContext.getWebSite(tmparam);
+		if (null != site && null != site.getRule(ruleId)) {
+			Rule r = site.getRule(ruleId);
+			//Get request body and generate rule XML
+			String body = SWBUtils.IO.readInputStream(request.getInputStream(), "UTF-8");
+			System.out.println("------request body-------");
+			System.out.println(body);
+			System.out.println("-------------------------");
+			if (null != body) {
+				JSONObject payload = new JSONObject(body);
+				String xml = getRuleXML(payload);
+				System.out.println("------new rule definition------");
+				System.out.println(xml);
+				out.println("{\"status\":\"ok\"}");
+			}
+		}
+	
+    }
     
+    /**
+     * Gets Rule element definitions recursively
+     * @param doc Main DOM Document
+     * @param parent current parent element
+     * @param elemDef JSON definition of element
+     */
+    private void getRuleElements(Document doc, Element parent, JSONObject elemDef) {
+    	boolean isNot = elemDef.optBoolean("not", false);
+    	String type = elemDef.optString("condition");
+    	Element el = null;
+    	
+    	if (type.isEmpty()) { //Add condition tag
+    		el = doc.createElement(elemDef.getString("id"));
+    		String op = elemDef.getString("operator");
+    		String val = elemDef.getString("value");
+    		
+    		switch(op) {
+    			case "equal":
+    				op = "=";
+    				break;
+    			case "not_equal":
+    				op = "!=";
+    				break;
+    			case "greater":
+    				op = "&gt;";
+    				break;
+    			case "less":
+    				op = "&lt;";
+    				break;
+    			case "history":
+    				op = val;
+    				break;
+    		}
+    		el.setAttribute("cond", op);
+    		el.setTextContent(val);
+    		parent.appendChild(el);
+    	} else { //Add condition node
+    		if (isNot) type = "not";
+    		JSONArray rules = elemDef.getJSONArray("rules");
+    		if (("AND".equals(type) || "OR".equals(type)) && rules.length() == 1) {
+    			el = parent;
+    		} else {
+    			el = doc.createElement(type.toLowerCase());
+    			parent.appendChild(el);
+    		}
+    		
+	    	for (int i = 0; i < rules.length(); i++) {
+	    		JSONObject rDef = rules.getJSONObject(i);
+	    		getRuleElements(doc, el, rDef);
+	    	}
+    	}
+    }
+    
+    /**
+     * Gets XML string for JSON rule definition
+     * @param ruleDef JSON object for rule definition
+     * @return XML representation of JSON rule definition
+     */
+    private String getRuleXML(JSONObject ruleDef) {
+    	Document ret = SWBUtils.XML.xmlToDom("<?xml version=\"1.0\" encoding=\"UTF-8\"?><rule/>");
+    	Element root = (Element) ret.getElementsByTagName("rule").item(0);
+    	
+    	getRuleElements(ret, root, ruleDef);
+
+    	return SWBUtils.XML.domToXml(ret);
+    }
+    
+    /**
+     * Process requests to get rule configuration options (conditions, operators, values)
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
     public void doGetRuleFilters(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
     	response.setContentType("text/html; charset=UTF-8");
         response.setHeader("Cache-Control", "no-cache");
@@ -257,6 +348,14 @@ public class SWBARule extends GenericResource {
     	out.print(getJSONComboAttr());
     }
     
+    /**
+     * Shows edit UI for rules
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
     public void doEditRule(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
         String rrid = request.getParameter("suri");
@@ -294,6 +393,8 @@ public class SWBARule extends GenericResource {
                     	RequestDispatcher rd = request.getRequestDispatcher(jsp);
                 	
                 		request.setAttribute("paramRequest", paramRequest);
+                		request.setAttribute("ruleId", rRule.getId());
+                		request.setAttribute("ruleModel", rRule.getSemanticObject().getModel().getName());
                 		rd.include(request, response);
                     }
                 }
@@ -800,7 +901,6 @@ public class SWBARule extends GenericResource {
     
     /**
      * Gets a JSON String with the user attributes.
-     * 
      * @return JSON String with the user attributes
      */
     private String getJSONComboAttr() {
