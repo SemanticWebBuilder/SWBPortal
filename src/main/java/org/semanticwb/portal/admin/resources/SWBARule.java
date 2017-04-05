@@ -24,9 +24,14 @@ package org.semanticwb.portal.admin.resources;
 
 import java.io.*;
 import java.util.*;
+
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.semanticwb.*;
 import org.semanticwb.model.*;
 import org.semanticwb.platform.SemanticOntology;
@@ -233,8 +238,68 @@ public class SWBARule extends GenericResource {
     public void processRequest(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         if (paramRequest.getMode().equals("gateway")) {
             doGateway(request, response, paramRequest);
+        } else if ("editRule".equals(paramRequest.getMode())) {
+        	doEditRule(request, response, paramRequest);
+        } else if ("getRuleFilters".equals(paramRequest.getMode())) {
+        	doGetRuleFilters(request, response, paramRequest);
         } else {
             super.processRequest(request, response, paramRequest);
+        }
+    }
+    
+    public void doGetRuleFilters(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	response.setContentType("text/html; charset=UTF-8");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Pragma", "no-cache");
+    	
+    	PrintWriter out = response.getWriter();
+    	
+    	out.print(getJSONComboAttr());
+    }
+    
+    public void doEditRule(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+        SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
+        String rrid = request.getParameter("suri");
+        Rule rRule = (Rule) ont.getGenericObject(rrid);
+        String tmsid = rRule.getWebSite().getId();
+        if (tmsid == null) {
+            tmsid = paramRequest.getWebPage().getWebSiteId();
+        }
+
+        log.debug("tm:"+tmsid);
+
+        comboAtt = null;
+        vecOrderAtt = null;
+        loadComboAttr(tmsid, rRule.getURI(), paramRequest);
+        
+        String accion = request.getParameter("act");
+        if (accion == null) {
+            accion = "edit";
+        }
+
+        try {
+            if (null != rRule) {
+                if (accion.equals("edit") || accion.equals("details")) {
+                    String xml = rRule.getXml();
+                    if (null == xml) {
+                        xml = "<rule/>";
+                        rRule.setXml(xml);
+                    }
+                    System.out.println("-------XML-----");
+                    System.out.println(xml);
+                    Document docxml = SWBUtils.XML.xmlToDom(xml);
+
+                    if (docxml != null) {
+                    	String jsp = "/swbadmin/jsp/SWBARules/view.jsp";
+                    	RequestDispatcher rd = request.getRequestDispatcher(jsp);
+                	
+                		request.setAttribute("paramRequest", paramRequest);
+                		rd.include(request, response);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(paramRequest.getLocaleString("msgErrorEditRule") + ", WBARules.doEdit", e);
         }
     }
 
@@ -250,89 +315,8 @@ public class SWBARule extends GenericResource {
      */
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-
-        response.setContentType("text/html; charset=ISO-8859-1");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Pragma", "no-cache");
-        SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
-        String rrid = request.getParameter("suri");
-        Rule rRule = (Rule) ont.getGenericObject(rrid);
-        String tmsid = rRule.getWebSite().getId();
-        if (tmsid == null) {
-            tmsid = paramRequest.getWebPage().getWebSiteId();
-        }
-
-        log.debug("tm:"+tmsid);
-
-        comboAtt = null;
-        vecOrderAtt = null;
-        loadComboAttr(tmsid, rRule.getURI(), paramRequest);
-        StringBuffer ret = new StringBuffer("");
-        String accion = request.getParameter("act");
-        if (accion == null) {
-            accion = "edit";
-        }
-        String id = "0";
-        SWBResourceURL url = paramRequest.getActionUrl();
-
-        if (request.getParameter("suri") != null) {
-            id = request.getParameter("suri");
-        }
-
-        try {
-            if (!id.equals("0")) {
-                SWBResourceURL urlEdit = paramRequest.getRenderUrl().setMode(paramRequest.Mode_EDIT);
-                urlEdit.setParameter("act", "edit");
-                urlEdit.setParameter("id", id);
-                SWBResourceURL urlDetail = paramRequest.getRenderUrl().setMode(paramRequest.Mode_EDIT);
-                urlDetail.setParameter("act", "details");
-                urlDetail.setParameter("id", id);
-                SWBResourceURL urlHistory = paramRequest.getRenderUrl().setMode(paramRequest.Mode_EDIT);
-                urlHistory.setParameter("act", "history");
-                urlHistory.setParameter("id", id);
-                ret.append("\n<div class=\"swbform\">");
-//                ret.append("\n<fieldset>");
-//                ret.append("\n<TABLE width=\"98%\"  border=\"0\" cellpadding=\"5\" cellspacing=\"0\">");
-//                ret.append("\n<TR>");
-//                ret.append("\n<TD width=\"150\" align=\"right\"> " + paramRequest.getLocaleString("msgIdentifier") + "&nbsp;&nbsp;&nbsp;</TD>");
-//                ret.append("\n<TD>");
-//                ret.append(rRule.getId());
-//                ret.append("\n</TD>");
-//                ret.append("\n</TR>");
-//                ret.append("\n</TABLE></fieldset>");
-
-                if (accion.equals("edit") || accion.equals("details")) {
-                    String xml = null;
-                    xml = rRule.getXml();
-                    if (null == xml) {
-                        xml = "<rule/>";
-                        rRule.setXml(xml);
-                    }
-                    Document docxml = SWBUtils.XML.xmlToDom(xml);
-
-                    sbTree = new StringBuffer();
-                    if (docxml != null) {
-                        Element rule = (Element) docxml.getFirstChild();
-                        elemNum = 0;
-                        rRule = null;
-                        //ret.append("\n<fieldset>");
-                        ret.append("\n<table width=\"100%\"  border=\"0\" cellpadding=\"5\" cellspacing=\"0\" >");
-                        //ret.append("\n<tr><td >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + paramRequest.getLocaleString("msgCriteriaDefinition") + "</td></tr>");
-                        ret.append("\n<tr><td >");
-                        ret.append(getApplet(request, response, paramRequest));
-                        ret.append("\n</td></tr>");
-                        ret.append("\n</table>");
-                        //ret.append("\n</fieldset>");
-                    }
-                    sbTree = null;
-                    docxml = null;
-                }
-                ret.append("\n</div>");
-            }
-        } catch (Exception e) {
-            log.error(paramRequest.getLocaleString("msgErrorEditRule") + ", WBARules.doEdit", e);
-        }
-        response.getWriter().print(ret.toString());
+    	PrintWriter out = response.getWriter();
+        out.print("<iframe style=\"border:0px; width:100%; height:100%; position:absolute; top:0px; left:0px;\" frameborder=\"0\" scrolling=\"no\" src=\""+paramRequest.getRenderUrl().setMode("editRule").setParameter("suri", request.getParameter("suri"))+"\"></iframe>");
     }
 
     /**
@@ -812,6 +796,70 @@ public class SWBARule extends GenericResource {
 //            log.debug("---- "+itkeys.next());
 //        }
 
+    }
+    
+    /**
+     * Gets a JSON String with the user attributes.
+     * 
+     * @return JSON String with the user attributes
+     */
+    private String getJSONComboAttr() {
+    	JSONArray attributes = new JSONArray();
+    	
+    	for (int i = 0; i < vecOrderAtt.size(); i++) {
+            String valor = (String) vecOrderAtt.get(i);
+            HashMap hmAttr = (HashMap) comboAtt.get(valor);
+            String label = (String) hmAttr.get("Etiqueta");
+
+        	JSONObject attribute = new JSONObject();
+            attribute.put("type", (String) hmAttr.get("Tipo"));
+            attribute.put("name", valor);
+            attribute.put("title", label);
+
+            HashMap hmOper = (HashMap) hmAttr.get("Operador");
+            Iterator itOper = hmOper.keySet().iterator();
+            JSONArray operators = new JSONArray();
+            
+            while (itOper.hasNext()) {
+                String thisValue = (String) itOper.next();
+                String thisLabel = (String) hmOper.get(thisValue);
+                JSONObject operator = new JSONObject();
+                operator.put("value", thisValue);
+                operator.put("title", thisLabel);
+                operators.put(operator);
+            }
+            attribute.put("operators", operators);
+            
+            hmOper = null;
+            JSONArray attValues = new JSONArray();
+
+            if (!hmAttr.get("Tipo").equals("TEXT")) {
+                HashMap valoresCombo = (HashMap) hmAttr.get("Valor");
+                Iterator itValCombo = valoresCombo.keySet().iterator();
+                
+                while (itValCombo.hasNext()) {
+                    String nomValCombo = (String) itValCombo.next();
+                    String labelValCombo = (String) valoresCombo.get(nomValCombo);
+                    JSONObject attValue = new JSONObject();
+                    attValue.put("title", labelValCombo);
+                    attValue.put("value", nomValCombo);
+                    attValues.put(attValue);
+                }
+                attribute.put("catalog", attValues);
+            } else {
+                //armar text para pedir/mostrar valor
+            	JSONObject attValue = new JSONObject();
+                attValue.put("title", "");
+                attValue.put("value", "TEXT");
+                attValues.put(attValue);
+                attribute.put("catalog", attValues);
+            }
+            attributes.put(attribute);
+        }
+        
+    	JSONObject ret = new JSONObject();
+    	ret.put("attributes", attributes);
+        return ret.toString();
     }
 
     /**
