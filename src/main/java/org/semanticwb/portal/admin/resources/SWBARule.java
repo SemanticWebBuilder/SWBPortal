@@ -459,7 +459,11 @@ public class SWBARule extends GenericResource {
         
     	PrintWriter out = response.getWriter();
     	JSONObject ret = getRuleJSON(rRule);
-    	out.print(ret.toString());
+    	if (null != ret) {
+    		out.print(ret.toString());
+    	} else {
+    		out.print("{}");
+    	}
     }
     
     /**
