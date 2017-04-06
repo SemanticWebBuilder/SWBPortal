@@ -26,6 +26,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.semanticwb.SWBPlatform;
+import org.semanticwb.SWBPortal;
+import org.semanticwb.model.AdminFilter;
+import org.semanticwb.model.GenericIterator;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.User;
+import org.semanticwb.model.UserGroup;
+import org.semanticwb.model.WebPage;
 import org.semanticwb.portal.api.GenericResource;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
@@ -40,6 +48,9 @@ import org.semanticwb.portal.api.SWBResourceURL;
  * @author jose.jimenez
  */
 public class ServerDocumentsManager extends GenericResource {
+    
+    private UserGroup superUserGroup = null;
+    private UserGroup adminUserGroup = null;
 
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response,
@@ -50,12 +61,16 @@ public class ServerDocumentsManager extends GenericResource {
         String showInterfacePath = paramRequest.getRenderUrl().setMode("showInter").
                 setCallMethod(SWBResourceURL.Call_DIRECT).toString();
         
-        htmlCode.append("<iframe id=\"srvrdcmts");
-        htmlCode.append(this.getResourceBase().getId());
-        htmlCode.append("\" width=\"100%\" height=\"70%\" dojoType=\"dijit.layout.ContentPane\" src=\"");
-        htmlCode.append(showInterfacePath);
-        htmlCode.append("\" frameborder=\"0\"></iframe>");
-        
+        User user = paramRequest.getUser();
+        if (this.validateUser(user, paramRequest.getAdminTopic())) {
+            htmlCode.append("<iframe id=\"srvrdcmts");
+            htmlCode.append(this.getResourceBase().getId());
+            htmlCode.append("\" width=\"100%\" height=\"70%\" dojoType=\"dijit.layout.ContentPane\" src=\"");
+            htmlCode.append(showInterfacePath);
+            htmlCode.append("\" frameborder=\"0\"></iframe>");
+        } else {
+            htmlCode.append(paramRequest.getLocaleString("errorNoAccess"));
+        }
         out.println(htmlCode.toString());
         out.flush();
     }
@@ -65,6 +80,7 @@ public class ServerDocumentsManager extends GenericResource {
         
         PrintWriter out = response.getWriter();
         StringBuilder htmlCode = new StringBuilder(512);
+        String jsBasePath = SWBPlatform.getContextPath() + "/swbadmin/js/elfinder/";
         
         htmlCode.append("<!DOCTYPE html>\n");
         htmlCode.append("<html>\n");
@@ -75,22 +91,41 @@ public class ServerDocumentsManager extends GenericResource {
 //        htmlCode.append("    <link rel=\"stylesheet\" type=\"text/css\" href=\"//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css\">\n");
 //        htmlCode.append("    <script src=\"//ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js\"></script>\n");
 //        htmlCode.append("    <script src=\"//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js\"></script>\n");
-        htmlCode.append("    <link rel=\"stylesheet\" type=\"text/css\" href=\"/swbadmin/js/elfinder/css/jquery-ui.css\">\n");
-        htmlCode.append("    <script src=\"/swbadmin/js/elfinder/js/jquery.min.js\"></script>\n");
-        htmlCode.append("    <script src=\"/swbadmin/js/elfinder/js/jquery-ui.min.js\"></script>\n");
-        htmlCode.append("    <link rel=\"stylesheet\" type=\"text/css\" href=\"/swbadmin/js/elfinder/css/elfinder.min.css\">\n");
-        htmlCode.append("    <link rel=\"stylesheet\" type=\"text/css\" href=\"/swbadmin/js/elfinder/css/theme.css\">\n");
-        htmlCode.append("    <script src=\"/swbadmin/js/elfinder/js/elfinder_beauti.js\"></script>\n");
+        htmlCode.append("    <link rel=\"stylesheet\" type=\"text/css\" href=\"");
+        htmlCode.append(jsBasePath);
+        htmlCode.append("css/jquery-ui.css\">\n");
+        htmlCode.append("    <script src=\"");
+        htmlCode.append(jsBasePath);
+        htmlCode.append("js/jquery.min.js\"></script>\n");
+        htmlCode.append("    <script src=\"");
+        htmlCode.append(jsBasePath);
+        htmlCode.append("js/jquery-ui.min.js\"></script>\n");
+        htmlCode.append("    <link rel=\"stylesheet\" type=\"text/css\" href=\"");
+        htmlCode.append(jsBasePath);
+        htmlCode.append("css/elfinder.min.css\">\n");
+        htmlCode.append("    <link rel=\"stylesheet\" type=\"text/css\" href=\"");
+        htmlCode.append(jsBasePath);
+        htmlCode.append("css/theme.css\">\n");
+        htmlCode.append("    <script src=\"");
+        htmlCode.append(jsBasePath);
+        htmlCode.append("js/elfinder.min.js\"></script>\n");
         htmlCode.append("    <script type=\"text/javascript\" charset=\"utf-8\">\n");
         htmlCode.append("      $(document).ready(function() {\n");
         htmlCode.append("        $('#elfinder').elfinder({\n");
-        htmlCode.append("          url : '/elFinderConnector',  // connector URL (REQUIRED)\n");
+        htmlCode.append("          url : '");
+        htmlCode.append(SWBPlatform.getContextPath());
+        htmlCode.append("/elFinderConnector',  // connector URL (REQUIRED)\n");
         htmlCode.append("          resourceId : '");
         htmlCode.append(this.getResourceBase().getId());
         htmlCode.append("',\n");
         htmlCode.append("          resourcePath : '");
         htmlCode.append(this.getResourceBase().getWorkPath());
+        htmlCode.append("',\n");
+        htmlCode.append("          customData : {\n");
+        htmlCode.append("              URI : '");
+        htmlCode.append(paramRequest.getAdminTopic().getURI());
         htmlCode.append("'\n");
+        htmlCode.append("          }\n");
         htmlCode.append("        });\n");
         htmlCode.append("      });\n");
         htmlCode.append("    </script>\n");
@@ -114,6 +149,47 @@ public class ServerDocumentsManager extends GenericResource {
         } else {
             super.processRequest(request, response, paramRequest);
         }
+        
     }
     
+    /**
+     * Permite el uso del recurso a los usuarios que tengan asignados el grupo de superUsuario
+     * o el grupo de administradores y que ademas tengan un filtro que explicitamente asigne permisos
+     * a la seccion de documentos del servidor.
+     * @param user el usuario a validar
+     * @param webPage la seccion desde donde se esta ejecutando este recurso
+     * @return un boolean indicando si el usuario cumple con los criterios para ejecutar este recurso
+     */
+    private boolean validateUser(User user, WebPage webPage) {
+        
+        boolean userHasAccess = false;
+        boolean superUserGroupKnown = false;
+        
+        if (null == this.superUserGroup) {
+            
+            this.superUserGroup = SWBContext.getAdminRepository().getUserGroup("su");
+            this.adminUserGroup = SWBContext.getAdminRepository().getUserGroup("admin");
+            if (null != this.superUserGroup) {
+                superUserGroupKnown = true;
+            }
+        } else {
+            superUserGroupKnown = true;
+        }
+        
+        if (superUserGroupKnown && user.hasUserGroup(this.superUserGroup)) {
+            userHasAccess = true;
+        } else if (superUserGroupKnown && user.hasUserGroup(this.adminUserGroup)) {
+            GenericIterator<AdminFilter> filterList = user.listAdminFilters();
+            if (null != filterList && filterList.hasNext()) {
+                while (filterList.hasNext()) {
+                    AdminFilter filter = filterList.next();
+                    userHasAccess = filter.haveAccessToWebPage(webPage);
+                    if (userHasAccess) {
+                        break;
+                    }
+                }
+            }
+        }
+        return userHasAccess;
+    }
 }
