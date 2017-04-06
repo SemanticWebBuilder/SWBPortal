@@ -62,6 +62,7 @@ import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceModes;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Admin resource to manage and edit SWBRules.
@@ -218,6 +219,8 @@ public class SWBARule extends GenericResource {
         	doGetRuleFilters(request, response, paramRequest);
         } else if ("updateRuleDefinition".equals(mode)) {
         	doUpdateRuleDefinition(request, response, paramRequest);
+        } else if ("getRuleDefinition".equals(mode)) {
+        	doGetRuleJson(request, response, paramRequest);
         } else {
             super.processRequest(request, response, paramRequest);
         }
@@ -249,18 +252,18 @@ public class SWBARule extends GenericResource {
 			Rule r = site.getRule(ruleId);
 			//Get request body and generate rule XML
 			String body = SWBUtils.IO.readInputStream(request.getInputStream(), "UTF-8");
-			System.out.println("------request body-------");
-			System.out.println(body);
-			System.out.println("-------------------------");
+			//System.out.println("------request body-------");
+			//System.out.println(body);
+			//System.out.println("-------------------------");
 			if (null != body) {
 				JSONObject payload = new JSONObject(body);
 				String xml = getRuleXML(payload);
-				System.out.println("------new rule definition------");
-				System.out.println(xml);
+				//System.out.println("------new rule definition------");
+				//System.out.println(xml);
+				r.setXml(xml);
 				out.println("{\"status\":\"ok\"}");
 			}
 		}
-	
     }
     
     /**
@@ -317,6 +320,96 @@ public class SWBARule extends GenericResource {
     }
     
     /**
+     * Gets JSON object containing rule definition as required by query-builder.
+     * @param rule Rule to get definition from.
+     * @return JSON object containing rule definition or null if rule is undefined.
+     */
+    private JSONObject getRuleJSON(Rule rule) {
+    	Document dom = SWBUtils.XML.xmlToDom(rule.getXml());
+    	Element root = (Element) dom.getElementsByTagName("rule").item(0);
+    	JSONObject ret = null;
+    	
+    	if (null != root) {
+    		NodeList childs = root.getChildNodes();
+    		if (childs.getLength() > 0) {
+    			root = (Element) childs.item(0);
+    		} else {
+    			return ret;
+    		}
+    	}
+    	
+    	return getElementsJSON(root);
+    }
+
+    /**
+     * Gets subrule definitions
+     * @param root Root element to get definitions from
+     * @return Array with subrule definitions
+     */
+    private JSONArray getElementRules(Element root) {
+    	NodeList childs = root.getChildNodes();
+    	
+    	if (childs.getLength() == 0) return null;
+    	
+    	JSONArray rules = new JSONArray();
+    	for (int i = 0; i < childs.getLength(); i++) {
+    		Element child = (Element) childs.item(i);
+    		JSONObject c = getElementsJSON(child);
+    		rules.put(c);
+    	}
+    	
+    	return rules;
+    }
+
+    /**
+     * Gets JSON node with subrule definition or condition definition
+     * @param root Root element
+     * @return JSON node with subrule definition or condition definition
+     */
+    private JSONObject getElementsJSON(Element root) {
+    	JSONObject obj = new JSONObject();
+    	String tagName = root.getTagName();
+    	String types = "and|or|not";
+    	boolean isNot = false;
+    	
+    	if (types.contains(tagName)) {
+    		if("not".equals(tagName)) {
+    			tagName = "and";
+    			isNot = true;
+    		}
+    		obj.put("not", isNot);
+    		obj.put("condition", tagName.toUpperCase());
+    		JSONArray rules = getElementRules(root);
+    		if (null != rules) obj.put("rules", rules);
+    	} else {
+    		obj.put("id", tagName);
+    		String op = root.getAttribute("cond");
+    		String val = root.getTextContent();
+    		switch(op) {
+    			case "=":
+    				op = "equal";
+    				break;
+    			case "!=":
+    				op = "not_equal";
+    				break;
+    			case "&gt;":
+    				op = "greater";
+    				break;
+    			case "&lt;":
+    				op = "less";
+    				break;
+    			default:
+    				if (op.startsWith("-")) op = "history";
+    				break;
+    		}
+    		obj.put("operator", op);
+    		obj.put("value", val);
+    	}
+    	
+    	return obj;
+    }
+    
+    /**
      * Gets XML string for JSON rule definition
      * @param ruleDef JSON object for rule definition
      * @return XML representation of JSON rule definition
@@ -346,6 +439,27 @@ public class SWBARule extends GenericResource {
     	PrintWriter out = response.getWriter();
     	
     	out.print(getJSONComboAttr());
+    }
+    
+    /**
+     * Process requests to get rule configuration data
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
+    public void doGetRuleJson(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	response.setContentType("text/html; charset=UTF-8");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Pragma", "no-cache");
+    	
+        String rrid = request.getParameter("suri");
+        Rule rRule = (Rule) SWBPlatform.getSemanticMgr().getOntology().getGenericObject(rrid);
+        
+    	PrintWriter out = response.getWriter();
+    	JSONObject ret = getRuleJSON(rRule);
+    	out.print(ret.toString());
     }
     
     /**
@@ -384,10 +498,9 @@ public class SWBARule extends GenericResource {
                         xml = "<rule/>";
                         rRule.setXml(xml);
                     }
-                    System.out.println("-------XML-----");
-                    System.out.println(xml);
-                    Document docxml = SWBUtils.XML.xmlToDom(xml);
 
+                    Document docxml = SWBUtils.XML.xmlToDom(xml);
+                    
                     if (docxml != null) {
                     	String jsp = "/swbadmin/jsp/SWBARules/view.jsp";
                     	RequestDispatcher rd = request.getRequestDispatcher(jsp);
