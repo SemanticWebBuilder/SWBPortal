@@ -85,20 +85,16 @@ public class SWBAGlobalAccessMonitor extends GenericResource {
         final Resource base = getResourceBase();
 
         
-//int sb;
-//try {
-//    sb = Integer.parseInt(base.getAttribute("sb","1"));
-//}catch(NumberFormatException nfe) {
-//    sb = 1;
-//}
-        
+        out.println("<script type=\"text/javascript\" src=\""
+                    +SWBPlatform.getContextPath()
+                    +"/swbadmin/js/dojo/dojo/dojo.js\" djconfig=\"parseOnLoad: true, isDebug: false, locale: 'es'\"></script>");
+        out.println("<div class=\"swbform\">");
+        out.println(" <fieldset>");
+        out.println("<a href=\""
+                +paramsRequest.getRenderUrl().setMode(SWBResourceURL.Mode_ADMIN).setParameter("supil", "true")
+                +"\"><img src=\"/swbadmin/images/portlet/configuration.png\" alt=\"Configurar\" /></a>");
 HashMap<String,String> mySites = new HashMap<>();
-//String id;
 WebSite site;
-//Iterator<WebSite> sites;
-//sites = SWBContext.listWebSites(false);
-System.out.println("\n\ndoView....");
-System.out.println("base.getAttribute(\"sites\")="+base.getAttribute("sites"));
 String[] sites;
 if(base.getAttribute("sites")==null) {
     sites=new String[2];
@@ -127,12 +123,9 @@ for(String siteId : sites) {
         mySites.put(siteId, site.getDisplayTitle(lang));
     }
 }
-        out.println("<script type=\"text/javascript\" src=\""
-                    +SWBPlatform.getContextPath()
-                    +"/swbadmin/js/dojo/dojo/dojo.js\" djconfig=\"parseOnLoad: true, isDebug: false, locale: 'es'\"></script>");
+
         
-        out.println("<div class=\"swbform\">");
-        out.println(" <fieldset>");
+
         out.println("  <div style=\"width:450px\">");
         for(Map.Entry<String, String> entry : mySites.entrySet()) {
             out.println("  <div id=\"chart_"+entry.getKey()+"_div\" style=\"border: 1px solid #ccc\"></div>");
@@ -306,11 +299,16 @@ for(String siteId : sites) {
 
     private String getForm(HttpServletRequest request, SWBParamRequest paramsRequest) throws SWBResourceException
     {
-        String name = getClass().getName().substring(getClass().getName().lastIndexOf(".") + 1);
-        WBAdmResourceUtils admResUtils = new WBAdmResourceUtils();
+        //String name = getClass().getName().substring(getClass().getName().lastIndexOf(".") + 1);
+        //WBAdmResourceUtils admResUtils = new WBAdmResourceUtils();
         StringBuilder ret = new StringBuilder();
         Resource base = getResourceBase();
         SWBResourceURL url = paramsRequest.getActionUrl().setAction("update");
+//        final String supil = request.getParameter("supil");
+        final boolean supil = Boolean.parseBoolean(request.getParameter("supil"));
+        if(supil) {
+            url.setParameter("supil", Boolean.toString(supil));
+        }
         
         String siteId;
         WebSite site;
@@ -351,7 +349,6 @@ for(String siteId : sites) {
         ret.append("</tr> \n");
         
         String mySites = base.getAttribute("sites","");
-System.out.println("\n\n 1.-----mySites="+mySites);
         if(mySites.isEmpty()) {
             mySites = SWBContext.WEBSITE_ADMIN;
             site = SWBContext.getWebSite("demo");
@@ -359,7 +356,6 @@ System.out.println("\n\n 1.-----mySites="+mySites);
                 mySites += ",demo";
             }
         }
-System.out.println("2.-----mySites="+mySites);
         ret.append("<tr> \n");
         ret.append("<td align=\"right\">"
                 +paramsRequest.getLocaleString("lblSelectWebSites")+ " *:" + "</td> \n");
@@ -396,8 +392,18 @@ System.out.println("2.-----mySites="+mySites);
             ret.append("<table> \n");
             ret.append("<tr> \n");
             ret.append("\n<td>");   
-            ret.append("\n <button dojoType=\"dijit.form.Button\" type=\"submit\">"+paramsRequest.getLocaleString("btnSubmit")+"</button>&nbsp;");
-            ret.append("\n <button dojoType=\"dijit.form.Button\" type=\"reset\">"+paramsRequest.getLocaleString("btnReset")+"</button>");            
+            ret.append("\n <button dojoType=\"dijit.form.Button\" type=\"submit\">"
+                    +paramsRequest.getLocaleString("btnSubmit")
+                    +"</button>&nbsp;");
+            if(supil) {
+                ret.append("\n <button dojoType=\"dijit.form.Button\" type=\"reset\" onclick=\"window.location.href='")
+                        .append(paramsRequest.getRenderUrl().setMode(SWBResourceURL.Mode_VIEW)).append("'\" >")
+                        .append(paramsRequest.getLocaleString("btnCancel")).append("</button>");
+            }else {
+                ret.append("\n <button dojoType=\"dijit.form.Button\" type=\"reset\">"
+                    +paramsRequest.getLocaleString("btnReset")
+                    +"</button>");
+            }            
             ret.append("\n</td>");
             ret.append("\n</tr>");
             ret.append("\n</table>");
@@ -417,8 +423,7 @@ System.out.println("2.-----mySites="+mySites);
         
         PrintWriter out = response.getWriter();
         
-        //response.setRenderParameter("msg", "msgOkUpdateResource");
-        
+        final boolean supil = Boolean.parseBoolean(request.getParameter("supil"));
         
         String action = null != request.getParameter("act") && !"".equals(request.getParameter("act").trim()) ? request.getParameter("act").trim() : paramRequest.getAction();
 
@@ -430,10 +435,14 @@ System.out.println("2.-----mySites="+mySites);
         {
             String msg = request.getParameter("msg");
             if(msg!=null) {
+                SWBResourceURL url = paramRequest.getRenderUrl().setAction("edit");
+                if(supil) {
+                    url.setMode(SWBResourceURL.Mode_VIEW);
+                }
                 msg = paramRequest.getLocaleString(msg);
                 out.println("<script type=\"text/javascript\" language=\"JavaScript\">");
                 out.println("   alert('" + msg+ " "+ getResourceBase().getId() + "');");
-                out.println("   location='" + paramRequest.getRenderUrl().setAction("edit").toString() + "';");
+                out.println("   location='" + url.toString() + "';");
                 out.println("</script>");
             }
         }
@@ -443,6 +452,8 @@ System.out.println("2.-----mySites="+mySites);
     public void processAction(HttpServletRequest request, SWBActionResponse response)
             throws SWBResourceException, IOException
     {
+System.out.println("processAction...");
+System.out.println("request.getParameter(\"supil\")="+request.getParameter("supil"));
         Resource base = getResourceBase();
         final String action = response.getAction();
         if("update".equalsIgnoreCase(action)) {
@@ -479,6 +490,11 @@ System.out.println("request.getParameterValues(\"sites\")="+request.getParameter
                 //response.setRenderParameter("msg", "msgOkUpdateResource");
             }finally {
                 //response.setAction(SWBResourceURL.Action_ADD);
+            }
+            
+            final String supil = request.getParameter("supil");
+            if(supil != null) {
+                response.setRenderParameter("supil", supil);
             }
         }
     }

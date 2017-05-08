@@ -9,7 +9,9 @@
                 <input type="TEXT" name="fileName1" label="File Web Address" size="50" />
                 <input type="TEXT" name="architecture" label="arquitectura" size="50" />
                 <input type="TEXT" name="historyUrl" label="Url de estadisticas" size="50" />
-                <input type="FILE" name="template" label="template(xsl)" size="50" showfile="true" isremovefile="true" />
+                <input type="file" name="template" label="Template file (xsl, xslt):" size="50" filetype="xsl|xslt" jsrequired="false" showfile="true" isshowfiletype="true" 
+                       isremovefile="true" showmsg="See template..." removemsg="Remove template" msg="Current template: " 
+                       bydefault="/swbadmin/xsl/FileDownload/WBFileDownload.xslt" msgbydefault="Default template: " />
 		<input type="SUBMIT" name="btnSave"  value="Save" class="boton"/>
 		<input type="RESET"  name="btnReset" value="Cancel" class="boton"/>
         </fieldset>

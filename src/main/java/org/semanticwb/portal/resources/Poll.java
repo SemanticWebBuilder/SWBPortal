@@ -1593,11 +1593,20 @@ public class Poll extends GenericResource {
             ret.append("</li>");
 
             ret.append("<li class=\"swbform-li\">");
-            if(!"".equals(base.getAttribute("template", "").trim())) {
-                ret.append("<label class=\"swbform-label\">"+paramRequest.getLocaleString("lblAdmin_curTemplate")+"</label>");
-                ret.append("<a href=\"\">"+base.getAttribute("template")+"</a>");
-            }else {
-                ret.append("<label class=\"swbform-label\">"+paramRequest.getLocaleString("lblAdmin_defTemplate")+":&nbsp;Poll.xsl</label>");
+            if (!"".equals(base.getAttribute("template", "").trim())) {
+                ret.append(("<label class=\"swbform-label\">" + paramRequest.getLocaleString("lblAdmin_curTemplate") + "</label>"));
+                ret.append("<a href=\"");
+                ret.append(SWBPlatform.getContextPath());
+                ret.append(("/showfile?file=" + base.getWorkPath() + "/" + base.getAttribute("template") + "&pathType=res&resUri="));
+                ret.append(this.getResourceBase().getSemanticObject().getEncodedURI());
+                ret.append(("&attr=template\">"+base.getAttribute("template") + "</a>"));
+            } else {
+                ret.append(("<label class=\"swbform-label\">" + paramRequest.getLocaleString("lblAdmin_defTemplate") + ":&nbsp;"));
+                ret.append("<a href=\"");
+                ret.append(SWBPlatform.getContextPath());
+                ret.append("/showfile?file=/swbadmin/xsl/Poll/Poll.xsl&pathType=def&resUri=");
+                ret.append(this.getResourceBase().getSemanticObject().getEncodedURI());
+                ret.append("&attr=template\">Poll.xsl</a></label>");
             }
             ret.append("</li>");
             if( base.getAttribute("template")!=null ) {

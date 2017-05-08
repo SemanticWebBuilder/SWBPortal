@@ -9,6 +9,16 @@
             <input type="text" id="sb" name="sb" label="Tamaño del tablero" maxlength="1" regExp="\d{1}" invalidMessage="Tamaño inválido" promptMessage="Número de gráficas" jsrequired="true" value="2"/>
         </fieldset>
         
+        <fieldset legend="Aspecto">
+            <select name="align" label="Alinear" multiple="true" promptMessage="Seleccionar los sitio web a monitorear">
+                <option value="left">Izquierda</option>
+                <option value="right">Derecha</option>
+                <option value="center">Centro</option>
+            </select>
+            
+
+        </fieldset>
+        
         <fieldset>
             <input type="submit" name="btnSave" id="btnSave" value="Guardar" />
             <input type="reset"  name="btnReset" id="btnReset" value="Restablecer" />

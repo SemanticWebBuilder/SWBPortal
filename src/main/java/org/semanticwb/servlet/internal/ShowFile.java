@@ -24,8 +24,9 @@ package org.semanticwb.servlet.internal;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.net.URLEncoder;
+import java.util.HashMap;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -42,53 +43,124 @@ import org.semanticwb.SWBUtils;
  */
 public class ShowFile implements InternalServlet {
 
-    /** The log. */
-    private static Logger log = SWBUtils.getLogger(ShowFile.class);
+    /** Realizes log operations */
+    private final Logger log = SWBUtils.getLogger(ShowFile.class);
+    
+    /** Contains matches among file types and mime types */
+    private final HashMap<String, String> filesContentTypes = new HashMap<String, String>();
 
-    /* (non-Javadoc)
-     * @see org.semanticwb.servlet.internal.InternalServlet#doProcess(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.servlet.internal.DistributorParams)
+    /**
+     * 
+     * @param request
+     * @param response
+     * @param dparams
+     * @throws IOException
+     * @throws ServletException 
      */
     @Override
-    public void doProcess(HttpServletRequest request, HttpServletResponse response, DistributorParams dparams) throws IOException, ServletException {
+    public void doProcess(HttpServletRequest request, HttpServletResponse response,
+            DistributorParams dparams) throws IOException, ServletException {
+        
         try {
             String path = request.getParameter("file");
             String pathType = request.getParameter("pathType");
             String content = "";
+            String filename = path.substring(path.lastIndexOf('/') + 1);
+            String fileExtension = filename.substring(filename.lastIndexOf('.') + 1);
+            InputStream input = null;
+            boolean isThereData = false;
+
             if (pathType.equals("def")) {
-                content = SWBUtils.IO.readInputStream(SWBPortal.getAdminFileStream(path));
+                if (!"/".equalsIgnoreCase(SWBPlatform.getContextPath()) &&
+                        path.startsWith(SWBPlatform.getContextPath() + "/")) {
+                    path = path.substring(SWBPlatform.getContextPath().length());
+                }
+                input = SWBPortal.getAdminFileStream(path);
+                if (null != input) {
+                    content = SWBUtils.IO.readInputStream(input);
+                    isThereData = true;
+                }
             } else if (pathType.equals("res")) {
-                content = SWBUtils.IO.readInputStream(SWBPortal.getFileFromWorkPath(path));
+                input = SWBPortal.getFileFromWorkPath(path);
+                if (null != input) {
+                    content = SWBUtils.IO.readInputStream(input);
+                    isThereData = true;
+                }
             } else {
                 FileInputStream fileInput = new FileInputStream(path);
                 content = SWBUtils.IO.readInputStream(fileInput);
+                isThereData = true;
             }
-            PrintWriter out = response.getWriter();
+            
+            if (isThereData) {
+                response.setContentType(fileExtension);
+                response.setHeader("Content-disposition","attachment; filename=" + filename);
 
-            out.println("<html>");
-            out.println("<head>");
-            out.println(" <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>");
-            out.println(" <title>EditArea Test</title>");
-            //out.println(" <script language=\"javascript\" type=\"text/javascript\" src=\"/swb/swbadmin/js/editarea/edit_area/edit_area_full.js\"></script>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println(" <applet alt=\"editar xsl\" codebase=\"" + SWBPlatform.getContextPath() + "/\" code=\"applets.edit.XSLEditorApplet\" archive=\"swbadmin/lib/SWBAplXSLEditor.jar, swbadmin/lib/rsyntaxtextarea.jar\" width=\"100%\" height=\"100%\">");
-            out.println("  <param name=\"content\" value=\"" + URLEncoder.encode(content, "UTF-8") + "\" />");
-            out.println("  <param name=\"isDefaultTemplate\" value=\"true\" />");
-            out.println(" </applet>");
-            out.println("</body> \n");
-            out.println("</html> \n");
-
+                PrintWriter out = response.getWriter();
+                out.print(content);
+            
+//            out.println("<html>");
+//            out.println("<head>");
+//            out.println(" <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>");
+//            out.println(" <title>EditArea Test</title>");
+//            //out.println(" <script language=\"javascript\" type=\"text/javascript\" src=\"/swb/swbadmin/js/editarea/edit_area/edit_area_full.js\"></script>");
+//            out.println("</head>");
+//            out.println("<body>");
+//            out.println(" <applet alt=\"editar xsl\" codebase=\"" + SWBPlatform.getContextPath() + "/\" code=\"applets.edit.XSLEditorApplet\" archive=\"swbadmin/lib/SWBAplXSLEditor.jar, swbadmin/lib/rsyntaxtextarea.jar\" width=\"100%\" height=\"100%\">");
+//            out.println("  <param name=\"content\" value=\"" + URLEncoder.encode(content, "UTF-8") + "\" />");
+//            out.println("  <param name=\"isDefaultTemplate\" value=\"true\" />");
+//            out.println(" </applet>");
+//            out.println("</body> \n");
+//            out.println("</html> \n");
+            }
         } catch (Exception e) {
             e.printStackTrace(System.out);
             log.debug(e);
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.semanticwb.servlet.internal.InternalServlet#init(javax.servlet.ServletContext)
+    /**
+     * Initializes the servlet to be ready to use
      */
     @Override
     public void init(ServletContext config) throws ServletException {
         log.event("Initializing InternalServlet ShowFile...");
+        filesContentTypes.put("html", "text/html");
+        filesContentTypes.put("htm", "text/html");
+        filesContentTypes.put("txt", "text/plain");
+        filesContentTypes.put("bmp", "image/bmp");
+        filesContentTypes.put("css", "text/css");
+        filesContentTypes.put("csv", "text/csv");
+        filesContentTypes.put("doc", "application/msword");
+        filesContentTypes.put("docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        filesContentTypes.put("gif", "image/gif");
+        filesContentTypes.put("ico", "image/x-icon");
+        filesContentTypes.put("jar", "application/java-archive");
+        filesContentTypes.put("jpeg", "image/jpeg");
+        filesContentTypes.put("jpg", "image/jpeg");
+        filesContentTypes.put("js", "application/javascript");
+        filesContentTypes.put("json", "application/json");
+        filesContentTypes.put("pdf", "application/pdf");
+        filesContentTypes.put("ppt", "application/vnd.ms-powerpoint");
+        filesContentTypes.put("pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+        filesContentTypes.put("ppsx", "application/vnd.openxmlformats-officedocument.presentationml.slideshow");
+        filesContentTypes.put("rar", "application/x-rar-compressed");
+        filesContentTypes.put("xhtml", "application/xhtml+xml");
+        filesContentTypes.put("xls", "application/vnd.ms-excel");
+        filesContentTypes.put("xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        filesContentTypes.put("xml", "application/xml");
+        filesContentTypes.put("zip", "application/zip");
+        filesContentTypes.put("xsl", "application/xml");
+        filesContentTypes.put("xslt", "application/xml");
+//        filesContentTypes.put("", "application/vnd.ms-powerpoint");
+//        filesContentTypes.put("", "application/vnd.ms-project");
+//        filesContentTypes.put("", "");
+//        filesContentTypes.put("", "");
+//        filesContentTypes.put("", "");
+//        filesContentTypes.put("", "");
+//        filesContentTypes.put("", "");
+//        filesContentTypes.put("", "");
+//        filesContentTypes.put("", "");
+//        filesContentTypes.put("", "");
     }
 }
