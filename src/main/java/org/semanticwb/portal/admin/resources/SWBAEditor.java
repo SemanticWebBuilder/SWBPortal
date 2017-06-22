@@ -32,15 +32,12 @@ import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.base.util.URLEncoder;
-import org.semanticwb.model.AdminFilter;
-import org.semanticwb.model.GenericIterator;
 import org.semanticwb.model.ResourceSubType;
 import org.semanticwb.model.ResourceType;
 import org.semanticwb.model.SWBComparator;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.Template;
 import org.semanticwb.model.User;
-import org.semanticwb.model.UserGroup;
 import org.semanticwb.model.VersionInfo;
 import org.semanticwb.model.WebSite;
 import org.semanticwb.portal.api.GenericResource;
@@ -986,7 +983,11 @@ public class SWBAEditor extends GenericResource
                     
                     //System.out.println("file:"+file);
                     FileOutputStream fout=new FileOutputStream(file);
-                    SWBUtils.IO.copyStream(in, fout);
+                    ByteArrayOutputStream bout=new ByteArrayOutputStream();
+                    SWBUtils.IO.copyStream(in, bout);
+                    String data=new String(bout.toByteArray(),"UTF-8");
+                    fout.write(data.getBytes());                    
+                    
                     //ret = writeFile(in, file);
                     //System.out.println("ret:"+ret);
                 }

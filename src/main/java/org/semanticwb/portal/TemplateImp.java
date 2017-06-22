@@ -302,9 +302,9 @@ public class TemplateImp extends Template
             //FileInputStream in= new FileInputStream(AFUtils.getInstance().getWorkPath()+"/templates/"+recTemplate.getId()+"/"+recTemplate.getActualversion()+"/"+filename);
             HtmlStreamTokenizer tok = null;
             if (filename.startsWith("/"))
-                tok = new HtmlStreamTokenizer(SWBPortal.getFileFromWorkPath(filename, "UTF-8"));
+                tok = new HtmlStreamTokenizer(SWBPortal.getFileFromWorkPath(filename));
             else
-                tok = new HtmlStreamTokenizer(SWBPortal.getFileFromWorkPath(actRelWorkPath + "/" + filename, "UTF-8"));
+                tok = new HtmlStreamTokenizer(SWBPortal.getFileFromWorkPath(actRelWorkPath + "/" + filename));
             StringBuffer auxpart = new StringBuffer();
             //HtmlTag opentag=null;                       //tag inicial
             boolean textpart = false;

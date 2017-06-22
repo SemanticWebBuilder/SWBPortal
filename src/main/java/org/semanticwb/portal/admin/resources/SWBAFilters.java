@@ -715,6 +715,7 @@ public class SWBAFilters extends GenericResource {
      */
     public void doGateway(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
         PrintWriter out = response.getWriter();
         String ret = "";
         String action = paramRequest.getAction();

@@ -23,6 +23,7 @@
 package org.semanticwb.portal.admin.resources;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -93,12 +94,13 @@ public class SWBATemplateEdit extends GenericResource {
      * @throws IOException
      */
     public void doParseHTML(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-    	response.setContentType("text/html; charset=UTF-8");
+    	response.setContentType("text/html");
         response.setHeader("Cache-Control", "no-cache");
         response.setHeader("Pragma", "no-cache");
+        response.setCharacterEncoding("UTF-8");
     	
     	PrintWriter out = response.getWriter();
-    	String in = SWBUtils.IO.readInputStream(request.getInputStream(), "UTF-8");
+    	String in = SWBUtils.IO.readInputStream(request.getInputStream());
     	String ret = SWBPortal.UTIL.parseHTML(in, "images/");
     	
     	out.print(ret);
@@ -439,7 +441,8 @@ public class SWBATemplateEdit extends GenericResource {
      * @throws IOException
      */
     private void getTemplateContent(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-    	response.setContentType("text/html; charset=UTF-8");
+    	response.setContentType("text/html");
+        response.setCharacterEncoding("UTF-8");
     	String templateId = (String) request.getParameter("templateId");
     	String websiteId = (String) request.getParameter("webSiteId");
     	int verNum = Integer.parseInt(request.getParameter("verNum"));
@@ -451,7 +454,9 @@ public class SWBATemplateEdit extends GenericResource {
     	
     	if (null != tpl && user.haveAccess(tpl)) {
     		FileInputStream fis = new FileInputStream(templatePath);
-    		SWBUtils.IO.copyStream(fis, response.getOutputStream());
+                ByteArrayOutputStream out=new ByteArrayOutputStream();
+    		SWBUtils.IO.copyStream(fis, out);
+                response.getWriter().print(out.toString());
     		fis.close();
     	}
     }
@@ -493,7 +498,8 @@ public class SWBATemplateEdit extends GenericResource {
                 //out.println("</div>");
             }
     	} else {
-	    	response.setContentType("text/html; charset=ISO-8859-1");
+	    	response.setContentType("text/html");
+                response.setCharacterEncoding("UTF-8");
 	        response.setHeader("Cache-Control", "no-cache");
 	        response.setHeader("Pragma", "no-cache");
 	        Resource base = getResourceBase();

@@ -700,9 +700,9 @@ public class SWBPortal {
                 }
 
                 try {
-                    site = SWBContext.getWebSite("demo");
+                    site = SWBContext.getWebSite("basico");
                     if (site == null) {
-                        File file = new File(getWorkPath() + "/sitetemplates/demo.zip");
+                        File file = new File(getWorkPath() + "/sitetemplates/basico.zip");
                         if (file.exists()) {
                             log.event("Creating Demo WebSite...");
                             UTIL.InstallZip(file);
@@ -907,8 +907,8 @@ public class SWBPortal {
         }
 
         try {
-            log.debug("Loading admin Files from: /WEB-INF/lib/dojo.jar");
-            String zipPath = SWBUtils.getApplicationPath() + "/WEB-INF/lib/dojo.jar";
+            log.debug("Loading admin Files from: /WEB-INF/lib/dojo.zip");
+            String zipPath = SWBUtils.getApplicationPath() + "/WEB-INF/lib/dojo.zip";
             ZipFile zf = new ZipFile(zipPath);
             Enumeration e = zf.entries();
             while (e.hasMoreElements()) {
