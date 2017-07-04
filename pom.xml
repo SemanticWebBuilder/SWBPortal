@@ -199,9 +199,9 @@
                 <version>1.9.5.4</version>
             </dependency>
             <dependency>
-                <groupId>org.semanticwb.external</groupId>
-                <artifactId>bliki</artifactId>
-                <version>3.0.6</version>
+              <groupId>info.bliki.wiki</groupId>
+              <artifactId>bliki-core</artifactId>
+              <version>3.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.semanticwb.external</groupId>
