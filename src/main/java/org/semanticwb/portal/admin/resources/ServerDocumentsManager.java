@@ -20,7 +20,7 @@
  * dirección electrónica:
  *  http://www.semanticwebbuilder.org
  */
-package org.semanticwb.portal.resources;
+package org.semanticwb.portal.admin.resources;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -42,25 +42,25 @@ import org.semanticwb.portal.api.SWBResourceURL;
 /**
  * Presenta la interface del administrador de documentos del servidor, con la que los usuarios
  * con los permisos adecuados, pueden gestionar los archivos contenidos en la instancia de SWB.
- * 
- * Displays the interface for the server documents administrator, with which users who have the 
+ *
+ * Displays the interface for the server documents administrator, with which users who have the
  * proper permissions, can manage files within SWB's instance
  * @author jose.jimenez
  */
 public class ServerDocumentsManager extends GenericResource {
-    
+
     private UserGroup superUserGroup = null;
     private UserGroup adminUserGroup = null;
 
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response,
             SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        
+
         PrintWriter out = response.getWriter();
         StringBuilder htmlCode = new StringBuilder(256);
         String showInterfacePath = paramRequest.getRenderUrl().setMode("showInter").
                 setCallMethod(SWBResourceURL.Call_DIRECT).toString();
-        
+
         User user = paramRequest.getUser();
         if (this.validateUser(user, paramRequest.getAdminTopic())) {
             htmlCode.append("<iframe id=\"srvrdcmts");
@@ -77,11 +77,11 @@ public class ServerDocumentsManager extends GenericResource {
 
     public void doShowInterface(HttpServletRequest request, HttpServletResponse response,
             SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        
+
         PrintWriter out = response.getWriter();
         StringBuilder htmlCode = new StringBuilder(512);
         String jsBasePath = SWBPlatform.getContextPath() + "/swbadmin/js/elfinder/";
-        
+
         htmlCode.append("<!DOCTYPE html>\n");
         htmlCode.append("<html>\n");
         htmlCode.append("  <head>\n");
@@ -138,20 +138,20 @@ public class ServerDocumentsManager extends GenericResource {
         out.flush();
 
     }
-    
+
     @Override
     public void processRequest(HttpServletRequest request, HttpServletResponse response,
             SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        
+
         String mode = paramRequest.getMode();
         if (mode.equalsIgnoreCase("showInter")) {
             doShowInterface(request, response, paramRequest);
         } else {
             super.processRequest(request, response, paramRequest);
         }
-        
+
     }
-    
+
     /**
      * Permite el uso del recurso a los usuarios que tengan asignados el grupo de superUsuario
      * o el grupo de administradores y que ademas tengan un filtro que explicitamente asigne permisos
@@ -161,12 +161,12 @@ public class ServerDocumentsManager extends GenericResource {
      * @return un boolean indicando si el usuario cumple con los criterios para ejecutar este recurso
      */
     private boolean validateUser(User user, WebPage webPage) {
-        
+
         boolean userHasAccess = false;
         boolean superUserGroupKnown = false;
-        
+
         if (null == this.superUserGroup) {
-            
+
             this.superUserGroup = SWBContext.getAdminRepository().getUserGroup("su");
             this.adminUserGroup = SWBContext.getAdminRepository().getUserGroup("admin");
             if (null != this.superUserGroup) {
@@ -175,7 +175,7 @@ public class ServerDocumentsManager extends GenericResource {
         } else {
             superUserGroupKnown = true;
         }
-        
+
         if (superUserGroupKnown && user.hasUserGroup(this.superUserGroup)) {
             userHasAccess = true;
         } else if (superUserGroupKnown && user.hasUserGroup(this.adminUserGroup)) {
