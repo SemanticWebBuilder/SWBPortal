@@ -27,30 +27,47 @@ package org.semanticwb.portal.admin.resources;
  *
  * Created on Febrero 2, 2006
  */
-
-
-
-
-import java.io.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.SWBResourceException;
-import org.w3c.dom.*;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
-import org.semanticwb.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+import java.util.UUID;
+import java.util.Vector;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.semanticwb.Logger;
+import org.semanticwb.SWBPlatform;
+import org.semanticwb.SWBUtils;
 import org.semanticwb.base.db.DBConnectionPool;
-import org.semanticwb.model.*;
+import org.semanticwb.model.Resource;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.User;
+import org.semanticwb.model.WebSite;
 import org.semanticwb.portal.admin.resources.wbtree.SWBTreeExt;
 import org.semanticwb.portal.admin.resources.wbtree.SWBTreeUtil;
 import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -364,11 +381,7 @@ public class SWBATreeDBQuery extends GenericResource
         //TODO: int access=AdmFilterMgr.getInstance().haveAccess2Server(user);
         int access=1; //modificar
         
-        WebSite tma=SWBContext.getAdminWebSite();
         Element menu=null;
-        Element option=null;
-        Element events=null;
-        Element event=null;
         
         //tree nodes
         Element root=addNode("node","server","Connection Pool",res);
@@ -423,9 +436,7 @@ public class SWBATreeDBQuery extends GenericResource
         //            if(access==AdmFilterMgr.NO_ACCESS)return;
         //        }
         
-        WebSite tma=SWBContext.getAdminWebSite();
         Element menu=null;
-        Element option=null;
         Element events=null;
         Element event=null;
         
@@ -495,11 +506,8 @@ public class SWBATreeDBQuery extends GenericResource
      */
     protected void addTable(User user, String tablename, Element res, String dbcon)
     {
-        WebSite tma=SWBContext.getAdminWebSite();
         Element menu=null;
         Element option=null;
-        Element events=null;
-        Element event=null;
         
         Element table=addNode("node",tablename,tablename,res);
         table.setAttribute("view","showurl=javascript:upd('"+dbcon+"');"); //+tma.getWebPage(STATUS_TOPIC).getUrl()+"?pool="+dbcon+"&act=jsupdpool&status=true&table="+tablename
@@ -593,9 +601,7 @@ public class SWBATreeDBQuery extends GenericResource
      */
     protected void addColumn(User user, String columnname, Element res, String dbcon, String tablename)
     {
-        WebSite tma=SWBContext.getAdminWebSite();
         Element menu=null;
-        Element option=null;
         
         Element node=addNode("node",""+dbcon+"_"+columnname,columnname,res);
         node.setAttribute("view","showurl=javascript:upd('"+dbcon+"');"); //+tma.getWebPage(STATUS_TOPIC).getUrl()+"?pool="+dbcon+"&act=jsupdpool&status=true"
@@ -662,9 +668,6 @@ public class SWBATreeDBQuery extends GenericResource
      */
     protected void addProperties(User user, String propname, Element res, String valor)
     {
-        WebSite tma=SWBContext.getAdminWebSite();
-        Element menu=null;
-        Element option=null;
         
         Element node=addNode("node",""+propname+"_"+valor,propname+": "+valor,res);
 //                node.setAttribute("action","showurl="+tma.getWebPage("WBAd_sys_FlowsInfo").getUrl()+"?id="+dbcon+"&tm="+columnname);
@@ -857,6 +860,8 @@ public class SWBATreeDBQuery extends GenericResource
         
         ServletInputStream in = request.getInputStream();
         Document dom = SWBUtils.XML.xmlToDom(in);
+        //System.out.println("-------Command------");
+        //System.out.println(SWBUtils.XML.domToXml(dom));
         if (!dom.getFirstChild().getNodeName().equals("req"))
         {
             response.sendError(404, request.getRequestURI());
@@ -884,6 +889,10 @@ public class SWBATreeDBQuery extends GenericResource
             }
             else
                 ret = SWBUtils.XML.domToXml(res, true);
+            //System.out.println("--------Document-------");
+            //System.out.println(ret);
+            //System.out.println("-------JSONDATA--------");
+            //System.out.println(getTreeData().toString(2));
         }
         catch(Exception e)
         {log.error(e);}
@@ -1267,6 +1276,110 @@ public class SWBATreeDBQuery extends GenericResource
         }
     }
     
+    private JSONArray getTreeData() {
+    	JSONArray ret = new JSONArray();
+        int access = PARCIAL_ACCESS; //modificar
+        
+        try {
+	        JSONObject root = createObj("ConnectionPool", null, "swbIconWebServer");
+	        ret.put(root);
+	        
+	        // Pool de conexiones
+	        Enumeration<DBConnectionPool> en = SWBUtils.DB.getPools();
+	        while(en.hasMoreElements()) {
+	            DBConnectionPool pool = en.nextElement();
+	            JSONObject poolObj = createObj(pool.getName(), root.getString("uuid"), "swbIconTemplateGroup");
+	            ret.put(poolObj);
+	            getTablesData(ret, poolObj);
+	        }
+        } catch (JSONException ex) {
+        	log.error("Error getting json data", ex);
+        }
+    	
+    	return ret;
+    }
+    
+    private void getTablesData(JSONArray ret, JSONObject root) {
+    	String [] as = { "TABLE" };
+    	String poolName = null;
+    	if (null != root) poolName = root.optString("name", null);
+    	
+    	if (null != poolName) {
+    		try {
+            	Connection conn = SWBUtils.DB.getConnection(poolName, "SWBATreeDBQuery.addPoolConn");
+            	DatabaseMetaData metadata = conn.getMetaData();
+            	ResultSet rstable = metadata.getTables(null, null, null, as);
+            	   	
+            	while (rstable.next()) {
+            		String tblName = rstable.getString("TABLE_NAME");
+            		JSONObject tableObj = createObj(tblName, root.getString("uuid"), "swbIconWebPage");
+            		ret.put(tableObj);
+            		getTableProperties(ret, metadata, tableObj, true);
+            		getTableProperties(ret, metadata, tableObj, false);
+                    //addTable(user, rstable.getString("TABLE_NAME"), poolconn, dbcon);
+                }
+            	rstable.close();
+                if(conn!=null)conn.close();
+    		} catch (SQLException sqex) {
+    			log.error("Error getting poolConnection data", sqex);
+    		} catch (JSONException jsex) {
+    			log.error("Error getting json data", jsex);
+    		}
+    	}
+    }
+    
+    private void getTableProperties(JSONArray ret, DatabaseMetaData metadata, JSONObject tblObj, boolean primary) throws SQLException {
+    	ResultSet cols = null;
+    	String cssIcon = "swbIconX509Certificate";
+    	JSONObject rootObj = tblObj;
+    	
+    	if (primary) {
+    		rootObj = createObj("PrimaryKeys", tblObj.getString("uuid"), cssIcon);
+    		cols = metadata.getPrimaryKeys(null,  null, tblObj.getString("name"));
+    		ret.put(rootObj);
+    	} else {
+    		cssIcon = "swbIconWebPageV";
+    		cols = metadata.getColumns(null, null, tblObj.getString("name"), null);
+    	}
+    	
+        while (cols.next()) {
+            String column = cols.getString(4);
+            JSONObject pkeyObj = createObj(column, rootObj.getString("uuid"), cssIcon);
+            ret.put(pkeyObj);
+            
+            JSONObject dtProp = createObj("Data Type: "+cols.getString(5), pkeyObj.getString("uuid"), "swbIconWebPageV");
+            JSONObject tnProp = createObj("Type Name: "+cols.getString(6), pkeyObj.getString("uuid"), "swbIconWebPageV");
+            ret.put(dtProp);
+            ret.put(tnProp);
+            
+            if (!primary) {
+            	JSONObject szProp = createObj("Size: "+cols.getString(7), pkeyObj.getString("uuid"), "swbIconWebPageV");
+            	JSONObject defProp = createObj("Default Value: "+cols.getString(13), pkeyObj.getString("uuid"), "swbIconWebPageV");
+            	JSONObject nullProp = createObj("Allows NULL: "+cols.getString(18), pkeyObj.getString("uuid"), "swbIconWebPageV");
+
+            	ret.put(szProp);
+            	ret.put(defProp);
+            	ret.put(nullProp);
+            }
+        }
+        
+        cols.close();
+    }
+    
+    private JSONObject createObj(String name, String parent, String cssIcon) {
+    	JSONObject obj = new JSONObject();
+    	
+    	try {
+    		obj.put("uuid", UUID.randomUUID().toString());
+    		if (null != name && !name.isEmpty()) obj.put("name", name);
+    		if (null != name && !name.isEmpty()) obj.put("parent", parent);
+    		if (null != name && !name.isEmpty()) obj.put("cssIcon", cssIcon);
+    	} catch (JSONException jsex) {
+    		log.error("Error creating json object for node");
+    	}
+    	return obj;
+    }
+        
     /**
      * Sort iterator.
      * 
