@@ -45,6 +45,8 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.Vector;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,7 +61,6 @@ import org.semanticwb.base.db.DBConnectionPool;
 import org.semanticwb.model.Resource;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.User;
-import org.semanticwb.model.WebSite;
 import org.semanticwb.portal.admin.resources.wbtree.SWBTreeExt;
 import org.semanticwb.portal.admin.resources.wbtree.SWBTreeUtil;
 import org.semanticwb.portal.api.GenericResource;
@@ -69,17 +70,15 @@ import org.semanticwb.portal.api.SWBResourceURL;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-// TODO: Auto-generated Javadoc
 /**
- * Recurso para la administraci�n de WebBuilder que muestra el �rbol con el pool
+ * Recurso para la administración de WebBuilder que muestra el árbol con el pool
  * de conexiones configuradas en webbuilder, que muestran las tablas de las bases de datos con sus columnas.
  *
  * Connection poll Tree availables on webbuilder configuration, that show the existing tables and columns.
  *
  * @author Juan Antonio Fernandez
  */
-public class SWBATreeDBQuery extends GenericResource
-{
+public class SWBATreeDBQuery extends GenericResource {
     
     /** The Constant STATUS_TOPIC. */
     static final String STATUS_TOPIC="WBAd_mnui_DBQuery"; //   ////WBAd_inti_DBQuery////
@@ -108,6 +107,8 @@ public class SWBATreeDBQuery extends GenericResource
     
     /** The Constant FULL_ACCESS. */
     public static final int FULL_ACCESS = 2;
+    
+    public static final String MODE_GETTREEDATA = "getTreeData";
 
     
     /**
@@ -149,12 +150,12 @@ public class SWBATreeDBQuery extends GenericResource
      */
     @Override
     public void processRequest(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-
-        if(paramRequest.getMode().equals("gateway"))
-        {
+    	String mode = paramRequest.getMode();
+        if("gateway".equals(mode)) {
             doGateway(request,response,paramRequest);
-        }
-        else super.processRequest(request,response,paramRequest);
+        } else if (MODE_GETTREEDATA.equals(mode)) {
+        	doGetTreeData(request, response, paramRequest);
+        } else super.processRequest(request,response,paramRequest);
     }
     
     
@@ -891,8 +892,8 @@ public class SWBATreeDBQuery extends GenericResource
                 ret = SWBUtils.XML.domToXml(res, true);
             //System.out.println("--------Document-------");
             //System.out.println(ret);
-            //System.out.println("-------JSONDATA--------");
-            //System.out.println(getTreeData().toString(2));
+            System.out.println("-------JSONDATA--------");
+            System.out.println(getTreeData().toString(2));
         }
         catch(Exception e)
         {log.error(e);}
@@ -900,6 +901,15 @@ public class SWBATreeDBQuery extends GenericResource
         out.flush();
         out.close();
         //System.out.println(new String(ret.getBytes()));
+    }
+    
+    public void doGetTreeData(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+        PrintWriter out = response.getWriter();
+        
+        JSONArray ret = getTreeData();
+        out.println(ret.toString());
     }
 
     /**
@@ -913,9 +923,10 @@ public class SWBATreeDBQuery extends GenericResource
      */
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        PrintWriter out=response.getWriter();
-        Resource base = getResourceBase();
+        //PrintWriter out=response.getWriter();
+        //Resource base = getResourceBase();
         String operValidas = SWBPlatform.getEnv("wb/resDBQueryFilter","select");
+        String jsp = "/swbadmin/jsp/SWBADBQuery/view.jsp";
         hmoper = new HashMap();
         if(operValidas.indexOf(';')>-1||operValidas.indexOf(',')>-1)
         {
@@ -936,352 +947,368 @@ public class SWBATreeDBQuery extends GenericResource
                 
             }
         }
-
-        out.println("<script language=\"javascript\">");
-        out.println("function upd(connpool)");
-        out.println("{");
-        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].dbcon.value=connpool;"); //poolname
-        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].poolname.value=connpool;");
-        out.println("}");
-        out.println("function queryUpd(comm)");
-        out.println("{");
-        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].query.value=comm;");
-        out.println("}");
-        out.println("function copyQueryVal(sel)");
-        out.println("{");
-        out.println("   var valor =  sel[sel.selectedIndex].value;");
-        out.println("   var connpool = valor.substring(0,valor.indexOf('|')); ");
-        out.println("   var strquery = valor.substring(valor.indexOf('|')+1); ");
-        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].dbcon.value=connpool;");
-        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].poolname.value=connpool;");
-        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].query.value=strquery;");
-        out.println("}");
-        out.println("function mnuexample(pcon, comm,tblname)");
-        out.println("{ ");
-        out.println(" upd(pcon);");
-        out.println(" var sqlcp = '';");
-        out.println(" if('drop'==comm)");
-        out.println(" {");
-        out.println("   sqlcp = 'drop table '+tblname;");
-        out.println(" }");
-        out.println(" else if('insert'==comm)");
-        out.println(" {");
-        out.println("   sqlcp = 'insert into '+ tblname + '( [ column name 1], [column name 2], ...) \\n\\r values ( [value for column name 1], [ value for column name 2], ....)';");
-        out.println(" }");
-        out.println(" else if('delete'==comm)");
-        out.println(" {");
-        out.println("   sqlcp = 'delete from '+ tblname + ' where column_name=some_value';");
-        out.println(" }");
-        out.println(" else if('update'==comm)");
-        out.println(" {");
-        out.println("   sqlcp = 'update '+ tblname + ' set column_name=new_value where column_name=some_value ';");
-        out.println(" }");
-        out.println(" else if('select'==comm)");
-        out.println(" {");
-        out.println("   sqlcp = 'select *, column_name(s) from '+ tblname + ' where column_name=some_value order by column_name asc';");
-        out.println(" }");
-        out.println(" else if('alter'==comm)");
-        out.println(" {");
-        out.println("   sqlcp = 'alter table '+ tblname + ' ADD [column_name datatype] or DROP COLUMN [column_name] ';");
-        out.println(" }");
-        out.println(" else ");
-        out.println(" {");
-        out.println("   sqlcp = 'command: '+comm+ ' ... on table: '+ tblname + ' not supported.';");
-        out.println(" }");
-        out.println("   queryUpd(sqlcp);");
-        out.println("}");
-        out.println("</script>");
-
         
-        if(request.getParameter("act")==null)
-        {
-          
-            out.println("<div class=\"swbform\">");
-            out.println("<fieldset>");
-            out.println("<table cellpadding=\"5\" cellspacing=\"0\" border=\"0\" width=\"100%\">");
-            out.println("<tr><td width=\"200\" valign=\"top\">");
-            out.println("<div class=\"applet\">");
-            out.println("<applet id=\"apptree\" name=\"apptree\" code=\"applets.generictree.GenericTree.class\" codebase=\""+SWBPlatform.getContextPath()+"/\" ARCHIVE=\"swbadmin/lib/SWBAplGenericTree.jar, swbadmin/lib/SWBAplCommons.jar\" width=\"250\" height=\"380\">");
-            SWBResourceURL url=paramRequest.getRenderUrl();
-            url.setMode("gateway");
-            url.setCallMethod(url.Call_DIRECT);
-            out.println("<param name =\"jsess\" value=\""+request.getSession().getId()+"\">");
-            out.println("<param name =\"cgipath\" value=\""+url+"\">");
-            out.println("</applet>");
-            out.println("</div>");
-            out.println("</td>");
-            
-            String query=request.getParameter("query");
-            HashMap hmpool = null;
-            if(query==null)query="";
-            else query=query.trim();
-            String dbcon=request.getParameter("dbcon");
-            
-            Enumeration<DBConnectionPool> en=SWBUtils.DB.getPools();
-            while(en.hasMoreElements())
-            {
-                DBConnectionPool pool = en.nextElement();
-                String name=pool.getName();
-                if(null==dbcon) dbcon = name;
-                
-                String [] as =
-                { "TABLE" } ;
-                try
-                {
-                    Connection conn = SWBUtils.DB.getConnection(name,"SWBATreeDBQuery.doView()");
-                    ResultSet rstable= conn.getMetaData().getTables(null, null, null, as);
-                    int orden=0;
-                    Vector vctable = new Vector();
-                    
-                    int numCols = rstable.getMetaData().getColumnCount();
-                    
-                    while(rstable.next())
-                    {
-                        vctable.add(orden, rstable.getString("TABLE_NAME"));
-                        orden++;
-                    }
-                    
-                    if(null==hmpool) hmpool = new HashMap();
-                    hmpool.put(name, vctable);
-                    rstable.close();
-                    conn.close();
-                }
-                catch(Exception e)
-                {
-                    log.error("Error while trying to load tables. ",e);
-                }
-                
-            }
-            
-            out.println("<td valign=\"top\" align=\"left\">");
-            
-            
-            out.println("<form id=\"f"+getResourceBase().getId()+"treeDBQuery\" name=\"f"+getResourceBase().getId()+"treeDBQuery\"  action=\""+paramRequest.getRenderUrl()+"\" method=\"post\">");
-            out.println("<table border=\"0\"cellspacing=\"0\" height=\"100%\" cellpadding=\"5\" width=\"100%\">");
-            out.println("<tr><td valign=\"top\">");
-            //out.println(paramRequest.getLocaleString("connPool"));
-            out.println("Querys utilizados:");
-            out.println("</td></tr><tr><td colspan=\"2\">");
-            out.println("<select  name=\"querys\" size=\"5\" style=\"width:100%\">");
-
-            HashMap queryList = null;
-            if(request.getSession().getAttribute(""+base.getId()+paramRequest.getWebPage().getWebSiteId())!=null)
-            {
-                queryList = (HashMap)request.getSession().getAttribute(""+base.getId()+paramRequest.getWebPage().getWebSiteId());
-                Iterator iteQuery = queryList.keySet().iterator();
-                while(iteQuery.hasNext())
-                {
-                    String thisQuery = (String) iteQuery.next();
-                    out.println("<option value=\""+thisQuery+"\">"+thisQuery.substring(thisQuery.indexOf('|')+1)+"</option>");
-                }
-            }
-            else
-            {
-                queryList = new HashMap();
-                String tmpCreate = (String) hmoper.get("create");
-                if(null!=tmpCreate)
-                {
-                    queryList.put(dbcon+"|create table table_name (column_name1 data_type, column_name2 data_type, .....)","create table table_name (column_name1 data_type, column_name2 data_type, .....)");
-                    out.println("<option selected value=\""+dbcon+"|create table table_name (column_name1 data_type, column_name2 data_type, .....) \">create table table_name (column_name1 data_type, column_name2 data_type, .....)</option>");
-                }
-            }
-            if(null!=request.getParameter("query"))
-            {
-                String pQuery = request.getParameter("query");
-                
-                if(pQuery.trim().length()>0)
-                {
-                    if(queryList.get(dbcon+"|"+pQuery)==null)
-                    {
-                        queryList.put(dbcon+"|"+pQuery, pQuery);
-                        out.println("<option value=\""+dbcon+"|"+pQuery+"\">"+pQuery+"</option>");
-                    }
-                }
-            }
-            
-            out.println("</select><br>");
-            out.println("<input type=\"button\" name=\"copyQuery\" onclick=\"copyQueryVal(querys);\" value=\"utilizar query\">");
-            request.getSession().setAttribute(""+base.getId()+paramRequest.getWebPage().getWebSiteId(), queryList);
-            
-            out.println("<input type=\"hidden\" name=\"dbcon\" value=\""+dbcon+"\">");
-            
-            out.println("</td></tr>");
-            
-            out.println("<tr><td >");
-            out.println("Pool: <input type=\"text\" name=\"poolname\" value=\""+dbcon+"\" style=\"border:0\">");
-            out.println("</td></tr>");
-            out.println("<tr><td>");
-            out.println("Query:");
-            out.println("</td></tr>");
-            out.println("<tr><td>");
-            out.print("<textarea name=\"query\" rows=\"5\" style=\"width:100%\">");
-            //out.print(query);
-            out.println("</textarea>");
-            out.println("</td></tr>");
-            out.println("</table>");
-            out.println("<input type=\"submit\" name=\"btnsubmit\" value=\""+paramRequest.getLocaleString("send")+"\">");
-            out.println("</form>");
-            out.println("</td></tr>");
-            out.println("</table>");
-            out.println("</fieldset>");
-            out.println("</div>");
-            
-            
-            try
-            {
-                if(query.length()>0)
-                {
-                    out.println("<script language=\"javascript\">");
-                    out.println("function hideDiv(objDIV) { ");
-                    out.println("    objDIV.style.visibility = 'hidden'; ");
-                    out.println("} ");
-                    out.println("");
-                    out.println("function showDiv(objDIV) { ");
-                    out.println("    objDIV.style.visibility = 'visible'; ");
-                    out.println("} ");
-                    out.println("</script>");
-                    out.println("<div class=\"swbform\">");
-                    out.println("<table border=\"0\" width=\"100%\" valign=\"top\" cellpadding=\"5\" cellspacing=\"0\">");
-                    out.println("<tr>");
-                    out.println("<td>");
-                    out.println("<font size=\"3\"><b><i>"+query+"</i></b></font>");
-                    out.println("</td>");
-                    out.println("</tr>");
-                    boolean ejecutar = false;
-                    if(hmoper.size()>0)
-                    {
-                        Iterator iteOper = hmoper.keySet().iterator();
-                        while(iteOper.hasNext())
-                        {
-                            String thisToken = (String) iteOper.next();
-                            thisToken = thisToken.toLowerCase();
-                            String tmpquery = query.toLowerCase();
-                            //query=query.toLowerCase();
-                            if(tmpquery.indexOf(thisToken.trim())>-1) ejecutar=true;
-                            
-                        }
-                    }
-                    
-                    
-                    if(ejecutar)
-                    {
-                        Connection con;
-                        if (dbcon != null && dbcon.length() > 0)
-                            con = SWBUtils.DB.getConnection(dbcon,"SWBATreeDBQuery");
-                        else
-                            con = SWBUtils.DB.getDefaultConnection();
-                        
-                        Statement st = con.createStatement();
-                        int affectedRows = 0;
-                        if(query.toLowerCase().startsWith("delete")||query.toLowerCase().startsWith("insert")||query.toLowerCase().startsWith("update")||query.toLowerCase().startsWith("drop")||query.toLowerCase().startsWith("alter")||query.toLowerCase().startsWith("create")) //
-                        {
-                            affectedRows = st.executeUpdate(query);
-                            out.println("<tr>");                            
-                            out.println("<td>");
-                            out.println("Registros afectados: ");
-                            out.println("<font size=\"1\">("+affectedRows+")</font>");
-                            out.println("</td>");
-                            out.println("</tr>");
-                        }
-                        else
-                        {
-                            ResultSet rs = st.executeQuery(query);
-                            try
-                            {
-                                ResultSetMetaData md = rs.getMetaData();
-                                int col = md.getColumnCount();
-                                out.println("<tr>");
-                                for (int x = 1; x <= col; x++)
-                                {
-                                    out.println("<th>");
-                                    out.println(md.getColumnName(x));
-                                    out.println("<font size=\"1\">("+md.getColumnTypeName(x)+")</font>");
-                                    out.println("</th>");
-                                }
-                                out.println("</tr>");
-                                int ch=0;
-                                int cuenta=0;
-                                while (rs.next())
-                                {
-                                    if(ch==0)
-                                    {
-                                        ch=1;
-                                        out.println("<tr bgcolor=\"#EFEDEC\">");
-                                    }
-                                    else
-                                    {
-                                        ch=0;
-                                        out.println("<tr>");
-                                    }
-                                    for (int x = 1; x <= col; x++)
-                                    {
-                                        
-                                        String aux = rs.getString(x);
-                                        if (aux == null) aux = "";
-                                        out.println("<td>");
-                                        
-                                        if(aux.indexOf("<?xml")>-1)
-                                        {
-                                            cuenta++;
-                                            //aux =aux.replaceAll("<", "&lt;");
-                                            //aux =aux.replaceAll(">", "&gt;");
-                                            out.println("<a onclick=\"javascript:showDiv(div"+cuenta+");\"><img border=0 src=\""+SWBPlatform.getContextPath()+"/swbadmin/images/preview.gif\" alt=\"view\"></a>"
-                                                    +"<div id=\"div"+cuenta+"\" name=\"div"+cuenta+"\" style=\"position: absolute; border: 1px none #000000; visibility:hidden;\" onmouseout=\"javascript:hideDiv(div"+cuenta+");\" ><textarea rows=\"15\" cols=\"50\" >"+aux+"</textarea></div>");
-                                        }
-                                        else
-                                        {
-                                            out.println(aux);
-                                        }
-                                        out.println("</td>");
-                                    }
-                                    out.println("</tr>");
-                                }
-                            }
-                            catch(java.sql.SQLException e)
-                            {}
-                        rs.close();
-                        
-                        }
-                        st.close();
-                        con.close();
-                        out.println("</table>");
-                        out.println("</div>");
-                    }
-                    else
-                    {
-                        out.println("<div class=\"swbform\">");
-                        out.println("<fieldset>");
-                        out.println("Error: Operaci&oacute;n no permitida <BR>");
-                        out.println("<textarea name=\"query\" rows=\"20\" cols=\"80\">");
-                        out.println(query);
-                        out.println("</textarea>");
-                        out.println("</fieldset>");
-                        out.println("</div>");
-                    }
-                    
-                }
-            }
-            catch(Exception e)
-            {
-                out.println("<div class=\"swbform\">");
-                out.println("<fieldset>");
-                out.println("Error: <BR>");
-                out.println("<textarea name=\"query\" rows=\"20\" cols=\"80\">");
-                e.printStackTrace(out);
-                out.println("</textarea>");
-                out.println("</fieldset>");
-                out.println("</div>");
-            }
-            
+        RequestDispatcher rd = request.getRequestDispatcher(jsp);
+        try {
+            request.setAttribute("paramRequest", paramRequest);
+            request.setAttribute("hmoper", hmoper);
+            rd.include(request, response);
+        } catch (ServletException sex) {
+            log.error("SWBAFilters - Error including view", sex);
         }
+        
+        
+
+//        out.println("<script language=\"javascript\">");
+//        out.println("function upd(connpool)");
+//        out.println("{");
+//        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].dbcon.value=connpool;"); //poolname
+//        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].poolname.value=connpool;");
+//        out.println("}");
+//        out.println("function queryUpd(comm)");
+//        out.println("{");
+//        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].query.value=comm;");
+//        out.println("}");
+//        out.println("function copyQueryVal(sel)");
+//        out.println("{");
+//        out.println("   var valor =  sel[sel.selectedIndex].value;");
+//        out.println("   var connpool = valor.substring(0,valor.indexOf('|')); ");
+//        out.println("   var strquery = valor.substring(valor.indexOf('|')+1); ");
+//        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].dbcon.value=connpool;");
+//        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].poolname.value=connpool;");
+//        out.println("   document.forms['f"+getResourceBase().getId()+"treeDBQuery'].query.value=strquery;");
+//        out.println("}");
+//        out.println("function mnuexample(pcon, comm,tblname)");
+//        out.println("{ ");
+//        out.println(" upd(pcon);");
+//        out.println(" var sqlcp = '';");
+//        out.println(" if('drop'==comm)");
+//        out.println(" {");
+//        out.println("   sqlcp = 'drop table '+tblname;");
+//        out.println(" }");
+//        out.println(" else if('insert'==comm)");
+//        out.println(" {");
+//        out.println("   sqlcp = 'insert into '+ tblname + '( [ column name 1], [column name 2], ...) \\n\\r values ( [value for column name 1], [ value for column name 2], ....)';");
+//        out.println(" }");
+//        out.println(" else if('delete'==comm)");
+//        out.println(" {");
+//        out.println("   sqlcp = 'delete from '+ tblname + ' where column_name=some_value';");
+//        out.println(" }");
+//        out.println(" else if('update'==comm)");
+//        out.println(" {");
+//        out.println("   sqlcp = 'update '+ tblname + ' set column_name=new_value where column_name=some_value ';");
+//        out.println(" }");
+//        out.println(" else if('select'==comm)");
+//        out.println(" {");
+//        out.println("   sqlcp = 'select *, column_name(s) from '+ tblname + ' where column_name=some_value order by column_name asc';");
+//        out.println(" }");
+//        out.println(" else if('alter'==comm)");
+//        out.println(" {");
+//        out.println("   sqlcp = 'alter table '+ tblname + ' ADD [column_name datatype] or DROP COLUMN [column_name] ';");
+//        out.println(" }");
+//        out.println(" else ");
+//        out.println(" {");
+//        out.println("   sqlcp = 'command: '+comm+ ' ... on table: '+ tblname + ' not supported.';");
+//        out.println(" }");
+//        out.println("   queryUpd(sqlcp);");
+//        out.println("}");
+//        out.println("</script>");
+//
+//        
+//        if(request.getParameter("act")==null)
+//        {
+//          
+//            out.println("<div class=\"swbform\">");
+//            out.println("<fieldset>");
+//            out.println("<table cellpadding=\"5\" cellspacing=\"0\" border=\"0\" width=\"100%\">");
+//            out.println("<tr><td width=\"200\" valign=\"top\">");
+//            out.println("<div class=\"applet\">");
+//            out.println("<applet id=\"apptree\" name=\"apptree\" code=\"applets.generictree.GenericTree.class\" codebase=\""+SWBPlatform.getContextPath()+"/\" ARCHIVE=\"swbadmin/lib/SWBAplGenericTree.jar, swbadmin/lib/SWBAplCommons.jar\" width=\"250\" height=\"380\">");
+//            SWBResourceURL url=paramRequest.getRenderUrl();
+//            url.setMode("gateway");
+//            url.setCallMethod(url.Call_DIRECT);
+//            out.println("<param name =\"jsess\" value=\""+request.getSession().getId()+"\">");
+//            out.println("<param name =\"cgipath\" value=\""+url+"\">");
+//            out.println("</applet>");
+//            out.println("</div>");
+//            out.println("</td>");
+//            
+//            String query=request.getParameter("query");
+//            HashMap hmpool = null;
+//            if(query==null)query="";
+//            else query=query.trim();
+//            String dbcon=request.getParameter("dbcon");
+//            
+//            Enumeration<DBConnectionPool> en=SWBUtils.DB.getPools();
+//            while(en.hasMoreElements())
+//            {
+//                DBConnectionPool pool = en.nextElement();
+//                String name=pool.getName();
+//                if(null==dbcon) dbcon = name;
+//                
+//                String [] as =
+//                { "TABLE" } ;
+//                try
+//                {
+//                    Connection conn = SWBUtils.DB.getConnection(name,"SWBATreeDBQuery.doView()");
+//                    ResultSet rstable= conn.getMetaData().getTables(null, null, null, as);
+//                    int orden=0;
+//                    Vector vctable = new Vector();
+//                    
+//                    int numCols = rstable.getMetaData().getColumnCount();
+//                    
+//                    while(rstable.next())
+//                    {
+//                        vctable.add(orden, rstable.getString("TABLE_NAME"));
+//                        orden++;
+//                    }
+//                    
+//                    if(null==hmpool) hmpool = new HashMap();
+//                    hmpool.put(name, vctable);
+//                    rstable.close();
+//                    conn.close();
+//                }
+//                catch(Exception e)
+//                {
+//                    log.error("Error while trying to load tables. ",e);
+//                }
+//                
+//            }
+//            
+//            out.println("<td valign=\"top\" align=\"left\">");
+//            
+//            
+//            out.println("<form id=\"f"+getResourceBase().getId()+"treeDBQuery\" name=\"f"+getResourceBase().getId()+"treeDBQuery\"  action=\""+paramRequest.getRenderUrl()+"\" method=\"post\">");
+//            out.println("<table border=\"0\"cellspacing=\"0\" height=\"100%\" cellpadding=\"5\" width=\"100%\">");
+//            out.println("<tr><td valign=\"top\">");
+//            //out.println(paramRequest.getLocaleString("connPool"));
+//            out.println("Querys utilizados:");
+//            out.println("</td></tr><tr><td colspan=\"2\">");
+//            out.println("<select  name=\"querys\" size=\"5\" style=\"width:100%\">");
+//
+//            HashMap queryList = null;
+//            if(request.getSession().getAttribute(""+base.getId()+paramRequest.getWebPage().getWebSiteId())!=null)
+//            {
+//                queryList = (HashMap)request.getSession().getAttribute(""+base.getId()+paramRequest.getWebPage().getWebSiteId());
+//                Iterator iteQuery = queryList.keySet().iterator();
+//                while(iteQuery.hasNext())
+//                {
+//                    String thisQuery = (String) iteQuery.next();
+//                    out.println("<option value=\""+thisQuery+"\">"+thisQuery.substring(thisQuery.indexOf('|')+1)+"</option>");
+//                }
+//            }
+//            else
+//            {
+//                queryList = new HashMap();
+//                String tmpCreate = (String) hmoper.get("create");
+//                if(null!=tmpCreate)
+//                {
+//                    queryList.put(dbcon+"|create table table_name (column_name1 data_type, column_name2 data_type, .....)","create table table_name (column_name1 data_type, column_name2 data_type, .....)");
+//                    out.println("<option selected value=\""+dbcon+"|create table table_name (column_name1 data_type, column_name2 data_type, .....) \">create table table_name (column_name1 data_type, column_name2 data_type, .....)</option>");
+//                }
+//            }
+//            if(null!=request.getParameter("query"))
+//            {
+//                String pQuery = request.getParameter("query");
+//                
+//                if(pQuery.trim().length()>0)
+//                {
+//                    if(queryList.get(dbcon+"|"+pQuery)==null)
+//                    {
+//                        queryList.put(dbcon+"|"+pQuery, pQuery);
+//                        out.println("<option value=\""+dbcon+"|"+pQuery+"\">"+pQuery+"</option>");
+//                    }
+//                }
+//            }
+//            
+//            out.println("</select><br>");
+//            out.println("<input type=\"button\" name=\"copyQuery\" onclick=\"copyQueryVal(querys);\" value=\"utilizar query\">");
+//            request.getSession().setAttribute(""+base.getId()+paramRequest.getWebPage().getWebSiteId(), queryList);
+//            
+//            out.println("<input type=\"hidden\" name=\"dbcon\" value=\""+dbcon+"\">");
+//            
+//            out.println("</td></tr>");
+//            
+//            out.println("<tr><td >");
+//            out.println("Pool: <input type=\"text\" name=\"poolname\" value=\""+dbcon+"\" style=\"border:0\">");
+//            out.println("</td></tr>");
+//            out.println("<tr><td>");
+//            out.println("Query:");
+//            out.println("</td></tr>");
+//            out.println("<tr><td>");
+//            out.print("<textarea name=\"query\" rows=\"5\" style=\"width:100%\">");
+//            //out.print(query);
+//            out.println("</textarea>");
+//            out.println("</td></tr>");
+//            out.println("</table>");
+//            out.println("<input type=\"submit\" name=\"btnsubmit\" value=\""+paramRequest.getLocaleString("send")+"\">");
+//            out.println("</form>");
+//            out.println("</td></tr>");
+//            out.println("</table>");
+//            out.println("</fieldset>");
+//            out.println("</div>");
+//            
+//            
+//            try
+//            {
+//                if(query.length()>0)
+//                {
+//                    out.println("<script language=\"javascript\">");
+//                    out.println("function hideDiv(objDIV) { ");
+//                    out.println("    objDIV.style.visibility = 'hidden'; ");
+//                    out.println("} ");
+//                    out.println("");
+//                    out.println("function showDiv(objDIV) { ");
+//                    out.println("    objDIV.style.visibility = 'visible'; ");
+//                    out.println("} ");
+//                    out.println("</script>");
+//                    out.println("<div class=\"swbform\">");
+//                    out.println("<table border=\"0\" width=\"100%\" valign=\"top\" cellpadding=\"5\" cellspacing=\"0\">");
+//                    out.println("<tr>");
+//                    out.println("<td>");
+//                    out.println("<font size=\"3\"><b><i>"+query+"</i></b></font>");
+//                    out.println("</td>");
+//                    out.println("</tr>");
+//                    boolean ejecutar = false;
+//                    if(hmoper.size()>0)
+//                    {
+//                        Iterator iteOper = hmoper.keySet().iterator();
+//                        while(iteOper.hasNext())
+//                        {
+//                            String thisToken = (String) iteOper.next();
+//                            thisToken = thisToken.toLowerCase();
+//                            String tmpquery = query.toLowerCase();
+//                            //query=query.toLowerCase();
+//                            if(tmpquery.indexOf(thisToken.trim())>-1) ejecutar=true;
+//                            
+//                        }
+//                    }
+//                    
+//                    
+//                    if(ejecutar)
+//                    {
+//                        Connection con;
+//                        if (dbcon != null && dbcon.length() > 0)
+//                            con = SWBUtils.DB.getConnection(dbcon,"SWBATreeDBQuery");
+//                        else
+//                            con = SWBUtils.DB.getDefaultConnection();
+//                        
+//                        Statement st = con.createStatement();
+//                        int affectedRows = 0;
+//                        if(query.toLowerCase().startsWith("delete")||query.toLowerCase().startsWith("insert")||query.toLowerCase().startsWith("update")||query.toLowerCase().startsWith("drop")||query.toLowerCase().startsWith("alter")||query.toLowerCase().startsWith("create")) //
+//                        {
+//                            affectedRows = st.executeUpdate(query);
+//                            out.println("<tr>");                            
+//                            out.println("<td>");
+//                            out.println("Registros afectados: ");
+//                            out.println("<font size=\"1\">("+affectedRows+")</font>");
+//                            out.println("</td>");
+//                            out.println("</tr>");
+//                        }
+//                        else
+//                        {
+//                            ResultSet rs = st.executeQuery(query);
+//                            try
+//                            {
+//                                ResultSetMetaData md = rs.getMetaData();
+//                                int col = md.getColumnCount();
+//                                out.println("<tr>");
+//                                for (int x = 1; x <= col; x++)
+//                                {
+//                                    out.println("<th>");
+//                                    out.println(md.getColumnName(x));
+//                                    out.println("<font size=\"1\">("+md.getColumnTypeName(x)+")</font>");
+//                                    out.println("</th>");
+//                                }
+//                                out.println("</tr>");
+//                                int ch=0;
+//                                int cuenta=0;
+//                                while (rs.next())
+//                                {
+//                                    if(ch==0)
+//                                    {
+//                                        ch=1;
+//                                        out.println("<tr bgcolor=\"#EFEDEC\">");
+//                                    }
+//                                    else
+//                                    {
+//                                        ch=0;
+//                                        out.println("<tr>");
+//                                    }
+//                                    for (int x = 1; x <= col; x++)
+//                                    {
+//                                        
+//                                        String aux = rs.getString(x);
+//                                        if (aux == null) aux = "";
+//                                        out.println("<td>");
+//                                        
+//                                        if(aux.indexOf("<?xml")>-1)
+//                                        {
+//                                            cuenta++;
+//                                            //aux =aux.replaceAll("<", "&lt;");
+//                                            //aux =aux.replaceAll(">", "&gt;");
+//                                            out.println("<a onclick=\"javascript:showDiv(div"+cuenta+");\"><img border=0 src=\""+SWBPlatform.getContextPath()+"/swbadmin/images/preview.gif\" alt=\"view\"></a>"
+//                                                    +"<div id=\"div"+cuenta+"\" name=\"div"+cuenta+"\" style=\"position: absolute; border: 1px none #000000; visibility:hidden;\" onmouseout=\"javascript:hideDiv(div"+cuenta+");\" ><textarea rows=\"15\" cols=\"50\" >"+aux+"</textarea></div>");
+//                                        }
+//                                        else
+//                                        {
+//                                            out.println(aux);
+//                                        }
+//                                        out.println("</td>");
+//                                    }
+//                                    out.println("</tr>");
+//                                }
+//                            }
+//                            catch(java.sql.SQLException e)
+//                            {}
+//                        rs.close();
+//                        
+//                        }
+//                        st.close();
+//                        con.close();
+//                        out.println("</table>");
+//                        out.println("</div>");
+//                    }
+//                    else
+//                    {
+//                        out.println("<div class=\"swbform\">");
+//                        out.println("<fieldset>");
+//                        out.println("Error: Operaci&oacute;n no permitida <BR>");
+//                        out.println("<textarea name=\"query\" rows=\"20\" cols=\"80\">");
+//                        out.println(query);
+//                        out.println("</textarea>");
+//                        out.println("</fieldset>");
+//                        out.println("</div>");
+//                    }
+//                    
+//                }
+//            }
+//            catch(Exception e)
+//            {
+//                out.println("<div class=\"swbform\">");
+//                out.println("<fieldset>");
+//                out.println("Error: <BR>");
+//                out.println("<textarea name=\"query\" rows=\"20\" cols=\"80\">");
+//                e.printStackTrace(out);
+//                out.println("</textarea>");
+//                out.println("</fieldset>");
+//                out.println("</div>");
+//            }
+//            
+//        }
     }
     
+    /**
+     * Gets JSON data for building resource tree.
+     * @return {@link JSONArray} of final nodes.
+     */
     private JSONArray getTreeData() {
     	JSONArray ret = new JSONArray();
         int access = PARCIAL_ACCESS; //modificar
         
         try {
 	        JSONObject root = createObj("ConnectionPool", null, "swbIconWebServer");
+	        root.put("uuid", "rootNode");
 	        ret.put(root);
 	        
 	        // Pool de conexiones
@@ -1299,6 +1326,11 @@ public class SWBATreeDBQuery extends GenericResource
     	return ret;
     }
     
+    /**
+     * Gets information of database tables.
+     * @param ret {@link JSONArray} of final nodes.
+     * @param root Wrapper for PoolConection.
+     */
     private void getTablesData(JSONArray ret, JSONObject root) {
     	String [] as = { "TABLE" };
     	String poolName = null;
@@ -1328,6 +1360,14 @@ public class SWBATreeDBQuery extends GenericResource
     	}
     }
     
+    /**
+     * Gets table column information for a given table.
+     * @param ret {@link JSONArray} of final nodes.
+     * @param metadata {@link DatabaseMetaData} object from connection.
+     * @param tblObj Wrapper object for table.
+     * @param primary whether to get properties for primary keys.
+     * @throws SQLException
+     */
     private void getTableProperties(JSONArray ret, DatabaseMetaData metadata, JSONObject tblObj, boolean primary) throws SQLException {
     	ResultSet cols = null;
     	String cssIcon = "swbIconX509Certificate";
@@ -1366,6 +1406,13 @@ public class SWBATreeDBQuery extends GenericResource
         cols.close();
     }
     
+    /**
+     * Creates a {@link JSONObject} with a random UUID field, and name, parent and cssIcon properties provided.
+     * @param name Name field
+     * @param parent Parent field
+     * @param cssIcon cssIcon field
+     * @return {@link JSONObject} with provided fields
+     */
     private JSONObject createObj(String name, String parent, String cssIcon) {
     	JSONObject obj = new JSONObject();
     	
