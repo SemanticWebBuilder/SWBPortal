@@ -175,6 +175,7 @@ public class SWBATreeDBQuery extends GenericResource {
             		conn = SWBUtils.DB.getDefaultConnection("SWBATreeDBQuery");
             	}
             	
+            	if (null == conn) conn = SWBUtils.DB.getDefaultConnection("SWBATreeDBQuery");
             	//Execute queries
 	            for (String q: queries.keySet()) {
 	            	JSONObject qRes = new JSONObject();
@@ -202,7 +203,7 @@ public class SWBATreeDBQuery extends GenericResource {
 	            			//qRes.put("trace", sqlex.getStackTrace().toString().replace("\n", "\\n").replace("\r", "\\r"));
 	            		}
 	            	} else {
-	            		qRes.put("error", "No tiene permisos para ejecutar la consulta");
+	            		qRes.put("error", paramRequest.getLocaleString("errOperNotAllowed"));
 	            	}
 	            	
 	            	ret.put(qRes);
@@ -386,6 +387,11 @@ public class SWBATreeDBQuery extends GenericResource {
     	return ret;
     }
     
+    /**
+     * Gets {@link ResultSet} columns from its {@link ResultSetMetaData}.
+     * @param rs {@link ResultSet}
+     * @return {@link JSONArray} with a {@link JSONObject} for each column in metadata.
+     */
     private JSONArray getResultSetColumnsJSON(ResultSet rs) {
     	JSONArray cols = new JSONArray();
     	try {
@@ -404,6 +410,11 @@ public class SWBATreeDBQuery extends GenericResource {
     	return cols;
     }
     
+    /**
+     * Gets a {@link JSONArray} with the content of the {@link ResultSet} 
+     * @param rs {@link ResultSet}
+     * @return {@link JSONArray} with a {@link JSONObject} wrapping each record.
+     */
     private JSONArray getResultsetRowsJSON(ResultSet rs) {
     	JSONArray rows = new JSONArray();
     	
