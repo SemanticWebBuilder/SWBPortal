@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
@@ -42,13 +42,13 @@ import org.w3c.dom.Element;
 
 // TODO: Auto-generated Javadoc
 /** Esta clase se encarga de desplegar y administrar los indices tematicos bajo ciertos
- * criterios(configuraci�n de recurso), usa un archivo XSL. Es un recurso de contenidos que viene de la version 2 de Webbuilder.
+ * criterios(configuración de recurso), usa un archivo XSL. Es un recurso de contenidos que viene de la version 2 de Webbuilder.
  *
  * This class administrate and displays thematic index under criteria like
  * resource configuration, uses and XSL file. Is a content resource and comes from version 2 of
  * WebBuilder.
  *
- * @author :Jorge Alberto Jim�nez Sandoval (JAJS)
+ * @author :Jorge Alberto Jiménez Sandoval (JAJS)
  */
 public class TematicIndexXSLConfig extends GenericAdmResource
 {
@@ -81,7 +81,7 @@ public class TematicIndexXSLConfig extends GenericAdmResource
     }
 
     /**
-     * Asigna la informaci�n de la base de datos al recurso.
+     * Asigna la información de la base de datos al recurso.
      * 
      * @param base the new resource base
      * @throws SWBResourceException the sWB resource exception
@@ -152,7 +152,6 @@ public class TematicIndexXSLConfig extends GenericAdmResource
         if(sendparams)
         {
             if(request.getQueryString()!=null) querystring = "?"+request.getQueryString();
-            //System.out.println("reenviar: "+request.getQueryString());
         }
 
         try
@@ -317,17 +316,14 @@ public class TematicIndexXSLConfig extends GenericAdmResource
      * @param paramRequest the param request
      * @throws SWBResourceException the sWB resource exception
      * @throws IOException Signals that an I/O exception has occurred.
-     * @exception com.infotec.appfw.exception.AFException
      * Si se origina cualquier error en el recurso al traer el html.
      */
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
-        //System.out.println("Entra a TematicIndex/doView");
         try
         {
             Document dom =getDom(request, response, paramRequest);
-            //System.out.println(AFUtils.getInstance().DomtoXml(dom));
             if(tpl==null) setResourceBase(getResourceBase());
             if(dom != null) {
                 response.getWriter().println(SWBUtils.XML.transformDom(tpl, dom));

@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
@@ -43,12 +43,13 @@ import org.semanticwb.portal.api.GenericResource;
 import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceModes;
 import org.semanticwb.portal.api.SWBResourceURL;
 
 // TODO: Auto-generated Javadoc
 /**
- * InlineEdit se encarga de desplegar y administrar un texto est?tico, este texto
- * se agrega en la administraci?n del recurso, acepta tags de html para cambiar su
+ * InlineEdit se encarga de desplegar y administrar un texto estático, este texto
+ * se agrega en la administración del recurso, acepta tags de html para cambiar su
  * aspecto.
  *
  * InlineEdit is in charge to unfold and to administer a static text, this text
@@ -66,20 +67,19 @@ public class InlineEdit extends GenericResource {
      * Obtiene la vista del recurso.
      *
      * @param request El servlet container crea un objeto HttpServletRequest y
-     * se pasa como argumento al m?todo del servlet.
+     * se pasa como argumento al método del servlet.
      * @param response El servlet container crea un objeto HttpServletResponse y
-     * se pasa como argumento al m?todo del servlet.
+     * se pasa como argumento al método del servlet.
      * @param paramRequest the param request
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws SWBResourceException the sWB resource exception
-     * @exception com.infotec.appfw.exception.AFException Si se origina cualquier error en el recurso al traer el html.
      */
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         Resource base = getResourceBase();
 
         SWBResourceURL url = paramRequest.getActionUrl();
-        url.setCallMethod(url.Call_DIRECT);
+        url.setCallMethod(SWBResourceModes.Call_DIRECT);
 
         String url2 = url.toString();
 
@@ -146,14 +146,14 @@ public class InlineEdit extends GenericResource {
         }
 
         String action = response.getAction();        
-        if(response.Action_EDIT.equals(action)) {
+        if(SWBResourceModes.Action_EDIT.equals(action)) {
             String editaccess = request.getParameter("editar");
             if(editaccess!=null) {
                 //getResourceBase().setAttribute("editRole", editaccess);
                 base.setAttribute("editRole", editaccess);
                 try {
                     getResourceBase().updateAttributesToDB();
-                    response.setAction(response.Action_ADD);
+                    response.setAction(SWBResourceModes.Action_ADD);
                 }catch(Exception e) {
                     log.error("Error al guardar Role/UserGroup para acceso al InlineEdit.",e);
                 }
@@ -186,11 +186,11 @@ public class InlineEdit extends GenericResource {
         String buttonResetText = paramRequest.getLocaleString("usrmsg_StaticText_doAdmin_buttonResetText");
 
         String action  = paramRequest.getAction();
-        if(paramRequest.Action_ADD.equals(action)) {
+        if(SWBResourceModes.Action_ADD.equals(action)) {
             out.println("<script type=\"text/javascript\">");
             out.println("<!--");
             out.println("   alert('" + resourceUpdatedMessage + " " + base.getId() + "');");
-            out.println("   location='" + paramRequest.getRenderUrl().setAction(paramRequest.Action_EDIT).toString() + "';");
+            out.println("   location='" + paramRequest.getRenderUrl().setAction(SWBResourceModes.Action_EDIT).toString() + "';");
             out.println("-->");
             out.println("</script>");
         }
@@ -201,7 +201,7 @@ public class InlineEdit extends GenericResource {
         String str_role = base.getAttribute("editRole", "0");
 
         SWBResourceURL urlAction = paramRequest.getActionUrl();
-        urlAction.setAction(paramRequest.Action_EDIT);
+        urlAction.setAction(SWBResourceModes.Action_EDIT);
 
         out.println("<div class=\"swbform\">");
         out.println("<form id=\"" + base.getId() + "/InLineEditRes\" name=\"" + getResourceBase().getId() + "/InLineEditRes\" action=\""+urlAction+"\" method=\"post\" >");

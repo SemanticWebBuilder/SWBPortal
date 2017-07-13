@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.api;
 
@@ -252,40 +252,6 @@ public class SWBActionResponseImp implements SWBActionResponse
             url.setWindowState(winState);
             url.setExtURIParams(extParams);
             s=url.toString(false);              //no codifica "&" por "&amp;"
-            
-//            //if(secure)s="https://"+request.getRequestURI();
-//            //if(topic!=adminTopic && adminTopic!=null)
-//            if(haveVirtTP)
-//            {
-//                s+=adminTopic.getUrl();
-//                s+="/"+DistributorParams.URLP_VTOPIC+"/"+topic.getMap().getId()+"/"+topic.getId();
-//            }else{
-//                s+=topic.getUrl();
-//            }
-//            s+="/"+DistributorParams.URLP_RENDERID+"/";
-//            s+=resource.getId();
-//            if(resource.getTopicMap()!=topic.getMap())s+="/"+DistributorParams.URLP_TOPICMAPID+"/"+resource.getTopicMapId();
-//            if(callMethod==Call_DIRECT)s+="/"+DistributorParams.URLP_METHOD+"/"+callMethod;
-//            if(action!=null)s+="/"+DistributorParams.URLP_ACTION+"/"+action;
-//            if(!mode.equals(Mode_VIEW))s+="/"+DistributorParams.URLP_MODE+"/"+mode;
-//            if(!winState.equals(WinState_NORMAL))s+="/"+DistributorParams.URLP_WINSTATE+"/"+winState;
-//        }
-//        
-//        String q="";
-//        Iterator it=map.keySet().iterator();
-//        while(it.hasNext())
-//        {
-//            String key=(String)it.next();
-//            try
-//            {
-//                q+="&"+key+"="+com.infotec.appfw.util.URLEncoder.encode((String)map.get(key));
-//            }catch(Exception e){AFUtils.log(e);}
-//        }
-//        if(q.length()>0 && s.indexOf('?')==-1)
-//        {
-//            q="?"+q.substring(1);
-//        }
-//        s+=q;
         }
         return s;
   }

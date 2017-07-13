@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.api;
 
@@ -145,13 +145,6 @@ public interface SWBResourceURL extends SWBResourceModes
      * @return the sWB resource url
      */
     public SWBResourceURL setAction(java.lang.String action);
-
-    
-    //public void setURLType(int type);
-    //public int getURLType();
-    //public com.infotec.topicmaps.Topic getTopic();
-    //public com.infotec.wb.core.Resource getResourceBase();
-    
     
     /**
      * Returns the resource URL string representation to be embedded in the

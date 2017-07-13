@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal;
 
@@ -59,7 +59,7 @@ import org.semanticwb.portal.util.SWBPriorityComparator;
 /**
  * The Class SWBResourceMgr.
  * 
- * @author Jei
+ * @author Javier Solís
  */
 public class SWBResourceMgr
 {
@@ -76,9 +76,8 @@ public class SWBResourceMgr
     /** The res reloader. */
     private boolean resReloader = false;
 
-//    private SWBIntervalEvaluation intereval;
     /** The cache. */
-private SWBResourceCachedMgr cache;
+    private SWBResourceCachedMgr cache;
     
     /** The tracer. */
     private SWBResourceTraceMgr tracer;
@@ -97,7 +96,7 @@ private SWBResourceCachedMgr cache;
 
 
     /**
-     * Inits the.
+     * Inits the {@link SWBResourceMgr}.
      */
     public void init()
     {
@@ -124,7 +123,7 @@ private SWBResourceCachedMgr cache;
     }
 
     /**
-     * Load resource models.
+     * Loads resource models.
      */
     public void loadResourceModels()
     {
@@ -143,7 +142,7 @@ private SWBResourceCachedMgr cache;
     }
 
     /**
-     * Load resource type model.
+     * Loads resource type model.
      * 
      * @param type the type
      */
@@ -152,8 +151,6 @@ private SWBResourceCachedMgr cache;
         String cls=type.getResourceOWL();
         if(cls!=null)
         {
-//            SemanticModel model=SWBPlatform.getSemanticMgr().getModel(cls);
-//            if(model==null)
             {
                 try
                 {
@@ -162,7 +159,6 @@ private SWBResourceCachedMgr cache;
                     if(!resourceOWLS.contains(path))
                     {
                         resourceOWLS.add(path);
-                        //System.out.println("path:"+path);
                         InputStream in=getClass().getResourceAsStream(path);
                         if(in!=null)
                         {
@@ -174,8 +170,6 @@ private SWBResourceCachedMgr cache;
                             {
                                 log.event("ResourceOntology:"+path);
                             }
-                            //SWBPlatform.getSemanticMgr().loadBaseVocabulary();
-                            //System.out.println(cls);
                         }
                     }
                 }catch(Exception e){log.error("Error loading OWL File:"+cls,e);}
@@ -184,22 +178,21 @@ private SWBResourceCachedMgr cache;
     }
 
     /**
-     * Gets the resource.
+     * Gets a resource related to a WebSite.
      * 
-     * @param model the model
-     * @param id the id
-     * @return the resource
+     * @param model {@link WebSite} ID
+     * @param id Resource ID
+     * @return the {@link SWBResource}
      */
     public SWBResource getResource(String model, String id)
     {
-        //System.out.println("model:"+model+" id:"+id);
         Resource resource=SWBContext.getWebSite(model).getResource(id);
         return getResource(resource);
     }
 
     /**
      * Elimina el recurso del cache de recursos.
-     * @param uri
+     * @param uri resource URI
      */
     public void removeResource(String uri)
     {
@@ -207,10 +200,10 @@ private SWBResourceCachedMgr cache;
     }
 
     /**
-     * Gets the resource.
+     * Gets a resource using its URI.
      * 
-     * @param uri the uri
-     * @return the resource
+     * @param uri Resource URI
+     * @return the {@link SWBResource}
      */
     public SWBResource getResource(String uri)
     {
@@ -231,10 +224,10 @@ private SWBResourceCachedMgr cache;
     }
 
     /**
-     * Gets the resource.
+     * Gets a resource by reference.
      * 
-     * @param resource the resource
-     * @return the resource
+     * @param resource the {@link SWBResource}
+     * @return the {@link SWBResource}
      */
     public SWBResource getResource(Resource resource)
     {
@@ -263,12 +256,12 @@ private SWBResourceCachedMgr cache;
     }
 
     /**
-     * Gets the resource cached.
+     * Gets a {@link SWBResource} from resources cache.
      * 
-     * @param res the res
-     * @param request the request
-     * @param paramsRequest the params request
-     * @return the resource cached
+     * @param res the {@link SWBResource}
+     * @param request the {@link HttpServletRequest} object
+     * @param paramsRequest the {@link SWBParamRequest} object
+     * @return the cached {@link SWBResource}
      */
     public SWBResource getResourceCached(SWBResource res, HttpServletRequest request, SWBParamRequest paramsRequest)
     {
@@ -284,40 +277,29 @@ private SWBResourceCachedMgr cache;
 
 
     /**
-     * Gets the contents.
+     * Gets the {@link SWBResource}s related to a {@link WebPage}.
      * 
-     * @param user the user
-     * @param topic the topic
-     * @param params the params
-     * @param tpl the tpl
-     * @return the contents
-     * @return
+     * @param user {@link User} object
+     * @param topic {@link WebPage} to get related resources from
+     * @param params the params //Not used
+     * @param tpl {@link Template} object //Not used
+     * @return Iterator of {@link SWBResource}s related to {@link WebPage}
      */
     public Iterator<SWBResource> getContents(User user, WebPage topic, HashMap params, Template tpl)
     {
         Date today = new Date();
-        //today = new Date(today.getYear(), today.getMonth(), today.getDate());
         TreeSet ret = new TreeSet(new SWBPriorityComparator(true));
-        //Iterator<ResourceRef> it = topic.listResourceRefs();
         Iterator<Resource> it = topic.listResources();
         while (it.hasNext())
         {
-            //ResourceRef ref = it.next();
-            //System.out.println("Occ:"+occ.getResourceData());
-            //Resource resource=ref.getResource();
             Resource resource=it.next();
-            //System.out.println("Resource:"+resource);
-            //SWBResource res = getResource(resource.getWebSiteId(), resource.getSId());
             SWBResource res = getResource(resource);
             if (res != null)
             {
                 Resource base = res.getResourceBase();
-                //System.out.println("base:"+base);
-                //if(user.haveAccess(base))
                 {
                     if(checkResource(base, user, 0, today, topic))
                     {
-                        //System.out.println("Add:"+res);
                         ret.add(res);
                     }
                 }
@@ -330,16 +312,15 @@ private SWBResourceCachedMgr cache;
     }
 
     /**
-     * Gets the resources.
+     * Gets the {@link SWBResource}s related to a {@link WebPage} filtering by type and resource type.
      * 
-     * @param type the type
-     * @param stype the stype
-     * @param user the user
-     * @param topic the topic
-     * @param params the params
-     * @param tpl the tpl
-     * @return the resources
-     * @return
+     * @param type Type of the resource
+     * @param stype the Subtype of the resource
+     * @param user the {@link User}
+     * @param topic {@link WebPage} to get related resources from
+     * @param params the params //Not used
+     * @param tpl the tpl //Not used
+     * @return Iterator of {@link SWBResource}s related to {@link WebPage}
      */
     public Iterator getResources(ResourceType type, ResourceSubType stype, User user, WebPage topic, HashMap params, Template tpl)
     {
@@ -379,7 +360,6 @@ private SWBResourceCachedMgr cache;
                     if(checkResource(base, user, camp, today, topic))
                     {
                         SWBResource wbr=getResource(base);
-                        //System.out.println("checkResource ok:"+wbr.getResourceBase().getId());
                         if(wbr!=null)
                         {
                             ret.add(wbr);
@@ -389,133 +369,6 @@ private SWBResourceCachedMgr cache;
             }
         }
 
-
-//        Date today = new Date();
-        //today = new Date(today.getYear(), today.getMonth(), today.getDate());
-
-
-
-
-//        //separar tipo de recurso
-//        int itype=0;
-//        String typemap=tpl.getWebSiteId();
-//        if(type != null)
-//        {
-//            try
-//            {
-//                if(type.indexOf("|")>-1)
-//                {
-//                    itype=Integer.parseInt(type.substring(0,type.indexOf('|')));
-//                    typemap=type.substring(type.indexOf('|')+1);
-//                }else
-//                {
-//                    itype=Integer.parseInt(type);
-//                }
-//            }catch(Exception e){log.error(e);}
-//        }
-        //System.out.println("itype:"+itype+" typemap:"+typemap);
-
-        //separar subtypo de recurso
-//        int stype=0;
-//        String stypemap=tpl.getWebSiteId();
-//        String sstype = (String)params.get("stype");
-//        if(sstype != null)
-//        {
-//            try
-//            {
-//                if(sstype.indexOf("|")>-1)
-//                {
-//                    stype=Integer.parseInt(sstype.substring(0,sstype.indexOf('|')));
-//                    stypemap=sstype.substring(sstype.indexOf('|')+1);
-//                }else
-//                {
-//                    stype=Integer.parseInt(sstype);
-//                }
-//            }catch(Exception e){log.error(e);}
-//        }
-//
-//
-//
-//        String name = (String) params.get("name");
-//
-//        int camp = 0;
-        //TODO:Implementar
-//        if (name != null)
-//        {
-//            camp = CampMgr.getInstance().getCamp(topic, tpl, name.toLowerCase());
-//        }
-//        System.out.println("camp-->"+name+":"+camp);
-        //OK_TODO: revisar recursos de global
-//
-//        ArrayList tp=null;
-//        if(topic.getWebSiteId().equals(tpl.getWebSiteId()))
-//        {
-//            HashMap map=(HashMap)resourcesbase.get(topic.getWebSiteId());
-//            if(map!=null)
-//            {
-//                HashMap aux=((HashMap) map.get(type));
-//                if(aux!=null)tp=new ArrayList(aux.values());
-//            }
-//        }else
-//        {
-//            //System.out.println("map:"+map);
-//            HashMap map=(HashMap)resourcesbase.get(topic.getMap().getId());
-//            if(map!=null)
-//            {
-//                HashMap aux=((HashMap) map.get(""+itype+"|"+tpl.getTopicMapId()));
-//                if(aux!=null)tp=new ArrayList(aux.values());
-//            }
-//
-//            map=(HashMap)resourcesbase.get(tpl.getTopicMapId());
-//            if(map!=null)
-//            {
-//                HashMap aux=((HashMap) map.get(""+itype));
-//                if(aux!=null)
-//                {
-//                    if(tp==null)tp=new ArrayList(aux.values());
-//                    else tp.addAll(aux.values());
-//                }
-//            }
-//        }
-//
-//        if(type.endsWith(TopicMgr.TM_GLOBAL))
-//        {
-//            HashMap mapg=(HashMap)resourcesbase.get(TopicMgr.TM_GLOBAL);
-//            if(mapg!=null)
-//            {
-//                HashMap aux=((HashMap)mapg.get(type.substring(0,type.indexOf('|'))));
-//                if(aux!=null)
-//                {
-//                    if(tp==null)tp=new ArrayList(aux.values());
-//                    else tp.addAll(aux.values());
-//                }
-//            }
-//        }
-//
-//        if (tp==null || tp.size()==0) return ret.iterator();
-//        Iterator en = tp.iterator();
-//        while (en.hasNext())
-//        {
-//            com.infotec.wb.core.Resource base = (Resource) en.next();
-//            //System.out.println("rec:"+base.getId()+" topicmap="+base.getTopicMapId() +" stype="+stype+" stypemap="+stypemap);
-//            if (checkResource(base, user, stype, stypemap, camp, today, topic))
-//            {
-//                WBResource wbr=getResource(base.getTopicMapId(),base.getId());
-//                //System.out.println("checkResource ok:"+wbr.getResourceBase().getId());
-//                if(wbr!=null)
-//                {
-//                    //if (base.isCached())
-//                    //{
-//                    //    ret.add(cache.getResource(wbr));
-//                    //}
-//                    //else
-//                    //{
-//                        ret.add(wbr);
-//                    //}
-//                }
-//            }
-//        }
-//        System.out.println("size:"+ret.size());
         return ret.iterator();
     }
 
@@ -533,21 +386,8 @@ private SWBResourceCachedMgr cache;
     public boolean checkResource(Resource base, User user, int camp, Date today, WebPage topic)
     {
         boolean passrules = true;
-        //System.out.println("checkResource:"+base.getId()+" tmid:"+base.getTopicMapId()+" stype:"+stype+" stypemap:"+stypemap+" camp:"+camp+" topic:"+topic.getDisplayName());
-//        RuleMgr ruleMgr = RuleMgr.getInstance();
 
-        //System.out.println(""+base.getActive()+" == 1 && "+base.getDeleted()+" == 0");
-        //System.out.println("&& (("+base.getSubType()+" == "+stype+" && ("+base.getSubType()+"==0 ||"+base.getSubTypeMap()+".equals("+stypemap+"))))");
-        //System.out.println("&& ("+camp+" < 3 || "+base.getCamp()+" == "+camp+")");
-        //System.out.println("&& ("+base.getMaxViews()+" == -1 || "+base.getMaxViews()+" > "+base.getViews()+")");
-        //System.out.println("&& ("+base.getCamp()+" == 0 || "+DBCatalogs.getInstance().getCamp(base.getTopicMapId(),base.getCamp()).getActive()+" == 1)");
-
-        if (base.isValid()
-                //&& base.getResourceSubType() == stype
-                //&& (camp < 3 || base.getCamp() == camp)
-                //&& (base.getMaxViews() == -1 || base.getMaxViews() > base.getViews())
-                //&& (base.getCamp() == 0 || DBCatalogs.getInstance().getCamp(base.getTopicMapId(),base.getCamp()).getActive() == 1)
-        )
+        if (base.isValid())
         {
             //validar lenguage del recurso
             Language l=base.getLanguage();
@@ -567,15 +407,12 @@ private SWBResourceCachedMgr cache;
 
             //TODO:calendar
             //if (passrules == true && !intereval.eval(today, base)) passrules = false;
-            //System.out.println("passrules:"+passrules);
             if (passrules)
             {
                 base.refreshRandPriority();
-                //System.out.println("priority:"+base.getRandPriority());
             }
         } else
             passrules = false;
-        //System.out.println("checkResource:"+passrules);
         return passrules;
     }
 
@@ -600,12 +437,9 @@ private SWBResourceCachedMgr cache;
             {
                 try
                 {
-                    //Class wbresource = Class.forName("infotec.wb2.lib.WBResource");
                     Class wbresource = Class.forName("com.infotec.wb.lib.WBResource");
-                    //System.out.println("convert:"+wbresource+" -> "+wbresource.isInstance(obj));
                     if (wbresource!=null && wbresource.isInstance(obj))
                     {
-                        //if(base!=null)base.setWb2Resource(true);
                         Class wbreswrapper = Class.forName("org.semanticwb.api.WBResourceToSWBResourceWrapper");
                         Constructor cons = wbreswrapper.getConstructor(new Class[]{wbresource});
                         aux = cons.newInstance(new Object[]{obj});
@@ -615,7 +449,6 @@ private SWBResourceCachedMgr cache;
                         wbresource = Class.forName("infotec.wb2.lib.WBResource");
                         if (wbresource!=null && wbresource.isInstance(obj))
                         {
-                            //if(base!=null)base.setWb2Resource(true);
                             Class wbreswrapper = Class.forName("infotec.wb2.lib.WBResourceWrapperNew");
                             Constructor cons = wbreswrapper.getConstructor(new Class[]{wbresource});
                             aux = cons.newInstance(new Object[]{obj});
@@ -684,7 +517,6 @@ private SWBResourceCachedMgr cache;
             }
             cls = cl.loadClass(clsname);
         }
-        //System.out.println("createWBResourceClass:"+clsname+"->"+cls);
         return cls;
     }
 
@@ -706,27 +538,11 @@ private SWBResourceCachedMgr cache;
                 String clsname = type.getResourceClassName();
                 Class cls = createSWBResourceClass(clsname);
                 obj = (SWBResource) convertOldWBResource(cls.newInstance());
-                //obj=(SWBResource)cls.newInstance();
                 if (obj != null)
                 {
                     obj.setResourceBase(resource);
                     if(obj.getResourceBase()==null)throw new SWBException(clsname+": if you override method setResourceBase, you have to invoke super.setResourceBase(base);");
                     obj.init();
-
-                    //HashMap basemap=(HashMap)resourcesbase.get(resource.getTopicMapId());
-                    //resources.put(resource.getURI(), obj);
-                    //if(base.isWb2Resource())oldresources.put(new Long(base.getId()), obj);
-
-    //                String typekey=""+resource.getType();
-    //                if(!resource.getTypeMap().equals(resource.getTopicMapId()))typekey+="|"+resource.getTypeMap();
-    //                HashMap tp = (HashMap) basemap.get(typekey);
-    //                if (tp == null)
-    //                {
-    //                    tp = new HashMap();
-    //                    basemap.put(typekey, tp);
-    //                }
-    //                tp.put(new Long(base.getId()), base);
-    //                System.out.println("base.getId():"+base.getId()+" tmid:"+base.getTopicMapId()+" typekey:"+typekey);
                 }
             }
         } catch (Throwable e)
@@ -734,7 +550,6 @@ private SWBResourceCachedMgr cache;
             if(resource!=null)log.error("Error Creating SWBResource:"+" "+resource.getWebSiteId()+"-"+resource.getId(),e);
             else log.error("Error Creating SWBResource: resource==null"+e);
         }
-        //System.out.println("createWBResource:"+obj);
         return obj;
     }
 

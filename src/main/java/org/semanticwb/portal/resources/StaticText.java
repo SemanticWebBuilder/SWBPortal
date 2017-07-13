@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
@@ -40,8 +40,8 @@ import org.semanticwb.portal.api.SWBResourceException;
 
 // TODO: Auto-generated Javadoc
 /**
- * StaticText se encarga de desplegar y administrar un texto est�tico, este texto
- * se agrega en la administraci�n del recurso, acepta tags de html para cambiar su
+ * StaticText se encarga de desplegar y administrar un texto estático, este texto
+ * se agrega en la administración del recurso, acepta tags de html para cambiar su
  * aspecto.
  *
  * StaticText is in charge to unfold and to administer a static text, this text
@@ -57,22 +57,17 @@ public class StaticText extends GenericAdmResource {
      * Obtiene la vista del recurso.
      * 
      * @param request El servlet container crea un objeto HttpServletRequest y
-     * se pasa como argumento al m�todo del servlet.
+     * se pasa como argumento al método del servlet.
      * @param response El servlet container crea un objeto HttpServletResponse y
-     * se pasa como argumento al m�todo del servlet.
+     * se pasa como argumento al método del servlet.
      * @param paramRequest the param request
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws SWBResourceException the sWB resource exception
-     * @exception com.infotec.appfw.exception.AFException Si se origina cualquier error en el recurso al traer el html.
      */
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         Resource base=getResourceBase();
         String staticText = replaceTags(base.getAttribute("text"), request, paramRequest);
-        
-//        SWBResourceURL url=paramRequest.getActionUrl();
-//        url.setCallMethod(url.Call_DIRECT);
-//        url.setMode(url.Mode_EDIT);
         
         PrintWriter out = response.getWriter();
         out.println(staticText);
@@ -157,17 +152,5 @@ public class StaticText extends GenericAdmResource {
         PrintWriter out = response.getWriter();
         out.print(staticText);
         out.flush();
-    }
-
-    /*@Override
-    public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
-        Resource base = response.getResourceBase();
-        base.setAttribute("text", request.getParameter("val"));
-        try{
-            base.updateAttributesToDB();
-        }catch(Exception e){
-            
-        }
-    }*/
-    
+    }    
 }
