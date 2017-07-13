@@ -63,7 +63,7 @@ import org.w3c.dom.NodeList;
 public class SWBDocRep extends GenericResource {
 
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(SWBImportWebSite.class);
+    private static Logger log = SWBUtils.getLogger(SWBDocRep.class);
     
     /** The PATH. */
     String PATH = SWBPortal.getWorkPath() + "/";
