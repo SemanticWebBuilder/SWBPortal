@@ -40,7 +40,7 @@ import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
 
 /**
- * Presenta la interface del administrador de documentos del servidor, con la que los usuarios
+ * Presenta la interfaz del administrador de documentos del servidor, con la que los usuarios
  * con los permisos adecuados, pueden gestionar los archivos contenidos en la instancia de SWB.
  *
  * Displays the interface for the server documents administrator, with which users who have the
@@ -75,6 +75,18 @@ public class ServerDocumentsManager extends GenericResource {
         out.flush();
     }
 
+    /**
+     * Genera el codigo HTML necesario para mostrar la interfaz del administrador de documentos
+     * contenidos en el contexto de la instancia de SWB.
+     * 
+     * Generates the HTML code that shows the documents administrator's interface
+     * for the files stored in the instance of SWB.
+     * @param request la peticion hecha por el usuario
+     * @param response la respuesta generada para devolverla al usuario
+     * @param paramRequest los datos asociados a la peticion del usuario, propios de SWB
+     * @throws SWBResourceException en caso de encontrar algun problema con la ejecucion de objetos de SWB
+     * @throws IOException en caso de haber un problema de entrada o salida de datos
+     */
     public void doShowInterface(HttpServletRequest request, HttpServletResponse response,
             SWBParamRequest paramRequest) throws SWBResourceException, IOException {
 
