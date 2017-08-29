@@ -1,26 +1,26 @@
-/**  
-* SemanticWebBuilder es una plataforma para el desarrollo de portales y aplicaciones de integración, 
-* colaboración y conocimiento, que gracias al uso de tecnología semántica puede generar contextos de 
-* información alrededor de algún tema de interés o bien integrar información y aplicaciones de diferentes 
-* fuentes, donde a la información se le asigna un significado, de forma que pueda ser interpretada y 
-* procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación 
-* para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite. 
-* 
-* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’), 
-* en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición; 
-* aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software, 
-* todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización 
-* del SemanticWebBuilder 4.0. 
-* 
-* INFOTEC no otorga garantía sobre SemanticWebBuilder, de ninguna especie y naturaleza, ni implícita ni explícita, 
-* siendo usted completamente responsable de la utilización que le dé y asumiendo la totalidad de los riesgos que puedan derivar 
-* de la misma. 
-* 
-* Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente 
-* dirección electrónica: 
+/**
+* SemanticWebBuilder es una plataforma para el desarrollo de portales y aplicaciones de integración,
+* colaboración y conocimiento, que gracias al uso de tecnología semántica puede generar contextos de
+* información alrededor de algún tema de interés o bien integrar información y aplicaciones de diferentes
+* fuentes, donde a la información se le asigna un significado, de forma que pueda ser interpretada y
+* procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
+* para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
+*
+* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+* en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
+* aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
+* todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
+* del SemanticWebBuilder 4.0.
+*
+* INFOTEC no otorga garantía sobre SemanticWebBuilder, de ninguna especie y naturaleza, ni implícita ni explícita,
+* siendo usted completamente responsable de la utilización que le dé y asumiendo la totalidad de los riesgos que puedan derivar
+* de la misma.
+*
+* Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
+* dirección electrónica:
 *  http://www.semanticwebbuilder.org
-**/ 
- 
+**/
+
 
 
 package org.semanticwb.portal.admin.resources.reports;
@@ -67,20 +67,20 @@ import org.json.JSONObject;
  *
  * This class generates the session report, takes information from
  * WebBuilder objects according with user parameters. this file is used in report
- * sections. 
+ * sections.
  */
 
 public class WBASessionReport extends GenericResource {
-    
+
     /** The log. */
     private static Logger log = SWBUtils.getLogger(WBASessionReport.class);
 
     /** The Constant S_REPORT_IDAUX. */
     public static final String S_REPORT_IDAUX = "_";
-    
+
     /** The Constant I_REPORT_TYPE. */
     public static final int I_REPORT_TYPE = 5;
-    
+
     /** The str rsc type. */
     private String strRscType;
 
@@ -99,7 +99,7 @@ public class WBASessionReport extends GenericResource {
 
     /**
      * Render.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -115,7 +115,7 @@ public class WBASessionReport extends GenericResource {
 
     /**
      * Process request.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -145,7 +145,7 @@ public class WBASessionReport extends GenericResource {
 
     /**
      * Do view.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -159,7 +159,7 @@ public class WBASessionReport extends GenericResource {
         response.setHeader("Pragma", "no-cache");
         PrintWriter out = response.getWriter();
         Resource base = getResourceBase();
-        
+
         final int I_ACCESS = 0;
         HashMap hm_repository = new HashMap();
         String rtype;
@@ -172,7 +172,7 @@ public class WBASessionReport extends GenericResource {
                 // Get access level of this user on this topicmap and if level is greater than "0" then user have access
                 // TODO
 //                i_access = AdmFilterMgr.getInstance().haveAccess2UserRep(paramsRequest.getUser(),ur_repository.getName());
-//                if(I_ACCESS < i_access) {                    
+//                if(I_ACCESS < i_access) {
                     hm_repository.put(repository.getId(), repository.getSemanticObject().getDisplayName(paramsRequest.getUser().getLanguage()));
 //                }
             }
@@ -180,7 +180,7 @@ public class WBASessionReport extends GenericResource {
             if(hm_repository.size() > I_ACCESS) {
                 String address = paramsRequest.getRenderUrl().toString();
                 String repositoryName = request.getParameter("wb_repository");
-                
+
                 int groupDates;
                 try {
                     groupDates = request.getParameter("wb_rep_type")==null ? 0:Integer.parseInt(request.getParameter("wb_rep_type"));
@@ -208,7 +208,7 @@ public class WBASessionReport extends GenericResource {
                 }catch(ParseException pe){
                     fecha12 = sdf.format(cal.getTime());
                 }
-                
+
                 String topicId = paramsRequest.getWebPage().getId();
                 if(topicId.lastIndexOf("Daily") != -1) {
                     rtype = "0";
@@ -225,7 +225,7 @@ public class WBASessionReport extends GenericResource {
                 url.setCallMethod(url.Call_DIRECT);
 
                 // javascript
-                out.println("<script type=\"text/javascript\">");                
+                out.println("<script type=\"text/javascript\">");
                 out.println("dojo.require(\"dijit.form.DateTextBox\");");
 
                 out.println("dojo.require(\"dojox.grid.DataGrid\");");//--
@@ -263,7 +263,7 @@ public class WBASessionReport extends GenericResource {
                 out.println("   gridMaster.startup();");
                 out.println("});");
                 //--
-                
+
                 out.println("function getParams(accion) {");
                 out.println("   var params = '?';");
                 out.println("   params = params + 'wb_repository=' + dojo.byId('wb_repository').value;");
@@ -290,14 +290,14 @@ public class WBASessionReport extends GenericResource {
                 out.println("   }");
                 out.println("   return params;");
                 out.println("}");
-                
+
                 out.println("function doXml(accion, size) { ");
                 /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("xml")+"\"+params,\"graphWindow\",size);    ");
                 /*out.println("   }");*/
                 out.println("}");
-                
+
                 out.println("function doExcel(accion, size) { ");
                 /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
@@ -309,28 +309,28 @@ public class WBASessionReport extends GenericResource {
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("histogram")+"\"+params,\"graphWindow\",size);   ");
                 out.println(" }");
-                
+
                 out.println("function doGraph(accion, size) { ");
                 /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("graph")+"\"+params,\"graphWindow\",size);    ");
                 /*out.println("   }");*/
                 out.println(" }");
-                
+
                 out.println("function doPdf(accion, size) { ");
                 /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("pdf")+"\"+params,\"graphWindow\",size);    ");
                 /*out.println("   }");*/
                 out.println("}");
-                
+
                 out.println("function doRtf(accion, size) { ");
                 /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("rtf")+"\"+params,\"graphWindow\",size);    ");
                 /*out.println("   }");*/
                 out.println("}");
-                
+
                 out.println(" function getTypeSelected(){");
                 out.println("     var strType = \"0\";");
                 out.println("     for(i=0;i<window.document.frmrep.wb_rep_type.length;i++){");
@@ -340,7 +340,7 @@ public class WBASessionReport extends GenericResource {
                 out.println("     }");
                 out.println("     return strType;");
                 out.println(" }");
-                
+
                 out.println("function doApply() {");
                 out.println("   var grid = dijit.byId('gridMaster');");
                 out.println("   var params = getParams("+ rtype + ");");
@@ -352,7 +352,7 @@ public class WBASessionReport extends GenericResource {
                 out.println("     if(window.document.frmrep.wb_rep_type[0].checked){");
                 out.println("       dojo.byId('wb_fecha1').disabled = false;");
                 out.println("       dojo.byId('wb_fecha11').disabled = true;");
-                out.println("       dojo.byId('wb_fecha12').disabled = true;");                
+                out.println("       dojo.byId('wb_fecha12').disabled = true;");
                 out.println("     }");
                 out.println("     if(window.document.frmrep.wb_rep_type[1].checked){");
                 out.println("       dojo.byId('wb_fecha1').disabled = true;");
@@ -363,7 +363,7 @@ public class WBASessionReport extends GenericResource {
                 out.println("}");
 
                 out.println("</script>");
-                
+
                 out.println("<div class=\"swbform\">");
                 out.println("<fieldset>");
                 if(rtype.equals("0")) {
@@ -375,14 +375,14 @@ public class WBASessionReport extends GenericResource {
 
                 out.println("<form id=\"frmrep\" name=\"frmrep\" method=\"post\" action=\"" + address + "\">");
                 out.println("<fieldset>");
-                out.println("<legend>"+paramsRequest.getLocaleString("session_report")+"</legend>");                
+                out.println("<legend>"+paramsRequest.getLocaleString("session_report")+"</legend>");
                 out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
                 if(rtype.equals("0")) {
                     out.println("<tr><td width=\"183\"></td><td width=\"146\"></td><td width=\"157\"></td><td width=\"443\"></td></tr>");
                 }else {
                     out.println("<tr><td width=\"100\"></td><td width=\"196\"></td><td width=\"224\"></td><td width=\"364\"></td></tr>");
                 }
-                
+
                 out.println("<tr>");
                 out.println("<td>" + paramsRequest.getLocaleString("repository") + ":</td>");
                 out.println("<td colspan=\"2\">");
@@ -412,7 +412,7 @@ public class WBASessionReport extends GenericResource {
                     out.println(" />");
                     out.println("&nbsp;" + paramsRequest.getLocaleString("by_day"));
                     out.println("</label></td>");
-                    out.println("<td colspan=\"2\">");                    
+                    out.println("<td colspan=\"2\">");
                     out.println("<input type=\"text\" name=\"wb_fecha1\" onblur=\"if(!this.value){this.focus();}\" id=\"wb_fecha1\" dojoType=\"dijit.form.DateTextBox\" size=\"11\" style=\"width:110px;\" hasDownArrow=\"true\" value=\""+fecha1+"\">");
                     out.println("</td>");
                     out.println("<td><input type=\"hidden\" id=\"wb_rtype\" name=\"wb_rtype\" value=\"0\" /></td>");
@@ -474,7 +474,7 @@ public class WBASessionReport extends GenericResource {
                     /*
                     if(request.getParameter("wb_rtype")!=null && repositoryName!=null ) {
                         out.println("<fieldset>");
-                        out.println("<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"98%\">");                            
+                        out.println("<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"98%\">");
                         out.println("<tr>");
                         out.println("<td>");
                         WBAFilterReportBean filter = buildFilter(request, paramsRequest);
@@ -486,10 +486,10 @@ public class WBASessionReport extends GenericResource {
                         try {
                             JRResource jrResource = new JRHtmlResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                             jrResource.prepareReport();
-                            jrResource.exportReport(response);                            
+                            jrResource.exportReport(response);
                         }catch (Exception e) {
                             throw new javax.servlet.ServletException(e);
-                        }                                                
+                        }
                         out.println("</td>");
                         out.println("</tr>");
                         out.println("<tr><td>&nbsp;</td></tr>");
@@ -500,7 +500,7 @@ public class WBASessionReport extends GenericResource {
                     GregorianCalendar gc_now = new GregorianCalendar();
                     int year13 = request.getParameter("wb_year13")==null ? gc_now.get(Calendar.YEAR):Integer.parseInt(request.getParameter("wb_year13"));
                     out.println("<tr>");
-                    out.println("<td>" + paramsRequest.getLocaleString("year") + ":</td>");                    
+                    out.println("<td>" + paramsRequest.getLocaleString("year") + ":</td>");
                     out.println("<td colspan=\"2\"><select id=\"wb_year13\" name=\"wb_year13\">");
                     for (int i = 2000; i < 2021; i++) {
                         out.println("<option value=\"" + i + "\"");
@@ -510,8 +510,8 @@ public class WBASessionReport extends GenericResource {
                         out.println(">" + i + "</option>");
                     }
                     out.println("</select>");
-                    out.println("</td>");                    
-                    out.println("<td><input type=\"hidden\" id=\"wb_rtype\" name=\"wb_rtype\" value=\"1\" /></td>");                        
+                    out.println("</td>");
+                    out.println("<td><input type=\"hidden\" id=\"wb_rtype\" name=\"wb_rtype\" value=\"1\" /></td>");
                     out.println("</tr>");
                     out.println("</table></fieldset>");
 
@@ -580,7 +580,7 @@ public class WBASessionReport extends GenericResource {
 
     /**
      * Do graph.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -590,27 +590,27 @@ public class WBASessionReport extends GenericResource {
     public void doGraph(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException{
         response.setContentType("application/pdf");
         Resource base = getResourceBase();
-        
-        try{            
+
+        try{
             String repositoryName = request.getParameter("wb_repository");
-            String rtype = request.getParameter("wb_rtype")==null ? "0" : request.getParameter("wb_rtype");            
+            String rtype = request.getParameter("wb_rtype")==null ? "0" : request.getParameter("wb_rtype");
             HashMap params = new HashMap();
             params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
             params.put("site", repositoryName);
-            
+
             if(rtype.equals("0")) {  // REPORTE DIARIO
                 WBAFilterReportBean filter = buildFilter(request, paramsRequest);
                 JRDataSourceable dataDetail = new JRSessionDataDetail(filter);
-                JasperTemplate jasperTemplate = JasperTemplate.SESSION_DAILY_GRAPH;                
+                JasperTemplate jasperTemplate = JasperTemplate.SESSION_DAILY_GRAPH;
                 try {
                     JRResource jrResource = new JRPdfResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                     jrResource.prepareReport();
-                    jrResource.exportReport(response);                            
+                    jrResource.exportReport(response);
                 }catch (Exception e) {
                     throw new javax.servlet.ServletException(e);
                 }
             }else {  // REPORTE MENSUAL
-                String s_year_13 = request.getParameter("wb_year13");                
+                String s_year_13 = request.getParameter("wb_year13");
                 if( s_year_13!=null ) {
                     WBAFilterReportBean filter = new WBAFilterReportBean();
                     filter.setSite(repositoryName);
@@ -618,11 +618,11 @@ public class WBASessionReport extends GenericResource {
                     filter. setType(I_REPORT_TYPE);
                     filter.setYearI(Integer.parseInt(s_year_13));
                     JRDataSourceable dataDetail = new JRSessionDataDetail(filter);
-                    JasperTemplate jasperTemplate = JasperTemplate.SESSION_MONTHLY_GRAPH;                        
+                    JasperTemplate jasperTemplate = JasperTemplate.SESSION_MONTHLY_GRAPH;
                     try {
                         JRResource jrResource = new JRPdfResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                         jrResource.prepareReport();
-                        jrResource.exportReport(response);                            
+                        jrResource.exportReport(response);
                     }catch (Exception e) {
                         throw new javax.servlet.ServletException(e);
                     }
@@ -636,7 +636,7 @@ public class WBASessionReport extends GenericResource {
 
     /**
      * Do rep excel.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -647,14 +647,14 @@ public class WBASessionReport extends GenericResource {
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "inline; filename=\"sr.xls\"");
         Resource base = getResourceBase();
-        
+
         try{
             String repositoryName = request.getParameter("wb_repository");
-            String rtype = request.getParameter("wb_rtype")==null ? "0" : request.getParameter("wb_rtype");            
+            String rtype = request.getParameter("wb_rtype")==null ? "0" : request.getParameter("wb_rtype");
             HashMap params = new HashMap();
             params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
             params.put("site", repositoryName);
-            
+
             if(rtype.equals("0")) {  // REPORTE DIARIO
                 WBAFilterReportBean filter = buildFilter(request, paramsRequest);
                 JRDataSourceable dataDetail = new JRSessionDataDetail(filter);
@@ -663,7 +663,7 @@ public class WBASessionReport extends GenericResource {
                 try {
                     JRResource jrResource = new JRXlsResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                     jrResource.prepareReport();
-                    jrResource.exportReport(response);                            
+                    jrResource.exportReport(response);
                 }catch (Exception e) {
                     throw new javax.servlet.ServletException(e);
                 }
@@ -681,7 +681,7 @@ public class WBASessionReport extends GenericResource {
                     try {
                         JRResource jrResource = new JRXlsResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                         jrResource.prepareReport();
-                        jrResource.exportReport(response);                            
+                        jrResource.exportReport(response);
                     }catch (Exception e) {
                         throw new javax.servlet.ServletException(e);
                     }
@@ -695,7 +695,7 @@ public class WBASessionReport extends GenericResource {
 
     /**
      * Do rep xml.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -705,15 +705,15 @@ public class WBASessionReport extends GenericResource {
     public void doRepXml(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException{
         response.setContentType("text/xml;charset=iso-8859-1");
         PrintWriter out = response.getWriter();
-        
-        Document dom = SWBUtils.XML.getNewDocument();        
+
+        Document dom = SWBUtils.XML.getNewDocument();
         Resource base = getResourceBase();
         try {
-            WBAFilterReportBean filter;            
+            WBAFilterReportBean filter;
             Iterator<SWBRecHit> itRecHits;
             int rtype = request.getParameter("wb_rtype")==null ? 0:Integer.parseInt(request.getParameter("wb_rtype"));
             if(rtype == 0) { // REPORTE DIARIO
-                filter = buildFilter(request, paramsRequest);                
+                filter = buildFilter(request, paramsRequest);
             }else { // REPORTE MENSUAL
                 String repository = request.getParameter("wb_repository");
                 int year13 = Integer.parseInt(request.getParameter("wb_year13"));
@@ -756,20 +756,20 @@ public class WBASessionReport extends GenericResource {
                 Element pages = dom.createElement("sessions");
                 pages.appendChild(dom.createTextNode(Long.toString(rec.getHits())));
                 row.appendChild(pages);
-            }            
+            }
             report.setAttribute("rows",Integer.toString(renglones));
         }
-        catch (Exception e){            
+        catch (Exception e){
             log.error("Error on method doRepXml() resource " + strRscType + " with id " + base.getId(), e);
         }
         out.print(SWBUtils.XML.domToXml(dom));
         out.flush();
         out.close();
     }
-    
+
     /**
      * Do rep pdf.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -779,22 +779,22 @@ public class WBASessionReport extends GenericResource {
     public void doRepPdf(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException{
         response.setContentType("application/pdf");
         Resource base = getResourceBase();
-        
+
         try {
             String repositoryName = request.getParameter("wb_repository");
-            String rtype = request.getParameter("wb_rtype")==null ? "0" : request.getParameter("wb_rtype");            
+            String rtype = request.getParameter("wb_rtype")==null ? "0" : request.getParameter("wb_rtype");
             HashMap params = new HashMap();
             params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
             params.put("site", repositoryName);
-            
+
             if(rtype.equals("0")) {  // REPORTE DIARIO
                 WBAFilterReportBean filter = buildFilter(request, paramsRequest);
                 JRDataSourceable dataDetail = new JRSessionDataDetail(filter);
-                JasperTemplate jasperTemplate = JasperTemplate.SESSION_DAILY;                
+                JasperTemplate jasperTemplate = JasperTemplate.SESSION_DAILY;
                 try {
                     JRResource jrResource = new JRPdfResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                     jrResource.prepareReport();
-                    jrResource.exportReport(response);                            
+                    jrResource.exportReport(response);
                 }catch (Exception e) {
                     throw new javax.servlet.ServletException(e);
                 }
@@ -808,11 +808,11 @@ public class WBASessionReport extends GenericResource {
                         filter. setType(I_REPORT_TYPE);
                         filter.setYearI(Integer.parseInt(s_year_13));
                         JRDataSourceable dataDetail = new JRSessionDataDetail(filter);
-                        JasperTemplate jasperTemplate = JasperTemplate.SESSION_MONTHLY;                        
+                        JasperTemplate jasperTemplate = JasperTemplate.SESSION_MONTHLY;
                         try {
                             JRResource jrResource = new JRPdfResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                             jrResource.prepareReport();
-                            jrResource.exportReport(response);                            
+                            jrResource.exportReport(response);
                         }catch (Exception e) {
                             throw new javax.servlet.ServletException(e);
                         }
@@ -824,10 +824,10 @@ public class WBASessionReport extends GenericResource {
             log.error("Error on method doRepPdf() resource " + strRscType + " with id " + base.getId(), e);
         }
     }
-    
+
     /**
      * Do rep rtf.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -841,25 +841,25 @@ public class WBASessionReport extends GenericResource {
 
         try {
             String repositoryName = request.getParameter("wb_repository");
-            String rtype = request.getParameter("wb_rtype")==null ? "0" : request.getParameter("wb_rtype");            
+            String rtype = request.getParameter("wb_rtype")==null ? "0" : request.getParameter("wb_rtype");
             HashMap params = new HashMap();
             params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
             params.put("site", repositoryName);
-            
+
             if(rtype.equals("0")) {  // REPORTE DIARIO
                 WBAFilterReportBean filter = buildFilter(request, paramsRequest);
                 JRDataSourceable dataDetail = new JRSessionDataDetail(filter);
-                JasperTemplate jasperTemplate = JasperTemplate.SESSION_DAILY;                
+                JasperTemplate jasperTemplate = JasperTemplate.SESSION_DAILY;
                 try {
                     JRResource jrResource = new JRRtfResource(jasperTemplate.getTemplatePath(),params, dataDetail.orderJRReport());
                     jrResource.prepareReport();
-                    jrResource.exportReport(response);                            
+                    jrResource.exportReport(response);
                 }catch (Exception e) {
                     throw new javax.servlet.ServletException(e);
                 }
             }else {  // REPORTE MENSUAL
                 String s_year_13 = request.getParameter("wb_year13");
-                /*if(!s_repository.equals(null)){*/                    
+                /*if(!s_repository.equals(null)){*/
                     if( s_year_13!=null ){
                         WBAFilterReportBean filter = new WBAFilterReportBean();
                         filter.setSite(repositoryName);
@@ -867,11 +867,11 @@ public class WBASessionReport extends GenericResource {
                         filter. setType(I_REPORT_TYPE);
                         filter.setYearI(Integer.parseInt(s_year_13));
                         JRDataSourceable dataDetail = new JRSessionDataDetail(filter);
-                        JasperTemplate jasperTemplate = JasperTemplate.SESSION_MONTHLY;                        
+                        JasperTemplate jasperTemplate = JasperTemplate.SESSION_MONTHLY;
                         try {
                             JRResource jrResource = new JRRtfResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                             jrResource.prepareReport();
-                            jrResource.exportReport(response);                            
+                            jrResource.exportReport(response);
                         }catch (Exception e) {
                             throw new javax.servlet.ServletException(e);
                         }
@@ -886,7 +886,7 @@ public class WBASessionReport extends GenericResource {
 
     /**
      * Do histrogram.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -912,7 +912,7 @@ public class WBASessionReport extends GenericResource {
             sb_ret.append("<head>");
             sb_ret.append("<title>"+paramsRequest.getLocaleString("session_report")+"</title>");
             sb_ret.append("</head>");
-            //sb_ret.append("<LINK href=\"" + WBUtils.getInstance().getWebPath() +"work/WBAdmin/templates/3/1/images/wb3.css\" rel=\"stylesheet\" type=\"text/css\" >");
+            
             sb_ret.append("<body>");
             sb_ret.append("<table border=\"0\" width=\"98%\">");
             sb_ret.append("<tr>");
@@ -1042,7 +1042,7 @@ public class WBASessionReport extends GenericResource {
 
     /**
      * Gets the histogram.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -1181,7 +1181,7 @@ public class WBASessionReport extends GenericResource {
 
     /**
      * Builds the filter.
-     * 
+     *
      * @param request the request
      * @param paramsRequest the params request
      * @return the wBA filter report bean
@@ -1189,7 +1189,7 @@ public class WBASessionReport extends GenericResource {
      * @throws IncompleteFilterException the incomplete filter exception
      */
     private WBAFilterReportBean buildFilter(HttpServletRequest request, SWBParamRequest paramsRequest) throws SWBResourceException, IncompleteFilterException {
-        WBAFilterReportBean filterReportBean = null;        
+        WBAFilterReportBean filterReportBean = null;
         String repositoryName = request.getParameter("wb_repository")==null ? paramsRequest.getWebPage().getWebSite().getId():request.getParameter("wb_repository");
         int groupDates;
         try {
@@ -1226,14 +1226,14 @@ public class WBASessionReport extends GenericResource {
             filterReportBean.setType(I_REPORT_TYPE);
             if(groupDates==0) { // radio button was 0. Select only one date
                 filterReportBean.setGroupedDates(false);
-                String[] numFecha = fecha1.split("-");                
+                String[] numFecha = fecha1.split("-");
                 filterReportBean.setYearI(Integer.parseInt(numFecha[0]));
                 filterReportBean.setMonthI(Integer.parseInt(numFecha[1]));
                 filterReportBean.setDayI(Integer.parseInt(numFecha[2]));
-                
+
             }else { // radio button was 1. Select between two dates
                 filterReportBean.setGroupedDates(true);
-                String[] numFecha = fecha11.split("-");                
+                String[] numFecha = fecha11.split("-");
                 filterReportBean.setYearI(Integer.parseInt(numFecha[0]));
                 filterReportBean.setMonthI(Integer.parseInt(numFecha[1]));
                 filterReportBean.setDayI(Integer.parseInt(numFecha[2]));
@@ -1291,7 +1291,7 @@ public class WBASessionReport extends GenericResource {
             while(iterator.hasNext()){
                 JSONObject obj = new JSONObject();
                 SWBRecHit recHit = iterator.next();
-                try {                    
+                try {
                     obj.put("repositorio", recHit.getTopicmap());
                     obj.put("anio", recHit.getYear());
                     obj.put("mes", recHit.getMonth());

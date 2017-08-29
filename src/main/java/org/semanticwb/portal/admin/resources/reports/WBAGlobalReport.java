@@ -169,16 +169,16 @@ public class WBAGlobalReport extends GenericResource {
             }
             if(hm_sites.size() > 0){ //If sites found
                 String address = paramsRequest.getWebPage().getUrl();
-                
+
                 String websiteId = request.getParameter("wb_site")==null ? (String)hm_sites.keySet().iterator().next():request.getParameter("wb_site");
 
-                int groupDates;                
+                int groupDates;
                 try {
                     groupDates = request.getParameter("wb_rep_type")==null ? 0:Integer.parseInt(request.getParameter("wb_rep_type"));
                 }catch(NumberFormatException e) {
                     groupDates = 0;
                 }
-                
+
                 GregorianCalendar cal = new GregorianCalendar();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String fecha1 = request.getParameter("wb_fecha1")==null ? sdf.format(cal.getTime()):request.getParameter("wb_fecha1");
@@ -335,13 +335,13 @@ public class WBAGlobalReport extends GenericResource {
                 out.println("     }");
                 out.println("     return strType;");
                 out.println(" }");
-                
+
                 out.println("function doApply() {");
                 out.println("   var grid = dijit.byId('gridMaster');");
                 out.println("   var params = getParams("+ rtype+ ");");
                 out.println("   fillGrid(grid, '"+url.setMode("fillgridmtr")+"'+params);");
                 out.println("}");
-                
+
                 out.println(" function doBlockade() {");
                 out.println("   if(window.document.frmrep.wb_rep_type) {");
                 out.println("     if(window.document.frmrep.wb_rep_type[0].checked){");
@@ -358,7 +358,7 @@ public class WBAGlobalReport extends GenericResource {
                 out.println(" }");
                 out.println("</script>");
 
-                
+
                 out.println("<div class=\"swbform\">");
                 out.println("<fieldset>");
                 if(rtype.equals("0")) {
@@ -448,7 +448,7 @@ public class WBAGlobalReport extends GenericResource {
                     out.println("</table>");
                     out.println("</fieldset>");
                     out.println("</form>");
-                    
+
 //                    out.println("<fieldset>");
 //                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
 //                    out.println("<tr>");
@@ -496,7 +496,7 @@ public class WBAGlobalReport extends GenericResource {
                     out.println("</table>");
                     out.println("</fieldset>");
                     out.println("</form>");
-                    
+
 //                    out.println("<fieldset>");
 //                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
 //                    out.println("<tr>");
@@ -890,7 +890,7 @@ public class WBAGlobalReport extends GenericResource {
             sb_ret.append("<head>");
             sb_ret.append("<title>"+paramsRequest.getLocaleString("global_report")+"</title>");
             sb_ret.append("</head>");
-            //sb_ret.append("<LINK href=\"" + WBUtils.getInstance().getWebPath() +"work/WBAdmin/templates/3/1/images/wb3.css\" rel=\"stylesheet\" type=\"text/css\" >");
+            
             sb_ret.append("<body>");
             sb_ret.append("<table border=\"0\" width=\"98%\">");
             sb_ret.append("<tr>");
@@ -1148,7 +1148,7 @@ public class WBAGlobalReport extends GenericResource {
         String wb_rtype = request.getParameter("wb_rtype")==null ? "0":request.getParameter("wb_rtype");
 
         JRDataSourceable dataDetail = null;
-        
+
         if(wb_rtype.equals("0")) { //Daily Report
             try{
             WBAFilterReportBean filter = buildFilter(request, paramsRequest);
@@ -1166,7 +1166,7 @@ public class WBAGlobalReport extends GenericResource {
             filter.setYearI(year13);
             dataDetail = new JRGlobalAccessDataDetail(filter);
         }
-              
+
         try {
             JRBeanCollectionDataSource dataSource = dataDetail.orderJRReport();
             Collection<SWBRecHit> collection = dataSource.getData();

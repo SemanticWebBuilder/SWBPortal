@@ -1,26 +1,26 @@
-/**  
-* SemanticWebBuilder es una plataforma para el desarrollo de portales y aplicaciones de integración, 
-* colaboración y conocimiento, que gracias al uso de tecnología semántica puede generar contextos de 
-* información alrededor de algún tema de interés o bien integrar información y aplicaciones de diferentes 
-* fuentes, donde a la información se le asigna un significado, de forma que pueda ser interpretada y 
-* procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación 
-* para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite. 
-* 
-* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’), 
-* en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición; 
-* aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software, 
-* todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización 
-* del SemanticWebBuilder 4.0. 
-* 
-* INFOTEC no otorga garantía sobre SemanticWebBuilder, de ninguna especie y naturaleza, ni implícita ni explícita, 
-* siendo usted completamente responsable de la utilización que le dé y asumiendo la totalidad de los riesgos que puedan derivar 
-* de la misma. 
-* 
-* Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente 
-* dirección electrónica: 
+/**
+* SemanticWebBuilder es una plataforma para el desarrollo de portales y aplicaciones de integración,
+* colaboración y conocimiento, que gracias al uso de tecnología semántica puede generar contextos de
+* información alrededor de algún tema de interés o bien integrar información y aplicaciones de diferentes
+* fuentes, donde a la información se le asigna un significado, de forma que pueda ser interpretada y
+* procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
+* para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
+*
+* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+* en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
+* aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
+* todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
+* del SemanticWebBuilder 4.0.
+*
+* INFOTEC no otorga garantía sobre SemanticWebBuilder, de ninguna especie y naturaleza, ni implícita ni explícita,
+* siendo usted completamente responsable de la utilización que le dé y asumiendo la totalidad de los riesgos que puedan derivar
+* de la misma.
+*
+* Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
+* dirección electrónica:
 *  http://www.semanticwebbuilder.org
-**/ 
- 
+**/
+
 package org.semanticwb.portal.admin.resources.reports;
 
 
@@ -64,16 +64,16 @@ import org.json.JSONObject;
  * The Class WBALoginUniqueReport.
  */
 public class WBALoginUniqueReport extends GenericResource{
-    
+
     /** The log. */
     private static Logger log = SWBUtils.getLogger(WBALoginUniqueReport.class);
 
     /** The Constant S_REPORT_IDAUX. */
     public static final String S_REPORT_IDAUX = "_";
-    
+
     /** The Constant I_REPORT_TYPE. */
     public static final int I_REPORT_TYPE = 7;
-    
+
     /** The str rsc type. */
     private String strRscType;
 
@@ -102,7 +102,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Process request.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -132,7 +132,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Do view.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -324,7 +324,7 @@ public class WBALoginUniqueReport extends GenericResource{
                 out.println("     }");
                 out.println("     return strType;");
                 out.println(" }");
-                
+
                 out.println("function doApply() {");
                 out.println("   var grid = dijit.byId('gridMaster');");
                 out.println("   var params = getParams("+ rtype + ");");
@@ -535,7 +535,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Do graph.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -588,7 +588,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Do rep excel.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -644,7 +644,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Do rep xml.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -744,7 +744,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Do rep pdf.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -797,7 +797,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Do rep rtf.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -851,7 +851,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Do histrogram.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -877,7 +877,7 @@ public class WBALoginUniqueReport extends GenericResource{
             sb_ret.append("<head>");
             sb_ret.append("<title>"+paramsRequest.getLocaleString("login_report")+"</title>");
             sb_ret.append("</head>");
-            //sb_ret.append("<LINK href=\"" + WBUtils.getInstance().getWebPath() +"work/WBAdmin/templates/3/1/images/wb3.css\" rel=\"stylesheet\" type=\"text/css\" >");
+            
             sb_ret.append("<body>");
             sb_ret.append("<table border=\"0\" width=\"98%\">");
             sb_ret.append("<tr>");
@@ -1007,7 +1007,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Gets the histogram.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -1146,7 +1146,7 @@ public class WBALoginUniqueReport extends GenericResource{
 
     /**
      * Builds the filter.
-     * 
+     *
      * @param request the request
      * @param paramsRequest the params request
      * @return the wBA filter report bean

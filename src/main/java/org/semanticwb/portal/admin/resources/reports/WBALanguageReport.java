@@ -73,13 +73,13 @@ import org.json.JSONObject;
  */
 
 public class WBALanguageReport extends GenericResource {
-    
+
     /** The log. */
     private Logger log = SWBUtils.getLogger(WBALanguageReport.class);
 
     /** The Constant I_REPORT_TYPE. */
     public static final int I_REPORT_TYPE = 2;
-    
+
     /** The str rsc type. */
     private String strRscType;
 
@@ -98,7 +98,7 @@ public class WBALanguageReport extends GenericResource {
 
     /**
      * Process request.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -130,7 +130,7 @@ public class WBALanguageReport extends GenericResource {
 
     /**
      * Do render lang.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -172,7 +172,7 @@ public class WBALanguageReport extends GenericResource {
 
     /**
      * Do view.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -364,13 +364,13 @@ public class WBALanguageReport extends GenericResource {
                 out.println("   }");
                 out.println("   return strType;");
                 out.println("}");
-                
+
                 out.println("function doApply() {");
                 out.println("   var grid = dijit.byId('gridMaster');");
                 out.println("   var params = getParams("+ rtype+ ");");
                 out.println("   fillGrid(grid, '"+url.setMode("fillgridmtr")+"'+params);");
                 out.println("}");
-                
+
                 out.println("function doBlockade() {");
                 out.println("  if(window.document.frmrep.wb_rep_type) {");
                 out.println("     if(window.document.frmrep.wb_rep_type[0].checked) {");
@@ -484,7 +484,7 @@ public class WBALanguageReport extends GenericResource {
                     out.println("</table>");
                     out.println("</fieldset>");
                     out.println("</form>");
-                    
+
 //                    out.println("<fieldset>");
 //                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
 //                    out.println("<tr>");
@@ -534,7 +534,7 @@ public class WBALanguageReport extends GenericResource {
                     out.println("</table>");
                     out.println("</fieldset>");
                     out.println("</form>");
-                    
+
 //                    out.println("<fieldset>");
 //                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
 //                    out.println("<tr>");
@@ -581,7 +581,7 @@ public class WBALanguageReport extends GenericResource {
 
     /**
      * Do graph.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -630,7 +630,7 @@ public class WBALanguageReport extends GenericResource {
 
     /**
      * Do rep excel.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -681,7 +681,7 @@ public class WBALanguageReport extends GenericResource {
 
     /**
      * Do rep xml.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -790,7 +790,7 @@ public class WBALanguageReport extends GenericResource {
 
     /**
      * Do rep pdf.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -838,7 +838,7 @@ public class WBALanguageReport extends GenericResource {
 
     /**
      * Do rep rtf.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -888,7 +888,7 @@ public class WBALanguageReport extends GenericResource {
 
     /**
      * Do histrogram.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -914,7 +914,7 @@ public class WBALanguageReport extends GenericResource {
             sb_ret.append("<head>");
             sb_ret.append("<title>"+paramsRequest.getLocaleString("language_report")+"</title>");
             sb_ret.append("</head>");
-            //sb_ret.append("<LINK href=\"" + WBUtils.getInstance().getWebPath() +"work/WBAdmin/templates/3/1/images/wb3.css\" rel=\"stylesheet\" type=\"text/css\" >");
+            
             sb_ret.append("<body>");
             sb_ret.append("<table border=\"0\" width=\"98%\">");
             sb_ret.append("<tr>");
@@ -1094,7 +1094,7 @@ sb_app.append("<param name=\"ndata\" value=\""+ j +"\">");
 
     /**
      * Gets the histogram.
-     * 
+     *
      * @param request the request
      * @param response the response
      * @param paramsRequest the params request
@@ -1275,7 +1275,7 @@ sb_app.append("<param name=\"ndata\" value=\""+ j +"\">");
 
     /**
      * Builds the filter.
-     * 
+     *
      * @param request the request
      * @param paramsRequest the params request
      * @return the wBA filter report bean
@@ -1373,7 +1373,7 @@ sb_app.append("<param name=\"ndata\" value=\""+ j +"\">");
 
     /**
      * List languages.
-     * 
+     *
      * @param websiteId the website id
      * @param language the language
      * @return the array list
@@ -1421,7 +1421,7 @@ sb_app.append("<param name=\"ndata\" value=\""+ j +"\">");
             if( !langId.equalsIgnoreCase("0") ) {
                 filter.setIdaux(langId);
             }
-            filter. setType(I_REPORT_TYPE);            
+            filter. setType(I_REPORT_TYPE);
             filter.setYearI(year13);
             dataDetail = new JRLanguageAccessDataDetail(filter);
         }
