@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
@@ -29,25 +29,30 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.StringTokenizer;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerException;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Resource;
 import org.semanticwb.portal.admin.admresources.util.WBAdmResourceUtils;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceURL;
+import org.semanticwb.portal.util.FileUpload;
+import org.semanticwb.portal.util.SWBCookieMgr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
-import org.semanticwb.portal.util.SWBCookieMgr;
-import org.semanticwb.portal.api.*;
-import org.semanticwb.portal.util.FileUpload;
+import org.w3c.dom.NodeList;
 
 /**
  * Poll se encarga de desplegar y administrar una encuesta de opinion bajo
@@ -158,7 +163,6 @@ public class Poll extends GenericResource {
         try {
             super.setResourceBase(base);
             workPath    = SWBPortal.getWorkPath()+base.getWorkPath()+"/";
-            //webWorkPath = SWBPortal.getWebWorkPath()+base.getWorkPath()+"/";
             webWorkPath = SWBPortal.getWebWorkPath();
             restype= base.getResourceType().getResourceClassName();
         }catch(Exception e) {
@@ -233,7 +237,6 @@ public class Poll extends GenericResource {
             url.setMode("accesible");
         }else {
             url.setMode("showResults");
-            //url.setCallMethod(SWBParamRequest.Call_DIRECT);
         }
 
         Document  dom = SWBUtils.XML.getNewDocument();
@@ -300,7 +303,6 @@ public class Poll extends GenericResource {
         }
         else
         {
-            //e.setAttribute("action", "window.location.href='"+url.toString(true)+"'");
             e.setAttribute("action", "postHtml('"+url.toString(true)+"','"+PREF+base.getId()+"')");
         }
         e.setAttribute("path", path);
@@ -376,14 +378,12 @@ public class Poll extends GenericResource {
                     }
                 }
                 StringBuilder html = new StringBuilder(SWBUtils.XML.transformDom(curtpl, dom));
-                //html.append(getRenderScript(paramRequest));
                 Display display;
                 try {
                     display = Display.valueOf(base.getAttribute("display", Display.SLIDE.name()));
                 }catch(Exception noe) {
                     display = Display.POPUP;
                 }
-                //if(display==Display.SLIDE) {
                 if(display!=Display.POPUP) {
                     html.append("<div id=\""+PREF).append(base.getId()).append("\" class=\"swb-encuesta-res\">&nbsp;</div>");
                 }
@@ -412,209 +412,13 @@ public class Poll extends GenericResource {
         response.setHeader("Pragma","no-cache"); //HTTP 1.0
 
         StringBuilder html = new StringBuilder();
-//        try {
-            Document dom = getDom(request, response, paramRequest);
-//            html.append( SWBUtils.XML.transformDom(tpl,dom) );
+        Document dom = getDom(request, response, paramRequest);
 
-            vote(request, response, paramRequest);
-            dom = SWBUtils.XML.xmlToDom( getResourceBase().getData() );
-            html.append(getPollResults(request, paramRequest, dom));
-//        }catch(TransformerException te) {
-//            log.error("Error in a resource Poll while transforms the document. ", te);
-//        }
+        vote(request, response, paramRequest);
+        dom = SWBUtils.XML.xmlToDom( getResourceBase().getData() );
+        html.append(getPollResults(request, paramRequest, dom));
         response.getWriter().println(html.toString());
     }
-
-    /**
-     * Muestra el html al usuario final.
-     * 
-     * @param request the request
-     * @param response the response
-     * @param paramRequest the param request
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws SWBResourceException the sWB resource exception
-     */
-    /*
-    @Override
-    public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        response.setContentType("text/html; charset=iso-8859-1");
-        response.setHeader("Cache-Control","no-cache"); //HTTP 1.1
-        response.setHeader("Pragma","no-cache"); //HTTP 1.0
-        response.setDateHeader ("Expires", 0); //prevents caching at the proxy server
-
-        Resource base=getResourceBase();
-
-        //StringBuffer ret = new StringBuffer("");
-        PrintWriter out = response.getWriter();
-        //String action = null != request.getParameter("enc_act") && !"".equals(request.getParameter("enc_act").trim()) ? request.getParameter("enc_act").trim() : "enc_step1";
-
-        try
-        {
-            Document dom=SWBUtils.XML.xmlToDom(base.getXml());
-            if(dom!=null) {
-                NodeList node = dom.getElementsByTagName("option");
-                if (!"".equals(base.getAttribute("question", "").trim()) && node.getLength() > 1) {
-                    if( base.getAttribute("cssClass")!=null && !base.getAttribute("cssClass").trim().equals("") ) {
-                        out.println("<div class=\""+base.getAttribute("cssClass")+"\">");
-                    }else {
-                        out.println("<div class=\"swb-encuesta\">");
-                    }
-
-                    if( base.getAttribute("header")!=null ) {
-                        String style = "";
-                        if( base.getAttribute("headerStyle")!=null ) {
-                            style = "style=\""+base.getAttribute("headerStyle")+"\"";
-                        }
-                        out.println("<h1 "+style+">"+base.getAttribute("header")+"</h1>");
-                    }
-
-                    out.println("<form name=\"frmEncuesta\" id=\"frmEncuesta_"+base.getId()+"\" action=\""+paramRequest.getRenderUrl()+"\" method=\"post\" style=\"color:"+base.getAttribute("textcolor")+";\" >");
-                    if (!"".equals(base.getAttribute("imgencuesta", "").trim())) {
-                        out.println("<img src=\""+webWorkPath+"/"+base.getAttribute("imgencuesta")+"\" border=\"0\" alt=\""+base.getAttribute("question")+"\" />");
-                    }
-
-                    out.println("<p>"+base.getAttribute("question")+"</p>");
-
-                    //out.println("<p>");
-                    for (int i = 0; i < node.getLength(); i++) {
-                        out.println("<label><input type=\"radio\" name=\"radiobutton\" value=\"enc_votos"+(i + 1)+"\" />");
-                        out.print(node.item(i).getChildNodes().item(0).getNodeValue()+"</label><br />");
-                    }
-                    //out.println("</p>");
-
-                    out.println("<p><span>");
-                    if(!"".equals(base.getAttribute("button", ""))) {
-                        out.println("<input type=\"image\" name=\"votar\" src=\"" + webWorkPath +"/"+ base.getAttribute("button").trim() +"\" onClick=\"buscaCookie(this.form); return false;\"/>");
-                    }else {
-                        out.println("<input type=\"button\" name=\"votar\" value=\"" + base.getAttribute("msg_tovote",paramRequest.getLocaleString("msg_tovote")) +"\" onClick=\"buscaCookie(this.form);\"/>");
-                    }
-                    out.println("</span></p>");
-
-                    SWBResourceURLImp url=new SWBResourceURLImp(request, base, paramRequest.getWebPage(),SWBResourceURL.UrlType_RENDER);
-                    url.setMode("showResults");
-                    url.setParameter("NombreCookie","VotosEncuesta"+ base.getId());
-                    url.setCallMethod(paramRequest.Call_DIRECT);
-
-                    boolean display = Boolean.valueOf(base.getAttribute("display","true")).booleanValue();
-                    if(display) {
-                        out.println("<p>");
-                        out.println("<a href=\"javascript:;\" onclick=\"javascript:abreResultados(\'" + url.toString(true) + "\')\">" + base.getAttribute("msg_viewresults",paramRequest.getLocaleString("msg_viewresults")) + "</a>");
-                        out.println("</p>");
-                    }else {
-                        out.println("<p>");
-                        out.println("<a href=\"javascript:;\" onclick=\"postHtml('"+url+"','"+PREF+base.getId()+"'); expande();\">" + base.getAttribute("msg_viewresults",paramRequest.getLocaleString("msg_viewresults")) + "</a>");
-                        out.println("<div id=\""+PREF+base.getId()+"\"> ");
-                        out.println("</div>");
-                        out.println("</p>");
-                    }
-                    if("1".equals(base.getAttribute("wherelinks", "").trim()) || "3".equals(base.getAttribute("wherelinks", "").trim())) {
-                        out.println(getLinks(dom.getElementsByTagName("link"), paramRequest.getLocaleString("lblView_relatedLink")));
-                    }
-                    out.println("<input type=\"hidden\" name=\"NombreCookie\" value=\"VotosEncuesta"+ base.getId() +"\"/>");
-                    out.println("</form>");
-                    out.println("</div>");
-
-                    StringBuilder win = new StringBuilder();
-                    win.append("menubar="+ base.getAttribute("menubar", "no"));
-                    win.append(",toolbar="+ base.getAttribute("toolbar", "no"));
-                    win.append(",status="+ base.getAttribute("status", "no"));
-                    win.append(",location="+ base.getAttribute("location", "no"));
-                    win.append(",directories="+ base.getAttribute("directories", "no"));
-                    win.append(",scrollbars="+ base.getAttribute("scrollbars", "no"));
-                    win.append(",resizable="+ base.getAttribute("resizable", "no"));
-                    win.append(",width="+ base.getAttribute("width", "360"));
-                    win.append(",height="+ base.getAttribute("height", "260"));
-                    win.append(",top="+ base.getAttribute("top", "125"));
-                    win.append(",left="+ base.getAttribute("left", "220"));
-
-                    out.println("<script type=\"text/javascript\">");
-                    out.println("dojo.require(\"dojo.fx\");");
-                    out.println("dojo.require(\"dijit.dijit\");");
-                    out.println("dojo.require(\"dijit.layout.ContentPane\");");
-
-                    out.println("\nfunction buscaCookie(forma) {");
-                    out.println("    var numcom = getCookie(forma.NombreCookie.value); ");
-                    out.println("    if(numcom == \"SI\") { ");
-                    if("true".equals(base.getAttribute("oncevote", "true").trim()) && !"0".equals(base.getAttribute("vmode", "0").trim())) {
-                        out.println("    alert('"+ paramRequest.getLocaleString("msgView_msgVote") +"'); ");
-                    }
-                    out.println("     } ");
-                    out.println("    grabaEncuesta(forma); ");
-                    out.println("} ");
-                    out.println("function setCookie(name) {");
-                    out.println("    document.cookie = name; ");
-                    out.println("    var expDate = new Date(); ");
-                    out.println("    expDate.setTime(expDate.getTime() + ( 720 * 60 * 60 * 1000) ); ");
-                    out.println("    expDate = expDate.toGMTString(); ");
-                    out.println("    var str1 = name +\"=SI; expires=\" + expDate + \";Path=/\"; ");
-                    out.println("    document.cookie = str1; ");
-                    out.println("} ");
-                    out.println("function getCookie (name) {");
-                    out.println("    var arg = name + \"=\"; ");
-                    out.println("    var alen = arg.length; ");
-                    out.println("    var clen = document.cookie.length; ");
-                    out.println("    var i = 0; ");
-                    out.println("    while (i < clen) ");
-                    out.println("    { ");
-                    out.println("        var j = i + alen; ");
-                    out.println("        if (document.cookie.substring(i, j) == arg) ");
-                    out.println("            return getCookieVal (j); ");
-                    out.println("        i = document.cookie.indexOf(\" \", i) + 1; ");
-                    out.println("        if (i == 0) break; ");
-                    out.println("    } ");
-                    out.println("    return null; ");
-                    out.println("} ");
-                    out.println("function getCookieVal (offset) {");
-                    out.println("    var endstr = document.cookie.indexOf (\";\", offset); ");
-                    out.println("    if (endstr == -1) ");
-                    out.println("        endstr = document.cookie.length; ");
-                    out.println("    return unescape(document.cookie.substring(offset, endstr)); ");
-                    out.println("} ");
-                    out.println("function grabaEncuesta(forma) {");
-                    out.println("    var optValue; ");
-                    out.println("    for(var i=0; i< forma.length; i++) {");
-                    out.println("        if(forma.elements[i].type == \"radio\") { ");
-                    out.println("            if(forma.elements[i].checked) { ");
-                    out.println("                optValue = forma.elements[i].value; ");
-                    out.println("                break;");
-                    out.println("            } ");
-                    out.println("        } ");
-                    out.println("    } ");
-                    out.println("    if(optValue != null) { ");
-                    if(display) {
-                        out.println("  window.open(\'"+ url.toString() +"&radiobutton=\'+optValue,\'_newenc\',\'"+win+"\'); ");
-                    }else {
-                        out.println("  postHtml('"+url.toString()+"&radiobutton='+optValue,'"+PREF+base.getId()+"'); expande();");
-                    }
-                    out.println("    }else { ");
-                    out.println("       alert('"+ paramRequest.getLocaleString("msgView_msgAnswer") +"'); ");
-                    out.println("    } ");
-                    out.println("} ");
-
-                    out.println("function abreResultados(ruta) {");
-                    out.println("    window.open(ruta,\'_newenc\',\'"+ win +"\'); ");
-                    out.println("} ");
-
-                    out.println("function expande() {");
-                    out.println("  var anim1 = dojo.fx.wipeIn( {node:\""+PREF+base.getId()+"\", duration:500 });");
-                    out.println("  var anim2 = dojo.fadeIn({node:\""+PREF+base.getId()+"\", duration:650});");
-                    out.println("  dojo.fx.combine([anim1,anim2]).play();");
-                    out.println("}");
-
-                    out.println("function collapse() {");
-                    out.println("  var anim1 = dojo.fx.wipeOut( {node:\""+PREF+base.getId()+"\", duration:500 });");
-                    out.println("  var anim2 = dojo.fadeOut({node:\""+PREF+base.getId()+"\", duration:650});");
-                    out.println("  dojo.fx.combine([anim1, anim2]).play();");
-                    out.println("}");
-
-                    out.println("</script>");
-                }
-            }
-        }catch (Exception e) {
-            log.error(paramRequest.getLocaleString("msgView_resource") +" "+ restype +" "+ paramRequest.getLocaleString("msgView_method"), e);
-        }
-        out.flush();
-    }*/
 
     /**
      * Muestra los resultados de la encuesta en especifico
@@ -629,10 +433,7 @@ public class Poll extends GenericResource {
         response.setHeader("Cache-Control","no-cache"); //HTTP 1.1
         response.setHeader("Pragma","no-cache"); //HTTP 1.0
         
-        //synchronized(request){
-            //System.out.println("vote");
         vote(request, response, paramRequest);
-        //}
         Document dom = SWBUtils.XML.xmlToDom( getResourceBase().getData() );
         response.getWriter().println( getPollResults(request, paramRequest, dom) );
     }
@@ -724,7 +525,6 @@ public class Poll extends GenericResource {
             cliVoted = validateCookie(request);
             //Pone cookie
             MngCookie = new SWBCookieMgr();
-            //String value = (String) MngCookie.SearchCookie("VotosEncuesta"+ base.getId(), request);
             MngCookie.AddCookie("VotosEncuesta"+ base.getId(), "SI",  true, true, request, response);
         }
 
@@ -955,7 +755,6 @@ public class Poll extends GenericResource {
         for (int i = 0; i < links.getLength(); i++) {
             String value = links.item(i).getChildNodes().item(0).getNodeValue().trim();
             if( !"".equals(value) ) {
-                //int idx = value.indexOf("/wblink/");
                 int idx = value.indexOf(",");
                 if( idx>-1 ) {
                     ownDesc = value.substring(idx + 1);
@@ -1364,12 +1163,10 @@ public class Poll extends GenericResource {
             ret.append("<li class=\"swbform-li\">");
             ret.append("<label class=\"swbform-label\">"+paramRequest.getLocaleString("lblAdmin_percentage")+"</label>");
             ret.append("<label for=\"porcenttrue\"><input type=\"radio\" name=\"porcent\" id=\"porcenttrue\" value=\""+Boolean.TRUE.toString()+"\" ");
-            //if(Boolean.TRUE.toString().equals(value))
             if(Boolean.parseBoolean(value))
                 ret.append(" checked=\"checked\"");
             ret.append("/> "+paramRequest.getLocaleString("lblAdmin_yes")+"</label>&nbsp;&nbsp;&nbsp;");
             ret.append("<label for=\"porcentfalse\"><input type=\"radio\" name=\"porcent\" id=\"porcentfalse\" value=\""+Boolean.FALSE.toString()+"\" ");
-            //if(Boolean.FALSE.toString().equals(value))
             if(!Boolean.parseBoolean(value))
                 ret.append(" checked=\"checked\"");
             ret.append("/> "+paramRequest.getLocaleString("lblAdmin_no")+"</label>");
@@ -1702,7 +1499,7 @@ public class Poll extends GenericResource {
     }
 
     /**
-     * Metodo de validaci?n en javascript para la encuesta.
+     * Metodo de validación en javascript para la encuesta.
      * 
      * @param paramRequest the param request
      * @return the admin script
@@ -1734,14 +1531,7 @@ public class Poll extends GenericResource {
         script.append("   if(!isFileType(pForm.button, 'jpg|jpeg|gif|png')) return false;");
         script.append("   if(!isFileType(pForm.backimgres, 'jpg|jpeg|gif|png')) return false;");
         script.append("   if(!isFileType(pForm.template, 'xsl|xslt')) return false;");
-//            ret.append("   if(pForm.textcolor.value==null || pForm.textcolor.value=='' || pForm.textcolor.value==' ')");
-//            ret.append("       pForm.textcolor.value='#'+ document.selColor.getColor();");
-//            ret.append("   if(!isHexadecimal(pForm.textcolor)) return false;");
-//            ret.append("   if(pForm.textcolorres.value==null || pForm.textcolorres.value=='' || pForm.textcolorres.value==' ')");
-//            ret.append("       pForm.textcolorres.value='#'+ document.selColorBack.getColor();");
-//            ret.append("   if(!isHexadecimal(pForm.textcolorres)) return false;");
         script.append("   if(!isNumber(pForm.time)) return false;");
-//            ret.append("   if(!isNumber(pForm.branches)) return false;");
         script.append("   if(!isNumber(pForm.width)) return false;");
         script.append("   if(!isNumber(pForm.height)) return false;");
         script.append("   if(!isNumber(pForm.top)) return false;");

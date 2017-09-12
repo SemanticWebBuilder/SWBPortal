@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,24 +18,26 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org.mx
+ *  http://www.semanticwebbuilder.org.mx.mx
  */
 package org.semanticwb.portal.api;
 
 import java.io.IOException;
-import javax.xml.transform.Templates;
-import javax.xml.transform.TransformerFactory;
-import org.semanticwb.portal.admin.admresources.db.AdmDBConnMgr ;
-import org.semanticwb.portal.admin.admresources.util.WBAdmResourceUtils;
-import org.semanticwb.portal.admin.admresources.util.XmlBundle;
-import java.util.Locale;
 import java.util.Hashtable;
+import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.Templates;
+import javax.xml.transform.TransformerFactory;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Resource;
+import org.semanticwb.portal.admin.admresources.db.AdmDBConnMgr ;
+import org.semanticwb.portal.admin.admresources.util.WBAdmResourceUtils;
+import org.semanticwb.portal.admin.admresources.util.XmlBundle;
 
 /** Objeto: Implementa una administración genérica de recursos bajo el API de administración de
  * recursos de SemanticWebBuilder.
@@ -50,7 +52,7 @@ public class GenericAdmResource extends GenericResource
 {
     
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(GenericAdmResource.class);
+    private static final Logger log = SWBUtils.getLogger(GenericAdmResource.class);
     
     /** The plt. */
     static Templates plt; 
@@ -124,7 +126,7 @@ public class GenericAdmResource extends GenericResource
     public void doAdmin(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException
     {
         Resource base=getResourceBase();
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         String action =  request.getParameter("act");
         if(action==null || (action!=null && action.trim().equals(""))) action=paramsRequest.getAction();
 
@@ -186,7 +188,7 @@ public class GenericAdmResource extends GenericResource
     public void doView(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException
     {
         Resource base=getResourceBase();
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         String action =  request.getParameter("act");
         if(action==null || (action!=null && action.trim().equals(""))) action=paramsRequest.getAction();
 

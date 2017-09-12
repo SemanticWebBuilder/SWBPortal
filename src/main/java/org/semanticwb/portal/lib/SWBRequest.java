@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,12 +18,18 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org.mx
+ *  http://www.semanticwebbuilder.org.mx.mx
  */
 package org.semanticwb.portal.lib;
 
 import java.io.IOException;
-import java.util.*;
+import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Vector;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
@@ -33,9 +39,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
+
 import org.semanticwb.servlet.SWBVirtualHostFilter;
 
-// TODO: Auto-generated Javadoc
 /**
  * Clase que implementa HttpServletRequest, la cual se utiliza para remplazar el
  * Request por defecto para se enviado al recurso.

@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -44,9 +44,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-
-
-// TODO: Auto-generated Javadoc
 /** Objeto que se encarga de desplegar y administrar recomendaciones de usuarios finales
  * interactuando con archivos de tipo Flash bajo ciertos criterios(configuraci&oacute;n del
  * recurso).
@@ -59,9 +56,8 @@ import org.w3c.dom.NodeList;
  */
 public class RecommendSwf extends Recommend {
     
-    
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(RecommendSwf.class);
+    private static final Logger log = SWBUtils.getLogger(RecommendSwf.class);
     
     
     /** Creates a new instance of RecomendarSwf. */    
@@ -91,7 +87,6 @@ public class RecommendSwf extends Recommend {
         try {        
             Document  dom = SWBUtils.XML.getNewDocument();
             if ("rec_step3".equals(action)) {
-//                dom = super.getDomEmail(request, paramRequest)getDomEmail(request, response, paramRequest); // Envia correo
             } else { // Nueva ventana con formulario               
                 User user = paramRequest.getUser();
                 SWBResourceURLImp url = new SWBResourceURLImp(request, base,
@@ -101,7 +96,7 @@ public class RecommendSwf extends Recommend {
                 url.setWindowState(SWBResourceURL.WinState_MAXIMIZED);
                 url.setParameter("rec_act", "rec_step3");
                 url.setTopic(paramRequest.getWebPage());
-                url.setCallMethod(paramRequest.Call_DIRECT);            
+                url.setCallMethod(SWBResourceURL.Call_DIRECT);            
 
                 Element el = dom.createElement("form");
                 el.setAttribute("path", path);
@@ -176,7 +171,7 @@ public class RecommendSwf extends Recommend {
         
         Resource base = getResourceBase();
         WBAdmResourceUtils admResUtils = new WBAdmResourceUtils();
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         String msg = paramRequest.getLocaleString("msgUndefinedOperation");
         String action = (null != request.getParameter("act")
                 && !"".equals(request.getParameter("act").trim()))
@@ -321,7 +316,6 @@ public class RecommendSwf extends Recommend {
                     }
                 }
                 base.setXml(SWBUtils.XML.domToXml(dom));
-                //base.update(paramRequest.getUser().getId(), "Resource with identifier "+base.getId()+" was updated successfully ");
                 msg = paramRequest.getLocaleString("msgOkUpdateResource")
                         + " " + base.getId();
                 if (applet != null && !"".equals(applet.trim())) {
@@ -426,7 +420,7 @@ public class RecommendSwf extends Recommend {
         
         WBAdmResourceUtils admResUtils = new WBAdmResourceUtils();
         Resource base = getResourceBase();
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         try {
             SWBResourceURL url = paramRequest.getRenderUrl().setAction("update");
             ret.append("<div class=\"swbform\">");
@@ -447,7 +441,6 @@ public class RecommendSwf extends Recommend {
                     + " (xsl, xslt):</td> \n");
             ret.append("<td>");
             ret.append("<input type=\"file\" name=\"template\" onChange=\"isFileType(this, 'xsl|xslt');\" />");
-            //if (!"".equals(base.getAttribute("template", "").trim()))
             if (path.indexOf(webWorkPath) != -1) {
                 ret.append("<p>"
                         + paramRequest.getLocaleString("msgCurrentTemplate")
@@ -644,17 +637,13 @@ public class RecommendSwf extends Recommend {
             ret.append("<tr> \n");
             ret.append("<td>");
             ret.append("<fieldset>");
-/*            ret.append("<table> \n");
-            ret.append("<tr> \n");
-            ret.append("\n<td>");*/
+
             ret.append("\n<input type=submit name=btnSave value="
                     + paramRequest.getLocaleString("btnSubmit")
                     + " onClick=\"if(jsValida(this.form)) return true; else return false;\">&nbsp;");
             ret.append("<input type=reset name=btnReset value="
                     + paramRequest.getLocaleString("btnReset") + ">");
-/*            ret.append("\n</td>");
-            ret.append("\n</tr>");
-            ret.append("</table> \n");*/
+
             ret.append("</fieldset>");
             ret.append("\n</td>");
             ret.append("\n</tr>");          
@@ -682,7 +671,7 @@ public class RecommendSwf extends Recommend {
             SWBParamRequest paramRequest)
             throws SWBResourceException, IOException {
         
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         WBAdmResourceUtils admResUtils = new WBAdmResourceUtils();
         try {
             ret.append("\n<script>");

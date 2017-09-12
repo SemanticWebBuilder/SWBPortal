@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources.blog;
 
@@ -27,22 +27,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.User;
 import org.semanticwb.model.UserRepository;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Post.
  * 
- * @author victor.lorenzana
+ * @author Víctor Lorenzana {victor.lorenzana}
  */
 public class Post
 {
 
     /** The log. */
-    private Logger log=SWBUtils.getLogger(Post.class);
+    private static final Logger log=SWBUtils.getLogger(Post.class);
     
     /** The title. */
     private String title;
@@ -98,8 +98,7 @@ public class Post
                 String uid = userid.substring(0,userid.indexOf("_"));
                 String repid = userid.substring(userid.indexOf("_")+1);
                 User recuser =UserRepository.ClassMgr.getUserRepository(repid).getUser(uid);
-                //System.out.println("userrep -> "+recuser);
-                StringBuffer name = new StringBuffer("");
+                StringBuilder name = new StringBuilder("");
                 if ( recuser == null )
                 {
                     name.append("Anonimo");

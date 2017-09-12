@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,33 +18,33 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources.projectdriver;
 
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
+
 import org.semanticwb.model.DisplayProperty;
 import org.semanticwb.model.User;
 import org.semanticwb.model.UserRepository;
 import org.semanticwb.model.WebPage;
 import org.semanticwb.model.WebSite;
 import org.semanticwb.platform.SemanticObject;
-import java.sql.Timestamp;
-import java.util.Date;
-// TODO: Auto-generated Javadoc
 
 /**
  * The Class ProjectDriverTools.
  * 
- * @author martha.jimenez
+ * @author Martha Jiménez {martha.jimenez}
  */
 public class ProjectDriverTools {
        //Agrupa en arreglos los tipos de WebPage y regresa un hashmap
@@ -56,11 +56,11 @@ public class ProjectDriverTools {
         */
        public HashMap calculateArrayPages(Iterator it)
        {
-           ArrayList actPageCon=new ArrayList();
-           ArrayList webPage=new ArrayList();
-           ArrayList proPage=new ArrayList();
-           ArrayList usPageCon=new ArrayList();
-           HashMap container = new HashMap();
+           ArrayList<WebPage> actPageCon=new ArrayList<>();
+           ArrayList<WebPage> webPage=new ArrayList<>();
+           ArrayList<WebPage> proPage=new ArrayList<>();
+           ArrayList<WebPage> usPageCon=new ArrayList<>();
+           HashMap<String, ArrayList<WebPage>> container = new HashMap<>();
            
            while(it.hasNext())
            {
@@ -132,7 +132,6 @@ public class ProjectDriverTools {
        private long calcuteLaborableDays(long a1, long a2) {
             long numdays = 0;
             long oneday = 24 * 60 * 60 * 1000;
-            int nodays = 0;
             Calendar cal1 = Calendar.getInstance();
             cal1.setTimeInMillis(a1);
             Calendar cal2 = Calendar.getInstance();
@@ -142,8 +141,6 @@ public class ProjectDriverTools {
                 while (a1 < a2){
                     if (cal1.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY && cal1.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) 
                         numdays++;
-                    else
-                        nodays++;
                     a1 += oneday;
                     cal1.setTimeInMillis(a1);
                 }
@@ -159,7 +156,7 @@ public class ProjectDriverTools {
          * @return the user valid
          */
         public ArrayList getUserValid(WebPage wpUs){
-              ArrayList listUser=new ArrayList();
+              ArrayList<UserWebPage> listUser=new ArrayList<>();
               Iterator<UserWebPage> itU = UserWebPage.ClassMgr.listUserWebPageByParent(wpUs, wpUs.getWebSite());
               while(itU.hasNext()){
                   UserWebPage uwpi= itU.next();
@@ -273,7 +270,7 @@ public class ProjectDriverTools {
          */
         public String viewListUsers(HashMap users,Iterator<UserWebPage> itU, String titleLan,String label)
         {
-            StringBuffer buff=new StringBuffer();
+            StringBuilder buff=new StringBuilder();
             while(itU.hasNext()){
                 UserWebPage wpu=(UserWebPage)itU.next();
                 ArrayList activ=(ArrayList)users.get(wpu.getURI());
@@ -305,7 +302,7 @@ public class ProjectDriverTools {
         public String printPage(ArrayList mpag, String title,User user,boolean progressBar,String titleLan)
         {
             Iterator itpr=mpag.iterator();
-            StringBuffer strb = new StringBuffer();
+            StringBuilder strb = new StringBuilder();
             strb.append("");
             if(itpr.hasNext())
             {
@@ -338,7 +335,7 @@ public class ProjectDriverTools {
             DecimalFormatSymbols dfs = new DecimalFormatSymbols();
             dfs.setDecimalSeparator('.');
             DecimalFormat df = new DecimalFormat("###.##", dfs);
-            StringBuffer ret = new StringBuffer();
+            StringBuilder ret = new StringBuilder();
 
             if(!info.isEmpty())
             {
@@ -392,7 +389,7 @@ public class ProjectDriverTools {
          * @return the progress html
          */
         private String getProgressHtml(float porcentajeTotal){
-            StringBuffer bf = new StringBuffer();
+            StringBuilder bf = new StringBuilder();
             DecimalFormatSymbols dfs = new DecimalFormatSymbols();
             dfs.setDecimalSeparator('.');
             DecimalFormat df = new DecimalFormat("###.##", dfs);
@@ -493,7 +490,7 @@ public class ProjectDriverTools {
                     ChildVisible.add(wp);
             }
             it=ChildVisible.iterator();
-            StringBuffer st=new StringBuffer();
+            StringBuilder st=new StringBuilder();
             if(it.hasNext()){
                 st.append("    <h2>"+title+"</h2>\n");
                 st.append("    <br>\n");
@@ -513,7 +510,7 @@ public class ProjectDriverTools {
 
                     st.append("          </div>\n");
                     if(level!=act.getLevel()&&pgrb!=null){
-                        StringBuffer st1=new StringBuffer();
+                        StringBuilder st1=new StringBuilder();
                         indentation=indentation+"&nbsp;&nbsp;&nbsp;&nbsp;";
                         String childp=getWebPageListLevel1(act,user,level,st1,indentation,titleLan);
                         indentation=indentation.substring(0, indentation.length()-24);
@@ -536,7 +533,7 @@ public class ProjectDriverTools {
          * @param titleLan the title lan
          * @return the web page list level1
          */
-        private String getWebPageListLevel1(Activity act, User user, int level,StringBuffer st1, String indentation,String titleLan)
+        private String getWebPageListLevel1(Activity act, User user, int level,StringBuilder st1, String indentation,String titleLan)
         {
             Iterator<Activity> it = Activity.ClassMgr.listActivityByParent(act,act.getWebSite());
             ArrayList ChildVisible=new ArrayList();
@@ -757,7 +754,7 @@ public class ProjectDriverTools {
          * @return the string
          */
         public String printStatusActivity(ArrayList listActs,String titleLan){
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             Iterator list = listActs.iterator();
             buf.append("");
             if(list.hasNext()){
