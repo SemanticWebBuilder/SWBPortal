@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
@@ -33,8 +33,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -59,7 +61,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author jorge.jimenez
+ * @author Jorge Jiménez {jorge.jimenez}
  */
 public class SWBSaveDBData extends GenericResource {
 
@@ -105,13 +107,10 @@ public class SWBSaveDBData extends GenericResource {
             }
             SWBResourceURL url = paramRequest.getRenderUrl();
             SWBResourceURL urlAction = paramRequest.getActionUrl();
-            StringBuffer strbf = new StringBuffer();
+            StringBuilder strbf = new StringBuilder();
             File file = new File(SWBPortal.getWorkPath() + "/sitetemplates/");
             File[] files = file.listFiles();
             urlAction.setAction("upload");
-            //out.println("<iframe id=\"templates\">");
-            //out.println("<div id=\"vtemplates\" dojoType=\"dijit.TitlePane\" title=\"Templates existentes de Sitios \" class=\"admViewTemplates\" open=\"true\" duration=\"150\" minSize_=\"20\" splitter_=\"true\" region=\"bottom\">");
-
 
             out.println("<script type=\"text/javascript\">"
                     + "dojo.require(\"dojo.parser\");"
@@ -170,7 +169,6 @@ public class SWBSaveDBData extends GenericResource {
             out.println("</fieldset>");
             out.println("<fieldset><span align=\"center\">");
             out.println("" + paramRequest.getLocaleString("upload") + "<input type=\"file\" name=\"zipmodel\" value=\"" + paramRequest.getLocaleString("new") + "\"/><br/>");
-            //out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id=\"send\" type=\"submit\"dojoType=\"dijit.form.Button\">"+paramRequest.getLocaleString("up")+"</button>");
             out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"submit\" id=\"send\" value=\"" + paramRequest.getLocaleString("up") + "\"/>");
             out.println("</fieldset>");
             out.println("</form>");
@@ -194,8 +192,6 @@ public class SWBSaveDBData extends GenericResource {
             out.println("</div>");
             out.println("</fieldset>");
             out.println("</div>");
-
-
 
             out.println(strbf.toString());
         } catch (Exception e) {
@@ -242,10 +238,8 @@ public class SWBSaveDBData extends GenericResource {
         try {
             PrintWriter out = response.getWriter();
             SWBResourceURL urlAction = paramRequest.getActionUrl();
-            //SWBResourceURL urlAction = paramRequest.getRenderUrl();
             if (paramRequest.getAction().equals("form")) {
                 try {
-                    //urlAction.setMode("install");
                     urlAction.setAction("install");
                     out.println("<form class=\"swbform\" id=\"frmImport1\" action=\"" + urlAction.toString() + "\" dojoType=\"dijit.form.Form\" method=\"post\">");
                     out.println("<fieldset>");
@@ -268,10 +262,8 @@ public class SWBSaveDBData extends GenericResource {
                     out.println("</table>");
                     out.println("</fieldset>");
                     out.println("<fieldset><span align=\"center\">");
-                    //out.append("<tr>");
                     out.println("<button dojoType='dijit.form.Button' type=\"submit\" onClick=\"if(!dijit.byId('frmImport1').isValid()) return false; return confirm('Esta Operación puede tardar varios minutos,finalizara con la leyenda -Sitio Creado-. Desea Continuar?');\">" + paramRequest.getLocaleString("send") + "</button>");
                     out.println("<button id=\"send\" dojoType=\"dijit.form.Button\" onClick=\"javascript:history.go(-1);\">" + paramRequest.getLocaleString("return") + "</button>");
-                    //out.println("</td></tr>");
                     out.println("</span></fieldset>");
 
                     out.println("<input type=\"hidden\" name=\"zipName\" value=\"" + request.getParameter("zipName") + "\" />");
@@ -285,12 +277,6 @@ public class SWBSaveDBData extends GenericResource {
                 if (threadId == null) {
                     out.println("Error al obtener el sitio para revisión de estatus de avance..");
                 }
-                /*
-                Iterator itthreads=Thread.getAllStackTraces().keySet().iterator();
-                while(itthreads.hasNext()){
-                Thread threadTmp=(Thread)itthreads.next();
-                System.out.println("Thead Generico:"+threadTmp.getId());
-                }*/
 
                 SWBModelAdminThreads swbmodeladmThreads = new SWBModelAdminThreads();
                 InstallZipThread thread = (InstallZipThread) swbmodeladmThreads.getThread(Long.parseLong(threadId));
@@ -306,13 +292,9 @@ public class SWBSaveDBData extends GenericResource {
                     url1.setAction("checkStatus");
                     url1.setParameter("threadId", threadId);
 
-                    //boolean bstep1 = false;
                     boolean bstep2 = false;
                     boolean bstep3 = false;
-                    /* Aqui no se utiliza, porque no se copian archivos
-                    if (thread.getStatus() >= 30) {
-                        bstep1 = true;
-                    }*/
+                    
                     if (thread.getStatus() >= 80) {
                         bstep2 = true;
                     }
@@ -322,8 +304,7 @@ public class SWBSaveDBData extends GenericResource {
                         url1.setParameter("wsUri", thread.getWebSiteUri());
                     }
 
-
-                    StringBuffer status_msg = new StringBuffer();
+                    StringBuilder status_msg = new StringBuilder();
 
                     status_msg.append("\n<div id=\"" + base.getId() + "/statusIndex\" class=\"swbform\">");
                     status_msg.append("\n<fieldset>");
@@ -336,7 +317,6 @@ public class SWBSaveDBData extends GenericResource {
                     status_msg.append("<td width=\"100\" bgcolor=\"GREY\" align=\"CENTER\"><font color=\"WHITE\">PASO 1 (Modelos)</font></td>");
                     status_msg.append("<td width=\"100\" bgcolor=\"GREY\" align=\"CENTER\"><font color=\"WHITE\">PASO 2 (Recursos)</font></td>");
                     status_msg.append("</tr>");
-
 
                     status_msg.append("<tr heigth=\"20\">");
 
@@ -368,11 +348,10 @@ public class SWBSaveDBData extends GenericResource {
                     status_msg.append("\n</fieldset>");
                     status_msg.append("\n</div>");
 
-
                     out.println(status_msg.toString());
 
                     if (bstep3) {
-                        url1.setMode(url1.Mode_VIEW);
+                        url1.setMode(SWBResourceURL.Mode_VIEW);
                         url1.setParameter("msgKey", "siteCreated");
                         out.println("<script type=\"text/javascript\">");
                         out.println("   sleep(500);");
@@ -499,14 +478,10 @@ public class SWBSaveDBData extends GenericResource {
                 String uri = request.getParameter("wsid");
                 WebSite site = SWBContext.getWebSite(uri);
                 String path = SWBPortal.getWorkPath() + "/";
-                //String modelspath = path + "models/";
                 String zipdirectory = path + "sitetemplates/";
                 String zipFile = zipdirectory + site.getId() + "_db.zip";
                 //---------Generación de archivo zip de carpeta work de sitio especificado-------------
                 java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(zipFile));
-                //java.io.File directory = new File(modelspath + site.getId() + "/");
-                //java.io.File base = new File(modelspath);
-                //org.semanticwb.SWBUtils.IO.zip(directory, base, zos);  //Graba filesystem de sitio en archivo zip
                 //Graba archivo cualquiera
                 zos.setComment("Model File SemanticWebBuilderOS");
                 try {
@@ -529,10 +504,10 @@ public class SWBSaveDBData extends GenericResource {
                     log.error(e);
                 }
                 //----------Generación de archivo siteInfo.xml del sitio especificado-----------
-                ArrayList aFiles = new ArrayList();
+                ArrayList<File> aFiles = new ArrayList<>();
                 File file = new File(zipdirectory + "siteInfo.xml");
                 FileOutputStream out = new FileOutputStream(file);
-                StringBuffer strbr = new StringBuffer();
+                StringBuilder strbr = new StringBuilder();
                 try {
                     strbr.append("<model>\n");
                     strbr.append("<id>" + site.getId() + "</id>\n");
@@ -552,13 +527,9 @@ public class SWBSaveDBData extends GenericResource {
                             rdfout.close();
                             //Agregar c/archivo .rdf de submodelos a arreglo de archivos
                             aFiles.add(fileSubModel);
-                            //graba el directorio work de c/submodelo en archivo zip
-                            //directory = new File(modelspath + sObj.getId() + "/");
-                            //org.semanticwb.SWBUtils.IO.zip(directory, base, zos);
                             //Genera datos de c/summodelo en archivo siteInfo.xml
                             strbr.append("<model>\n");
                             strbr.append("<type>" + sObj.getSemanticClass() + "</type>\n");
-                            //if(obj.instanceOf(WebSite.sclass)) //Que datos saco si es un rep de usuarios o de documentos y como los parseo despues
                             strbr.append("<id>" + sObj.getId() + "</id>\n");
                             strbr.append("<namespace>" + sObj.getModel().getNameSpace() + "</namespace>\n");
                             strbr.append("<title>" + sObj.getProperty(Descriptiveable.swb_title) + "</title>\n");
@@ -601,7 +572,7 @@ public class SWBSaveDBData extends GenericResource {
 
 
                 //Envia mensage de estatus en admin de wb
-                response.setMode(response.Mode_VIEW);
+                response.setMode(SWBActionResponse.Mode_VIEW);
                 response.setRenderParameter("msgKey", "siteExported");
                 response.setRenderParameter("wsUri", uri);
 
@@ -611,15 +582,11 @@ public class SWBSaveDBData extends GenericResource {
         } else if (response.getAction().equals("install")) {
             try {
                 File file = new File(request.getParameter("zipName"));
-                //WebSite website=SWBPortal.UTIL.InstallZip(file, "siteInfo.xml", request.getParameter("wsid"), request.getParameter("wstitle"));
                 InstallZipThread installZipThread = new InstallZipThread(file, "siteInfo.xml", request.getParameter("wsid"), request.getParameter("wstitle"));
                 installZipThread.start();
 
                 SWBModelAdminThreads swbmodeladmThreads = new SWBModelAdminThreads();
                 swbmodeladmThreads.addThread(installZipThread.getId(), installZipThread);
-                //response.setMode(response.Mode_VIEW);
-                //response.setRenderParameter("msgKey", "siteCreated");
-                //response.setRenderParameter("wsUri", website.getURI());
                 response.setRenderParameter("newSiteID", request.getParameter("wsid"));
                 response.setRenderParameter("threadId", "" + installZipThread.getId());
                 response.setMode("installmodel");

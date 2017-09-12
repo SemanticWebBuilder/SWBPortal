@@ -6,7 +6,7 @@
 * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
 * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
 *
-* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
 * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
 * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
 * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
 *
 * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
 * dirección electrónica:
-*  http://www.semanticwebbuilder.org
+*  http://www.semanticwebbuilder.org.mx
 **/
 
 package org.semanticwb.portal.admin.resources.reports;
@@ -30,37 +30,50 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
-
-import org.semanticwb.Logger;
-import org.semanticwb.SWBUtils;
-import org.semanticwb.model.Language;
-import org.semanticwb.model.Resource;
-import org.semanticwb.model.WebSite;
-import org.semanticwb.model.SWBContext;
-import org.semanticwb.portal.admin.resources.reports.beans.IncompleteFilterException;
-import org.semanticwb.portal.api.GenericResource;
-import org.semanticwb.portal.api.SWBResourceURL;
-import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.SWBResourceException;
-import org.semanticwb.portal.admin.resources.reports.beans.WBAFilterReportBean;
-import org.semanticwb.portal.admin.resources.reports.jrresources.*;
-import org.semanticwb.portal.admin.resources.reports.jrresources.data.JRLanguageAccessDataDetail;
-import org.semanticwb.portal.db.SWBRecHit;
-
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-
-import org.semanticwb.SWBPortal;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.semanticwb.Logger;
+import org.semanticwb.SWBPortal;
+import org.semanticwb.SWBUtils;
+import org.semanticwb.model.Language;
+import org.semanticwb.model.Resource;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.WebSite;
+import org.semanticwb.portal.admin.resources.reports.beans.IncompleteFilterException;
+import org.semanticwb.portal.admin.resources.reports.beans.WBAFilterReportBean;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRDataSourceable;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRPdfResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRRtfResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRXlsResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JasperTemplate;
+import org.semanticwb.portal.admin.resources.reports.jrresources.data.JRLanguageAccessDataDetail;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceModes;
+import org.semanticwb.portal.api.SWBResourceURL;
+import org.semanticwb.portal.db.SWBRecHit;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-// TODO: Auto-generated Javadoc
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+
 /** Esta clase genera el reporte de lenguajes de acceso, toma la informaci?n de los
  * objetos de WebBuilder de acuerdo con los par?metros recibidos del usuario. Este
  * archivo es usado en la parte de reportes.
@@ -75,7 +88,7 @@ import org.json.JSONObject;
 public class WBALanguageReport extends GenericResource {
 
     /** The log. */
-    private Logger log = SWBUtils.getLogger(WBALanguageReport.class);
+    private static final Logger log = SWBUtils.getLogger(WBALanguageReport.class);
 
     /** The Constant I_REPORT_TYPE. */
     public static final int I_REPORT_TYPE = 2;
@@ -188,9 +201,8 @@ public class WBALanguageReport extends GenericResource {
         Resource base = getResourceBase();
 
         final int I_ACCESS = 0;
-        //StringBuffer sb_ret = new StringBuffer();
         GregorianCalendar gc_now = new GregorianCalendar();
-        HashMap hm_sites = new HashMap();
+        HashMap<String, String> hm_sites = new HashMap<>();
         String rtype = null;
 
         try {
@@ -208,7 +220,6 @@ public class WBALanguageReport extends GenericResource {
             if(hm_sites.size() > I_ACCESS) {
                 String address = paramsRequest.getWebPage().getUrl();
                 String websiteId = request.getParameter("wb_site")==null ? (String)hm_sites.keySet().iterator().next():request.getParameter("wb_site");
-                String langId = request.getParameter("wb_lang")==null? "0":request.getParameter("wb_lang");
 
                 int groupDates;
                 try {
@@ -251,7 +262,7 @@ public class WBALanguageReport extends GenericResource {
                 }
 
                 SWBResourceURL url=paramsRequest.getRenderUrl();
-                url.setCallMethod(url.Call_DIRECT);
+                url.setCallMethod(SWBResourceModes.Call_DIRECT);
                 url.setMode("fillLangSel");
 
                 out.println("<script type=\"text/javascript\">");
@@ -485,20 +496,9 @@ public class WBALanguageReport extends GenericResource {
                     out.println("</fieldset>");
                     out.println("</form>");
 
-//                    out.println("<fieldset>");
-//                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
-//                    out.println("<tr>");
-//                    out.println("<td colspan=\"4\">");
-//                    out.println("<div id=\"ctnergrid\" style=\"height:350px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
-//                    out.println("  <div id=\"gridMaster\"></div>");
-//                    out.println("</div>");
                     out.println("<div id=\"ctnergrid\" style=\"height:350px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
                     out.println("  <div id=\"gridMaster\" jsid=\"gridMaster\"></div>");
                     out.println("</div>");
-//                    out.println("</td>");
-//                    out.println("</tr>");
-//                    out.println("</table>");
-//                    out.println("</fieldset>");
                     out.println("</div>");
                 }else { // REPORTE MENSUAL
                     int year13 = request.getParameter("wb_year13")==null ? gc_now.get(Calendar.YEAR):Integer.parseInt(request.getParameter("wb_year13"));
@@ -535,20 +535,9 @@ public class WBALanguageReport extends GenericResource {
                     out.println("</fieldset>");
                     out.println("</form>");
 
-//                    out.println("<fieldset>");
-//                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
-//                    out.println("<tr>");
-//                    out.println("<td colspan=\"4\">");
-//                    out.println("<div id=\"ctnergrid\" style=\"height:500px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
-//                    out.println("  <div id=\"gridMaster\"></div>");
-//                    out.println("</div>");
                     out.println("<div id=\"ctnergrid\" style=\"height:350px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
                     out.println("  <div id=\"gridMaster\" jsid=\"gridMaster\"></div>");
                     out.println("</div>");
-//                    out.println("</td>");
-//                    out.println("</tr>");
-//                    out.println("</table>");
-//                    out.println("</fieldset>");
                     out.println("</div>");
                 }
                 out.println("</div>");
@@ -591,7 +580,7 @@ public class WBALanguageReport extends GenericResource {
     public void doGraph(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
         response.setContentType("application/pdf");
         Resource base = getResourceBase();
-        HashMap<String,String> params = new HashMap();
+        HashMap<String,String> params = new HashMap<>();
         params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
         params.put("site", request.getParameter("wb_site"));
 
@@ -641,7 +630,7 @@ public class WBALanguageReport extends GenericResource {
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "inline; filename=\"lar.xls\"");
         Resource base = getResourceBase();
-        HashMap<String,String> params = new HashMap();
+        HashMap<String,String> params = new HashMap<>();
         params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
         params.put("site", request.getParameter("wb_site"));
 
@@ -650,7 +639,6 @@ public class WBALanguageReport extends GenericResource {
             if(rtype == 0) { // by day
                 WBAFilterReportBean filter = buildFilter(request, paramsRequest);
                 JRDataSourceable dataDetail = new JRLanguageAccessDataDetail(filter);
-                //JasperTemplate jasperTemplate = JasperTemplate.LANGUAGE_DAILY;
                 JasperTemplate jasperTemplate = JasperTemplate.LANGUAGE_DAILY_EXCEL;
                 JRResource jrResource = new JRXlsResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                 jrResource.prepareReport();
@@ -667,7 +655,6 @@ public class WBALanguageReport extends GenericResource {
                 filter. setType(I_REPORT_TYPE);
                 filter.setYearI(year13);
                 JRDataSourceable dataDetail = new JRLanguageAccessDataDetail(filter);
-                //JasperTemplate jasperTemplate = JasperTemplate.LANGUAGE_MONTHLY;
                 JasperTemplate jasperTemplate = JasperTemplate.LANGUAGE_MONTHLY_EXCEL;
                 JRResource jrResource = new JRXlsResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                 jrResource.prepareReport();
@@ -694,7 +681,6 @@ public class WBALanguageReport extends GenericResource {
 
         Document dom = SWBUtils.XML.getNewDocument();
         Resource base = getResourceBase();
-        /*ArrayList idaux = new ArrayList();*/
         try {
             WBAFilterReportBean filter;
             Iterator<SWBRecHit> itRecHits;
@@ -800,7 +786,7 @@ public class WBALanguageReport extends GenericResource {
     public void doRepPdf(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
         response.setContentType("application/pdf");
         Resource base = getResourceBase();
-        HashMap<String,String> params = new HashMap();
+        HashMap<String,String> params = new HashMap<>();
         params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
         params.put("site", request.getParameter("wb_site"));
 
@@ -896,8 +882,7 @@ public class WBALanguageReport extends GenericResource {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void doHistrogram(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
-        StringBuffer sb_ret = new StringBuffer();
-        StringBuffer sb_app = new StringBuffer();
+    		StringBuilder sb_ret = new StringBuilder();
         Resource base = paramsRequest.getResourceBase();
         String monthinyear = null;
         boolean hasBarname = false;
@@ -936,149 +921,6 @@ public class WBALanguageReport extends GenericResource {
             sb_ret.append("<tr>");
             sb_ret.append("<td colpsan=\"3\">");
             sb_ret.append(getHistogram(request, response, paramsRequest));
-            /*sb_app.append("\n<APPLET code=\"applets.graph.WBGraph.class\" archive=\""+ SWBPortal.getContextPath() + "/swbadmin/lib/SWBAplGraph.jar\" width=\"98%\" height=\"450\">");
-            sb_app.append("<param name=\"GraphType\" value=\"Bar\">");
-            sb_app.append("<param name=\"percent\" value=\"false\">");
-
-            JRBeanCollectionDataSource  ds;
-            String userLanguage = paramsRequest.getUser().getLanguage();
-
-            WebSite ws = SWBContext.getWebSite(request.getParameter("wb_site"));
-            if(ws != null) {
-                final ArrayList<String> paternLangs = listLanguages(request.getParameter("wb_site"), userLanguage);
-                paternLangs.add(UNKNOW);
-                WBAFilterReportBean filter;
-                if(rtype.equals("0")) { // by day
-                    if(hasBarname) {
-                        filter = new WBAFilterReportBean(userLanguage);
-                        filter.setSite(request.getParameter("wb_site"));
-                        String languageId = Arrays.toString(request.getParameterValues("wb_lang"));
-                        languageId = languageId.replaceFirst("\\[", "");
-                        languageId = languageId.replaceFirst("\\]", "");
-                        languageId = languageId.replace(" ", "");
-                        if(!languageId.equalsIgnoreCase("null")) {
-                            filter.setIdaux(languageId);
-                        }
-                        filter.setType(I_REPORT_TYPE);
-                        filter.setGroupedDates(true);
-
-                        SimpleDateFormat format = new SimpleDateFormat("dd/MMM/yyyy");
-                        Date di = format.parse("01/"+monthinyear);
-                        GregorianCalendar ci = new GregorianCalendar();
-                        ci.setTime(di);
-                        GregorianCalendar cf = new GregorianCalendar();
-                        cf.setTime(di);
-                        cf.add(Calendar.DAY_OF_MONTH, cf.getActualMaximum(Calendar.DAY_OF_MONTH)-1);
-                        filter.setYearI(ci.get(Calendar.YEAR));
-                        filter.setMonthI(ci.get(Calendar.MONTH)+1);
-                        filter.setDayI(ci.get(Calendar.DAY_OF_MONTH));
-                        filter.setYearF(cf.get(Calendar.YEAR));
-                        filter.setMonthF(cf.get(Calendar.MONTH)+1);
-                        filter.setDayF(cf.get(Calendar.DAY_OF_MONTH));
-                    }else {
-                        filter = buildFilter(request, paramsRequest);
-                    }
-                    Locale loc = new Locale(userLanguage);
-                    if(filter.isGroupedDates())
-                        sb_app.append("<param name=\"Title\" value=\""+paramsRequest.getLocaleString("daily_report")+". "+paramsRequest.getLocaleString("query_range")+": "+paramsRequest.getLocaleString("from")+" "+DateFormat.getDateInstance(DateFormat.MEDIUM, loc).format(filter.getDateI())+" "+paramsRequest.getLocaleString("to")+" "+DateFormat.getDateInstance(DateFormat.MEDIUM, loc).format(filter.getDateF())+"\">");
-                    else
-                        sb_app.append("<param name=\"Title\" value=\""+paramsRequest.getLocaleString("daily_report")+". "+paramsRequest.getLocaleString("query_range")+": "+DateFormat.getDateInstance(DateFormat.MEDIUM, loc).format(filter.getDateI())+"\">");
-                }else { // by each month
-                    String websiteId = request.getParameter("wb_site");
-                    int year13 = Integer.parseInt(request.getParameter("wb_year13"));
-                    String langId = request.getParameter("wb_lang")==null? "0":request.getParameter("wb_lang");
-                    filter = new WBAFilterReportBean();
-                    filter.setSite(websiteId);
-                    if( !langId.equalsIgnoreCase("0") ) {
-                        filter.setIdaux(langId);
-                    }
-                    filter. setType(I_REPORT_TYPE);
-                    filter.setYearI(year13);
-                    sb_app.append("\n<param name=\"Title\" value=\""+paramsRequest.getLocaleString("monthly_report")+". "+paramsRequest.getLocaleString("query_range")+": "+year13+"\">");
-                    String url = paramsRequest.getRenderUrl().toString()+"?wb_rtype=0&wb_rep_type=1&wb_site="+websiteId+"&wb_year13="+year13+"&wbr_barname=";
-                    sb_app.append("\n<param name=\"link\" value=\""+ url+ "\">");
-                }
-
-JRDataSourceable dataDetail = new JRLanguageAccessDataDetail(filter);
-ds = dataDetail.orderJRReport();
-ArrayList<SWBRecHit> rep = (ArrayList<SWBRecHit>)ds.getData();
-Date same = null;
-SWBRecHit rh;
-for(int k=0; k<rep.size(); ) {
-    ArrayList<String> languages = (ArrayList<String>)paternLangs.clone();
-    HashMap<String,SWBRecHit> m = new HashMap();
-    do {
-        rh = rep.get(k);
-        m.put(rh.getItem(), rh);
-        languages.remove(rh.getItem());
-        if(k+1<rep.size())
-            same = rep.get(k+1).getDate();
-        k++;
-    }while( k<rep.size()&&rh.getDate().equals(same) );
-    languages.trimToSize();
-    for(int i=0; i<languages.size(); i++) {
-        m.put(languages.get(i), new SWBRecHit());
-    }
-
-    StringBuilder data = new StringBuilder();
-    if(rtype.equals("0")) {
-        sb_app.append("<param name=\"label" + j + "\" value=\""+rh.getDay()+"/"+rh.getMonth("MMM")+"\">");
-    }else {
-        sb_app.append("<param name=\"label" + j + "\" value=\""+rh.getMonth("MMM")+"/"+rh.getYear()+"\">");
-    }
-    for(int i=0; i<paternLangs.size(); i++) {
-        rh = m.get(paternLangs.get(i));
-        data.append(rh.getHits());
-        if( i+1<paternLangs.size() )
-            data.append("|");
-    }
-    sb_app.append("<param name=\"data" + j + "\" value=\""+data+"\">");
-    j++;
-
-    languages = null;
-    m = null;
-    data = null;
-}
-sb_app.append("<param name=\"ncdata\" value=\""+(SWBUtils.Collections.sizeOf(ws.listLanguages())+1)+"\">");
-sb_app.append("<param name=\"ndata\" value=\""+ j +"\">");
-
-
-                Iterator<Language> langs = ws.listLanguages();
-                j = 0;
-                while(langs.hasNext()) {
-                    Language language = langs.next();
-                    sb_app.append("<param name=\"barname"+j+"\" value=\""+language.getDisplayTitle(userLanguage)+"\">");
-                    j++;
-                }
-                sb_app.append("<param name=\"barname"+j+"\" value=\""+UNKNOW+"\">");
-
-                sb_app.append("<param name=\"color0\" value=\"100,100,255\">");
-                sb_app.append("<param name=\"color1\" value=\"255,100,100\">");
-                sb_app.append("<param name=\"color2\" value=\"100,255,100\">");
-                sb_app.append("<param name=\"color3\" value=\"100,250,250\">");
-                sb_app.append("<param name=\"color4\" value=\"250,100,250\">");
-                sb_app.append("<param name=\"color5\" value=\"250,250,100\">");
-                sb_app.append("<param name=\"color6\" value=\"0,0,250\">");
-                sb_app.append("<param name=\"color7\" value=\"250,0,0\">");
-                sb_app.append("<param name=\"color8\" value=\"221,196,49\">");
-                sb_app.append("<param name=\"color9\" value=\"0,250,250\">");
-                sb_app.append("<param name=\"color10\" value=\"250,0,250\">");
-                sb_app.append("<param name=\"color11\" value=\"200,200,100\">");
-                sb_app.append("<param name=\"color12\" value=\"230,180,80\">");
-                sb_app.append("<param name=\"color13\" value=\"149,0,149\">");
-                sb_app.append("<param name=\"color14\" value=\"75,0,130\">");
-                sb_app.append("<param name=\"color15\" value=\"221,88,0\">");
-                sb_app.append("<param name=\"color15\" value=\"255,245,238\">");
-
-                sb_app.append("<param name=\"zoom\" value=\"true\">");
-                sb_app.append("\n</APPLET>");
-
-                // Evaluates if there are records
-                if(ds.getData().isEmpty())
-                    sb_ret.append("\n<br/><br/><br/><br/><font color=\"black\">"+paramsRequest.getLocaleString("no_records")+"</font>");
-                else
-                    sb_ret.append(sb_app.toString());
-            }*/
 
             sb_ret.append("\n</td>");
             sb_ret.append("</tr>");
@@ -1102,8 +944,8 @@ sb_app.append("<param name=\"ndata\" value=\""+ j +"\">");
      * @throws SWBResourceException the sWB resource exception
      */
     public String getHistogram(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException {
-        StringBuffer sb_ret = new StringBuffer();
-        StringBuffer sb_app = new StringBuffer();
+	    	StringBuilder sb_ret = new StringBuilder();
+	    	StringBuilder sb_app = new StringBuilder();
         boolean hasBarname = false;
         int j = 0;
 
@@ -1198,7 +1040,7 @@ sb_app.append("<param name=\"ndata\" value=\""+ j +"\">");
             SWBRecHit rh;
             for(int k=0; k<rep.size(); ) {
                 ArrayList<String> languages = (ArrayList<String>)paternLangs.clone();
-                HashMap<String,SWBRecHit> m = new HashMap();
+                HashMap<String,SWBRecHit> m = new HashMap<>();
                 do {
                     rh = rep.get(k);
                     m.put(rh.getItem(), rh);
@@ -1379,7 +1221,7 @@ sb_app.append("<param name=\"ndata\" value=\""+ j +"\">");
      * @return the array list
      */
     public static ArrayList<String> listLanguages(String websiteId, String language) {
-        ArrayList languages = new ArrayList();
+        ArrayList<String> languages = new ArrayList<>();
         WebSite ws = SWBContext.getWebSite(websiteId);
         Iterator<Language> langs = ws.listLanguages();
         while(langs.hasNext()) {

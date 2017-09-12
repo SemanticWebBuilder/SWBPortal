@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,22 +18,21 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
-import org.semanticwb.SWBUtils;
 import org.semanticwb.model.IPFilter;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.WebSite;
@@ -43,7 +42,6 @@ import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SWBAIPFilter.
  * 
@@ -51,10 +49,6 @@ import org.semanticwb.portal.api.SWBResourceURL;
  */
 public class SWBAIPFilter extends GenericResource
 {
-
-    /** The log. */
-    private Logger log = SWBUtils.getLogger(SWBAIPFilter.class);
-    
     /** The pagezise. */
     private int pagezise = 10;
 
@@ -76,7 +70,6 @@ public class SWBAIPFilter extends GenericResource
             while (itip.hasNext())
             {
                 IPFilter ipf=itip.next();
-                //System.out.println(ipf);
                 l1.add(ipf);
             }
             lista = l1.toArray(new IPFilter[0]);
@@ -100,14 +93,12 @@ public class SWBAIPFilter extends GenericResource
         JSONArray jarr = new JSONArray();
         try
         {
-            //JSONObject tjson = new JSONObject();
-            jobj.put("numRows", cant); //lista.length);
+            jobj.put("numRows", cant);
 
             jobj.put("items", jarr);
         } catch (JSONException njse)
         {
         }
-    //    JSONObject obj = new JSONObject();
         try
         {
             if (!empty && cant > 0)
@@ -136,7 +127,7 @@ public class SWBAIPFilter extends GenericResource
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         SWBResourceURL url = paramRequest.getRenderUrl();
         url.setMode(SWBResourceURL.Mode_EDIT);
         url.setCallMethod(SWBResourceURL.Call_DIRECT);
@@ -155,7 +146,7 @@ public class SWBAIPFilter extends GenericResource
         ret.append("\t<fieldset>\n\t<label for=\"Sitios\">"+paramRequest.getLocaleString("ipsite")+"</label>");
         Iterator<WebSite> itur = SWBContext.listWebSites(true);
         ret.append("\n\t\t\t\t<select dojoType=\"dijit.form.FilteringSelect\" autocomplete=\"false\" name=\"userRepository\" id=\"Sitios\"  >");
-        ret.append("\n\t\t\t\t\t<option value=\"\"></option>"); //todo Add Language
+        ret.append("\n\t\t\t\t\t<option value=\"\"></option>"); //TODO: Add Language
         while (itur.hasNext())
         {
             WebSite ur = itur.next();
@@ -185,8 +176,6 @@ public class SWBAIPFilter extends GenericResource
                 "                    {name: '"+paramRequest.getLocaleString("ipdate")+"',width:'20%',field: \"acct\"},\n " +
                 "            ]\n ;" +
                 "       var layout = [ view1 ];\n" +
-                //  "       model = new dojox.grid.data.Objects([{key: \"login\"}, {key: \"name\"},{key: \"papellid\"},{key: \"sapellid\"},{key: \"email\"}], null);\n" +
-
                 "       \n" +
                 "       dojo.addOnLoad(function(){\n" +
                 "   	model = new dojox.data.QueryReadStore({\n" +
@@ -220,15 +209,9 @@ public class SWBAIPFilter extends GenericResource
     public void doHelp(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
         String got = request.getParameter("sele");
-                StringBuffer ret = new StringBuffer(1000);
-                 SWBResourceURL url = paramRequest.getActionUrl();
-//                 ret.append("<script type=\"text/javascript\">\n"+
-//        "           dojo.require(\"dojo.parser\");\n"+
-//        "                   dojo.require(\"dijit.layout.ContentPane\");\n"+
-//        "                   dojo.require(\"dijit.form.FilteringSelect\");\n"+
-//        "                   dojo.require(\"dijit.form.CheckBox\");\n"+
-//        "        </script>\n");
-      //http://www.semanticwebbuilder.org/swb4/ontology#User
+        StringBuilder ret = new StringBuilder(1000);
+         SWBResourceURL url = paramRequest.getActionUrl();
+
         ret.append("<form id=\""+IPFilter.swb_IPFilter.getClassName()+"/create/"+got+"\" dojoType=\"dijit.form.Form\" class=\"swbform\" ");
         ret.append("action=\""+url+"\" ");
         ret.append("onSubmit=\"submitForm('"+IPFilter.swb_IPFilter.getClassName()+"/create/"+got+"');return false;\" method=\"POST\">");
@@ -261,7 +244,7 @@ public class SWBAIPFilter extends GenericResource
     @Override
     public void doXML(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         
         ret.append("<script type=\"text/javascript\">\n\ndojo.require(\"dojo.parser\");\ndijit.byId('swbDialog').hide();\nshowStatus('"+paramRequest.getLocaleString("ipMsgadd")+"');\n");
         ret.append("addNewTab('"+request.getParameter("suri")+"','"+SWBPlatform.getContextPath()+"/swbadmin/jsp/objectTab.jsp','"+request.getParameter("label")+"');\n");

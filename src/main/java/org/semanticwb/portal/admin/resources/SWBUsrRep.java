@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
@@ -33,8 +33,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -54,16 +56,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SWBUsrRep.
  * 
- * @author jorge.jimenez
+ * @author Jorge Jiménez {jorge.jimenez}
  */
 public class SWBUsrRep extends GenericResource {
 
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(SWBUsrRep.class);
+    private static final Logger log = SWBUtils.getLogger(SWBUsrRep.class);
     
     /** The PATH. */
     String PATH = SWBPortal.getWorkPath() + "/";
@@ -114,8 +115,6 @@ public class SWBUsrRep extends GenericResource {
             {
                 File[] files = file.listFiles();
                 urlAction.setAction("upload");
-                //out.println("<iframe id=\"templates\">");
-                //out.println("<div id=\"vtemplates\" dojoType=\"dijit.TitlePane\" title=\"Templates existentes de Sitios \" class=\"admViewTemplates\" open=\"true\" duration=\"150\" minSize_=\"20\" splitter_=\"true\" region=\"bottom\">");
                 out.println("<div class=\"swbform\">");
                 out.println("<fieldset>");
                 out.println("<legend>" + paramRequest.getLocaleLogString("existTpls") + "</legend>");
@@ -159,7 +158,6 @@ public class SWBUsrRep extends GenericResource {
                 out.println("</fieldset>");
                 out.println("<fieldset><span align=\"center\">");
                 out.println("" + paramRequest.getLocaleLogString("upload") + "<input type=\"file\" name=\"zipmodel\" value=\"" + paramRequest.getLocaleLogString("new") + "\"/><br/>");
-                //out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id=\"send\" dojoType=\"dijit.form.Button\" type=\"submit\">"+paramRequest.getLocaleLogString("up")+"</button>");
                 out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"submit\" id=\"send\" value=\"" + paramRequest.getLocaleString("up") + "\"/>");
                 out.println("</fieldset>");
                 out.println("</form>");
@@ -184,8 +182,6 @@ public class SWBUsrRep extends GenericResource {
             out.println("</div>");
             out.println("</fieldset>");
             out.println("</div>");
-
-
 
             out.println(strbf.toString());
         } catch (Exception e) {
@@ -337,19 +333,12 @@ public class SWBUsrRep extends GenericResource {
                 try {
                 String uri = request.getParameter("usrRepid");
                 UserRepository site = SWBContext.getUserRepository(uri);
-                //String path = SWBPortal.getWorkPath() + "/";
-                //String modelspath = path + "models/";
-                //String zipdirectory = path + "sitetemplates/";
-                
                 File file2Save=new File(ZIPDIRECTORY);
                 if(!file2Save.exists()) file2Save.mkdirs();
 
                 String zipFile = ZIPDIRECTORY + site.getId() + ".zip";
                 //---------Generación de archivo zip de carpeta work de sitio especificado-------------
                 java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(zipFile));
-                //java.io.File directory = new File(modelspath + site.getId() + "/");
-                //java.io.File base = new File(modelspath);
-                //org.semanticwb.SWBUtils.IO.zip(directory, base, zos);
                 //Graba archivo cualquiera
                 zos.setComment("Model File SemanticWebBuilderOS");
                 try {
@@ -371,7 +360,7 @@ public class SWBUsrRep extends GenericResource {
                     e.printStackTrace();
                 }
                 //----------Generación de archivo siteInfo.xml del sitio especificado-----------
-                ArrayList aFiles = new ArrayList();
+                ArrayList<File> aFiles = new ArrayList<>();
                 File file = new File(ZIPDIRECTORY + "siteInfo.xml");
                 FileOutputStream out = new FileOutputStream(file);
                 StringBuffer strbr = new StringBuffer();
@@ -414,9 +403,8 @@ public class SWBUsrRep extends GenericResource {
                 new File(ZIPDIRECTORY + site.getId() + ".nt").delete();
                 new File(ZIPDIRECTORY + "siteInfo.xml").delete();
 
-
                 //Envia mensage de estatus en admin de wb
-                response.setMode(response.Mode_VIEW);
+                response.setMode(SWBActionResponse.Mode_VIEW);
                 response.setRenderParameter("msgKey", "siteExported");
                 response.setRenderParameter("wsUri", uri);
 
@@ -426,7 +414,7 @@ public class SWBUsrRep extends GenericResource {
             }
         }else if (response.getAction().equals("install")) {
             String siteInfo = SWBUtils.IO.readFileFromZipAsString(request.getParameter("zipName"), "siteInfo.xml");
-            String oldIDModel = null, oldNamespace = null, oldTitle = null, oldDescription = null;
+            String oldIDModel = null, oldNamespace = null, oldDescription = null;
             System.out.println("siteInfoJ:"+siteInfo);
             Document dom = SWBUtils.XML.xmlToDom(siteInfo);
             System.out.println("domJ:"+dom);
@@ -441,9 +429,6 @@ public class SWBUsrRep extends GenericResource {
                     }
                     if (node.getNodeName().equals("namespace")) {
                         oldNamespace = node.getFirstChild().getNodeValue();
-                    }
-                    if (node.getNodeName().equals("title")) {
-                        oldTitle = node.getFirstChild().getNodeValue();
                     }
                     if (node.getNodeName().equals("description")) {
                         oldDescription = node.getFirstChild().getNodeValue();
@@ -501,40 +486,22 @@ public class SWBUsrRep extends GenericResource {
                 rdfcontent = rdfcontent.replaceAll(oldNamespace, newNs); //Reempplazar namespace anterior x nuevo
                 rdfcontent = rdfcontent.replaceAll(newNs+oldIDModel, newNs+newId); //Reempplazar namespace y id anterior x nuevos
 
-                //Reemplaza ids de repositorios de usuarios y documentos x nuevos
-//                rdfcontent = rdfcontent.replaceAll(oldIDModel + "_usr", newId + "_usr");
-//                rdfcontent = rdfcontent.replaceAll("http://user." + oldIDModel + ".swb#", "http://user." + newId + ".swb#");
-//                rdfcontent = rdfcontent.replaceAll(oldIDModel + "_rep", newId + "_rep");
-//                rdfcontent = rdfcontent.replaceAll("http://rep." + oldIDModel + ".swb#", "http://rep." + newId + ".swb#");
-
-                //rdfcontent = SWBUtils.TEXT.replaceAllIgnoreCase(rdfcontent, oldName, newName); //Reemplazar nombre anterior x nuevo nombre
-                //rdfcontent = parseRdfContent(rdfcontent, oldTitle, newTitle, oldIDModel, newId, newNs);
-
                 //Mediante inputStream creado generar repositorio de usuarios
                 InputStream io = SWBUtils.IO.getStreamFromString(rdfcontent);
                 SemanticModel model = SWBPlatform.getSemanticMgr().createDBModelByRDF(newId, newNs, io, "N-TRIPLE");
                 UserRepository website = SWBContext.getUserRepository(model.getName());
                 website.setTitle(newTitle);
                 website.setDescription(oldDescription);
-                String xmodelID = null, xmodelNS = null, xmodelTitle = null, xmodelDescr = null;
-                Iterator smodelsKeys = smodels.keySet().iterator();
+                String xmodelID = null;
+                Iterator<String> smodelsKeys = smodels.keySet().iterator();
                 while (smodelsKeys.hasNext()) { // Por c/submodelo que exista
                     String key = (String) smodelsKeys.next();
                     HashMap smodelValues = (HashMap) smodels.get(key);
-                    Iterator itkVaues = smodelValues.keySet().iterator();
+                    Iterator<String> itkVaues = smodelValues.keySet().iterator();
                     while (itkVaues.hasNext()) {
                         String kvalue = (String) itkVaues.next();
                         if (kvalue.equals("id")) {
                             xmodelID = (String) smodelValues.get(kvalue);
-                        }
-                        if (kvalue.equals("namespace")) {
-                            xmodelNS = (String) smodelValues.get(kvalue);
-                        }
-                        if (kvalue.equals("title")) {
-                            xmodelTitle = (String) smodelValues.get(kvalue);
-                        }
-                        if (kvalue.equals("description")) {
-                            xmodelDescr = (String) smodelValues.get(kvalue);
                         }
                     }
                     //Buscar rdf del submodelo
@@ -556,7 +523,7 @@ public class SWBUsrRep extends GenericResource {
                         fileModel.delete();
                     }
                 }
-                response.setMode(response.Mode_VIEW);
+                response.setMode(SWBActionResponse.Mode_VIEW);
                 response.setRenderParameter("msgKey", "siteCreated");
                 response.setRenderParameter("wsUri", website.getURI());
             }

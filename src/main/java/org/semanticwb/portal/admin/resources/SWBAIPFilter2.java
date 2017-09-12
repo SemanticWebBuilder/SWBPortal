@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,21 +18,31 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
-import java.io.*;
-import java.sql.Timestamp;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.SWBPlatform;
-import org.semanticwb.model.*;
-import org.semanticwb.portal.api.*;
+import org.semanticwb.model.IPFilter;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.User;
+import org.semanticwb.model.WebSite;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceURL;
 
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SWBAIPFilter2.
  * 
@@ -171,7 +181,6 @@ public class SWBAIPFilter2 extends GenericResource {
                         //TODO: falta saber si el IPFilter tiene descripcion, IP y action
                         if (strOrder.equals("ip")) sort=rec.getIpNumber(); 
                         else if (strOrder.equals("description"))  sort = rec.getDescription();
-//                        else if (strOrder.equals("action")) sort=String.valueOf(rec.getAction());
                         else if (strOrder.equals("lastupdate")) sort=String.valueOf(rec.getUpdated());
                         sort+=":"+rec.getId();
                         strArray[cont]=sort;
@@ -184,7 +193,6 @@ public class SWBAIPFilter2 extends GenericResource {
                     //TODO: falta saber si IPFilter va tener Description y action
                     if (strOrder.equals("ip")) sort=rec.getIpNumber();
                     else if (strOrder.equals("description"))  sort=rec.getDescription();
-//                    else if (strOrder.equals("action")) sort=String.valueOf(rec.getAction());
                     else if (strOrder.equals("lastupdate")) sort=String.valueOf(rec.getUpdated());
                     sort+=":"+rec.getId();
                     strArray[cont]=sort;
@@ -246,7 +254,7 @@ public class SWBAIPFilter2 extends GenericResource {
         Iterator<IPFilter> en = SWBContext.getWebSite(idtm).listIPFilters();
         while (en.hasNext()) 
         {
-            IPFilter rec = en.next();
+            en.next();
             cont++;
         }
         return cont;
@@ -262,7 +270,7 @@ public class SWBAIPFilter2 extends GenericResource {
     private String getStrObjTable(IPFilter rec, int row) 
     {
         if(rec==null) return "";
-        StringBuffer sbRet=new StringBuffer();
+        StringBuilder sbRet=new StringBuilder();
         String bgcolor="#FFFFFF";
         if(row%2==0) bgcolor="#EFEDEC";
         sbRet.append("<tr class=\"valores\" bgcolor=\""+bgcolor+"\"> \n");
@@ -280,7 +288,6 @@ public class SWBAIPFilter2 extends GenericResource {
         sbRet.append("</td> \n");
         sbRet.append("<td> \n");
         //TODO: getAction()
-        //sbRet.append(rec.getAction());
         sbRet.append("Acción???");
         sbRet.append("</td> \n");
         sbRet.append("<td> \n");
@@ -322,7 +329,7 @@ public class SWBAIPFilter2 extends GenericResource {
      */
     private String getJavaScript (SWBParamRequest paramsRequest) 
     {
-        StringBuffer sbRet=new StringBuffer();
+        StringBuilder sbRet=new StringBuilder();
         try 
         {
             sbRet.append("<script language=\"JavaScript\" type=\"text/JavaScript\"> \n");
@@ -345,7 +352,6 @@ public class SWBAIPFilter2 extends GenericResource {
             sbRet.append("      document.frmIPFilter.submit(); \n");
             sbRet.append("  } \n");
             sbRet.append("function send(action) { \n");
-            //SWBResourceURL urlResAct=paramsRequest.getActionUrl();
             sbRet.append("    var agree=false; \n");
             sbRet.append("\n    if(document.frmIPFilter.idtm.selectedIndex==0 || document.frmIPFilter.idtm.options[document.frmIPFilter.idtm.selectedIndex].value=='') { ");
             sbRet.append("\n        alert('"+paramsRequest.getLocaleString("msgSiteRequired")+"')");
@@ -378,8 +384,6 @@ public class SWBAIPFilter2 extends GenericResource {
             sbRet.append("    } \n");
             sbRet.append("    if (action=='save'){ \n");
             sbRet.append("      var agree=validateForm(); \n");
-            //sbRet.append("      document.frmIPFilter.action='"+urlResAct+"'; \n");
-            //sbRet.append("      document.frmIPFilter.act.value='"+paramsRequest.getAction()+"'; \n");
             sbRet.append("    } \n");
             sbRet.append("    if (agree) document.frmIPFilter.submit();\n");
             sbRet.append("} \n");
@@ -407,20 +411,7 @@ public class SWBAIPFilter2 extends GenericResource {
             sbRet.append("} \n");
             sbRet.append("\n function validateForm() {");
             sbRet.append("\n    var frm=document.frmIPFilter;");
-            /*
-            sbRet.append("\n    for (var i=0; i < frm.elements.length; i++ ) { ");
-            sbRet.append("\n        if(frm.elements[i]!=undefined) {");
-            // Valida los objetos de la forma tipo text
-            sbRet.append("\n            if(frm.elements[i].type==\"text\") {");
-            sbRet.append("\n               if (frm.elements[i].value=='') {");
-            sbRet.append("\n                  alert ('"+paramsRequest.getLocaleString("msgIPRequired")+"');");
-            sbRet.append("\n                  frm.elements[i].focus();");
-            sbRet.append("\n                  return false;");
-            sbRet.append("\n               }");
-            sbRet.append("\n            }");
-            sbRet.append("\n        }");
-            sbRet.append("\n    }");
-            */
+           
             sbRet.append("\n    if (frm.ip1.value=='') {");
             sbRet.append("\n        alert ('"+paramsRequest.getLocaleString("msgIPRequired")+"');");
             sbRet.append("\n        frm.ip1.focus();");
@@ -472,8 +463,7 @@ public class SWBAIPFilter2 extends GenericResource {
      */
     private String getIniForm(String strOrder, String idtm, SWBParamRequest paramsRequest) throws SWBResourceException
     {
-        StringBuffer sbRet=new StringBuffer();
-        //User user= paramsRequest.getUser();
+        StringBuilder sbRet=new StringBuilder();
         sbRet.append("<div class=\"box\">");
         sbRet.append("<form name=\"frmIPFilter\" method=\"post\" action=\"\"> \n");
         sbRet.append("<table width=\"100%\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\">");
@@ -489,12 +479,10 @@ public class SWBAIPFilter2 extends GenericResource {
         {
             WebSite tm=(WebSite)it.next();
             //TODO: AdmFilterMgr.getInstance().haveAccess2TopicMap
-            //if(2 == AdmFilterMgr.getInstance().haveAccess2TopicMap(user, tm.getId()))
-            {
-                js+="<option value=\""+tm.getId()+"\"";
-                if(tm.getId().equals(idtm)) { js+=" selected"; bOk=true; }
-                js+=">"+tm.getTitle()+"</option>\n";
-            }
+            js+="<option value=\""+tm.getId()+"\"";
+            if(tm.getId().equals(idtm)) { js+=" selected"; bOk=true; }
+            js+=">"+tm.getTitle()+"</option>\n";
+        
         }
         if(!bOk && js.indexOf(">"+paramsRequest.getWebPage().getWebSiteId()+"</option>")>-1)
             js=js.replaceFirst(">"+paramsRequest.getWebPage().getWebSiteId()+"</option>", "selected>"+paramsRequest.getWebPage().getWebSiteId()+"</option>");
@@ -515,7 +503,6 @@ public class SWBAIPFilter2 extends GenericResource {
         sbRet.append("<td><a href=\"javascript:sort('description',"+iPage+")\" class=\"link\">"+paramsRequest.getLocaleString("msgDescription")+"</a></td> \n");
         sbRet.append("<td><a href=\"javascript:sort('action',"+iPage+")\" class=\"link\">"+paramsRequest.getLocaleString("msgRestriction")+"</a></td> \n");
         sbRet.append("<td><a href=\"javascript:sort('lastupdate',"+iPage+")\">"+paramsRequest.getLocaleString("msgLastUpdate")+"</a></td> \n");
-        //sbRet.append("<td>"+paramsRequest.getLocaleString("msgLastUpdate")+"</td> \n");
         sbRet.append("</tr> \n");
         if (strOrder.equals("order")) 
         {
@@ -537,9 +524,7 @@ public class SWBAIPFilter2 extends GenericResource {
         sbRet.append("<td colspan=\"6\" align=right> \n");
         sbRet.append("<hr size=1 noshade> \n");
         sbRet.append("\n <input type=button  class=\"boton\" name=Open onClick='javascript:send(\"edit\")' value="+paramsRequest.getLocaleString("btnEdit")+">");        
-        //sbRet.append("&nbsp;&nbsp;&nbsp;");
         sbRet.append("\n <input type=button  class=\"boton\" name=Add onClick='javascript:send(\"add\");' value="+paramsRequest.getLocaleString("btnAdd")+">");
-        //sbRet.append("&nbsp;&nbsp;&nbsp;");
         sbRet.append("\n <input type=button  class=\"boton\" name=Remove onClick='javascript:send(\"remove\");' value="+paramsRequest.getLocaleString("btnRemove")+">");
         sbRet.append("</td> \n");
         sbRet.append("</tr> \n");
@@ -565,16 +550,14 @@ public class SWBAIPFilter2 extends GenericResource {
      */
     private String getForm(String id, String idtm, SWBParamRequest paramsRequest) throws SWBResourceException
     {
-        StringBuffer sbRet=new StringBuffer();
+        StringBuilder sbRet=new StringBuilder();
         IPFilter rec=null;
         if(!id.equals("0")) rec=SWBContext.getWebSite(idtm).getIPFilter(id);
         SWBResourceURL urlResAct=paramsRequest.getActionUrl();
         String[] ip=null;
-        //if(rec!=null && (rec.getIp()!=null && rec.getIp().matches("(((0)|([1-9]([0-9]){0,1})|(1([0-9]){2})|(2[0-4][0-9])|(25[0-5]))\\.){3}((0)|([1-9]([0-9]){0,1})|(1([0-9]){2})|(2[0-4][0-9])|(25[0-5]))$"))) 
         if(rec!=null && rec.getIpNumber()!=null) 
         {
             ip=rec.getIpNumber().split("\\.");
-            //if(ip.length < 1) ip=new String[]{rec.getIp()};
         }
         sbRet.append(getJavaScript(paramsRequest));
         sbRet.append("<div class=box>");
@@ -620,14 +603,12 @@ public class SWBAIPFilter2 extends GenericResource {
         sbRet.append("<td>&nbsp;</td> \n");
         sbRet.append("<td class=\"valores\"><input name=\"action\" type=\"radio\" value=0");
         //TODO: getAction() IPFilter ???
-        //if(rec==null || (rec!=null && rec.getAction() == 0)) sbRet.append(" checked");
         sbRet.append("> "+paramsRequest.getLocaleString("msgNotCount")+"</td> \n");
         sbRet.append("</tr> \n");
         sbRet.append("<tr> \n");
         sbRet.append("<td>&nbsp;</td> \n");
         sbRet.append("<td class=\"valores\"><input name=\"action\" type=\"radio\" value=1");
         //TODO: getAction() IPFilter ???
-        //if(rec!=null && rec.getAction() == 1) sbRet.append(" checked");
         sbRet.append("> "+paramsRequest.getLocaleString("msgNotAllow")+"</td> \n");
         sbRet.append("</tr> \n");
         sbRet.append("<tr><td colspan=\"6\"><HR size=\"1\" noshade></td></tr> \n");
@@ -637,9 +618,7 @@ public class SWBAIPFilter2 extends GenericResource {
         if(rec!=null && !rec.getId().equals("0")) sbRet.append(paramsRequest.getLocaleString("btnUpdate"));
         else sbRet.append(paramsRequest.getLocaleString("btnSave"));
         sbRet.append("> \n");
-        //sbRet.append("&nbsp;&nbsp;&nbsp; \n");
         sbRet.append("<input type=reset class=\"boton\" name=Reset value="+paramsRequest.getLocaleString("btnReset")+"> \n");
-        //sbRet.append("&nbsp;&nbsp;&nbsp; \n");
         sbRet.append("<input type=button class=\"boton\" name=Back onClick=location='"+strUrl+paramsRequest.getWebPage().getId()+"'; value="+paramsRequest.getLocaleString("msgBack")+"> ");
         sbRet.append("</td> \n");
         sbRet.append("</tr> \n");
@@ -662,7 +641,7 @@ public class SWBAIPFilter2 extends GenericResource {
     @Override
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
     
-        HashMap params=new HashMap();
+        HashMap <String, String>params=new HashMap<>();
 
         User user = response.getUser();
         String id=request.getParameter("id")!=null?request.getParameter("id"):"0";
@@ -685,22 +664,15 @@ public class SWBAIPFilter2 extends GenericResource {
         }
         else 
         {
-            int action=0;
             String ip=request.getParameter("ip");
             String description=request.getParameter("description");
-            Timestamp lastupdate = new Timestamp(System.currentTimeMillis());        
-            try { action=Integer.parseInt(request.getParameter("action")); }
-            catch(NumberFormatException e) { action=0; }  
-            
             if (strWBAction!=null && strWBAction.equals("add"))  
             {
                 IPFilter rec=ws.createIPFilter();
                 //TODO: IPFilter Description, Action, IP, user, created, updated
                     rec.setDescription(description);
                     rec.setIpNumber(ip);
-//                    rec.setAction(action);
                     rec.setCreator(user);
-                //IPFilter rec=srv.createIPFilter(idtm,ip,description,action,lastupdate,response.getUser().getId());
                 if(rec!=null && !rec.getId().equals("0")) msg=response.getLocaleString("msgOkAdd")+" "+rec.getId()+".";
                 else msg=response.getLocaleString("msgErrAdd")+" "+id+".";
                 params.put("confirm","added");
@@ -709,11 +681,9 @@ public class SWBAIPFilter2 extends GenericResource {
             {
                 IPFilter rec=ws.getIPFilter(id);
                 try{
-                //if(srv.updateIPFilter(idtm,id,ip,description,action,lastupdate,response.getUser().getId())) 
                     //TODO: IPFilter Description, Action, IP, user, created, updated
                     rec.setDescription(description);
                     rec.setIpNumber(ip);
-//                    rec.setAction(action);
                     rec.setModifiedBy(user);
                     msg=response.getLocaleString("msgOkUpdate")+" "+id+".";
                 }

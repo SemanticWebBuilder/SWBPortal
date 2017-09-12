@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,16 +18,22 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Properties;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.base.util.ErrorElement;
@@ -36,7 +42,7 @@ import org.semanticwb.portal.api.GenericResource;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
-// TODO: Auto-generated Javadoc
+
 /** Muestra la lista de errores generados en WebBuilder. Permite ver a detalle del
  * error seleccionando con la posibilidad de enviar el error por correo
  * electronico.
@@ -48,7 +54,7 @@ import org.semanticwb.portal.api.SWBResourceURL;
 public class SWBAErrorElementViewer extends GenericResource{
     
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(SWBAErrorElementViewer.class);
+    private static final Logger log = SWBUtils.getLogger(SWBAErrorElementViewer.class);
     
     /**
      * Creates a new instance of SWBAErrorElementViewer.
@@ -79,8 +85,8 @@ public class SWBAErrorElementViewer extends GenericResource{
         ErrorElement ee=null;
         if(act==null) act="";
 
-        Iterator ite_err = SWBUtils.ERROR.getErrorElements();
-        Vector hmerr = new Vector();
+        Iterator<ErrorElement> ite_err = SWBUtils.ERROR.getErrorElements();
+        ArrayList<ErrorElement> hmerr = new ArrayList<>();
         while(ite_err.hasNext())
         {
             ErrorElement eel = (ErrorElement) ite_err.next();
@@ -99,16 +105,14 @@ public class SWBAErrorElementViewer extends GenericResource{
             out.println("</tr>");
             out.println("</thead>");
             out.println("<tbody>");
-            Iterator iteErr = SWBUtils.ERROR.getErrorElements();
+            Iterator<ErrorElement> iteErr = SWBUtils.ERROR.getErrorElements();
             String rowColor="";
             boolean cambiaColor = true;
-            //int num = 0;
             while(iteErr.hasNext()){
                 rowColor="bgcolor=\"#EFEDEC\"";
                 if(!cambiaColor) rowColor="";
                 cambiaColor = !(cambiaColor);
-                ErrorElement  e = (ErrorElement) iteErr.next();
-                //num++;
+                ErrorElement  e = iteErr.next();
                 SWBResourceURL urlDetail = paramRequest.getRenderUrl();
                 urlDetail.setParameter("act","detail");
                 urlDetail.setParameter("idErr",Long.toString(e.getId()));
@@ -125,7 +129,6 @@ public class SWBAErrorElementViewer extends GenericResource{
             out.println("</div>");
         }
         if(act.equals("send")){
-            //String idErr = request.getParameter("idErr");
             String mensaje = request.getParameter("mensaje");
             String fecha = request.getParameter("fecha");
             String stacktrace = request.getParameter("stacktrace");
@@ -180,8 +183,6 @@ public class SWBAErrorElementViewer extends GenericResource{
         }
         if(act.equals("detail")){
             long id =  -1;
-            //long idN = -1;
-            //long idP = -1;
             String mensaje = "";
             String identificador = "";
             String fecha = "";
@@ -190,23 +191,17 @@ public class SWBAErrorElementViewer extends GenericResource{
                 id= Long.parseLong(request.getParameter("idErr"));
             }
             
-            
-            
-            
             out.println("<div class=\"swbform\">");
             out.println("<fieldset>");
             out.println("<table  width=\"98%\"  border=\"0\" >");
             
             if(id!=-1) {
-                Iterator iter = SWBUtils.ERROR.getErrorElements();
-                //int pos = getErrPos(hmerr, id);
-                
+                Iterator<ErrorElement> iter = SWBUtils.ERROR.getErrorElements();
                 long pid = 0;
                 long nid = 0;
                 int mpos =0;
                 boolean show_p=false;
                 boolean show_n = false;
-                //ErrorElement ee_tmp = null;
                 if(null!=hmerr&&!hmerr.isEmpty())
                 {
                     mpos = getErrPos(hmerr, id);
@@ -236,7 +231,6 @@ public class SWBAErrorElementViewer extends GenericResource{
                     SWBResourceURL urlDetailn = paramRequest.getRenderUrl();
                     urlDetailn.setParameter("act","detail");
                     urlDetailn.setParameter("idErr",Long.toString(nid));
-                    //out.println("<button dojoType=\"dijit.form.Button\" onclick=\"submitUrl('" + urlDetailn + "',this.domNode); return false;\">" + paramRequest.getLocaleString("btnprevious")+ "</button>");
                     out.println("<input type=\"button\" value=\""+paramRequest.getLocaleString("btnprevious")+"\" onclick=\"window.location='"+urlDetailn+"'\">");
                 }
                 
@@ -246,7 +240,6 @@ public class SWBAErrorElementViewer extends GenericResource{
                     SWBResourceURL urlDetailp = paramRequest.getRenderUrl();
                     urlDetailp.setParameter("act","detail");
                     urlDetailp.setParameter("idErr",Long.toString(pid));
-                    //out.println("<button dojoType=\"dijit.form.Button\" onclick=\"submitUrl('" + urlDetailp + "',this.domNode); return false;\">" + paramRequest.getLocaleString("btnnext")+ "</button>");
                     out.println(" <input type=\"button\" value=\""+paramRequest.getLocaleString("btnnext")+"\" onclick=\"window.location='"+urlDetailp+"'\">");
                 }
                 out.println("&nbsp;</td></tr></table></td></tr>");
@@ -302,8 +295,6 @@ public class SWBAErrorElementViewer extends GenericResource{
             out.println("<input type=\"hidden\" name=\"fecha\" value=\""+fecha+"\">");
             out.println("<input type=\"hidden\" name=\"stacktrace\" value=\""+stacktrace+"\">");
 
-            //out.println("<button dojoType=\"dijit.form.Button\" onclick=\"submitForm('"+getResourceBase().getId()+"/ErrorEV'); return false;\">" + paramRequest.getLocaleString("msgBtnSendError")+ "</button>");
-            //out.println("<button dojoType=\"dijit.form.Button\" onclick=\"submitUrl('" + urlBack + "',this.domNode); return false;\">" + paramRequest.getLocaleString("msgBtnBack")+ "</button>");
             out.println("<input type=\"submit\" value=\""+paramRequest.getLocaleString("msgBtnSendError")+"\" >&nbsp;<input type=button value=\""+paramRequest.getLocaleString("msgBtnBack")+"\" onclick=\"window.location='"+urlBack.toString()+"';\">");
             out.println("</form>");
             out.println("</td>");
@@ -321,12 +312,12 @@ public class SWBAErrorElementViewer extends GenericResource{
      * @param err_id the err_id
      * @return The position of the Error Element
      */
-    public int getErrPos(Vector hmErr, long err_id)
+    public int getErrPos(ArrayList<ErrorElement> hmErr, long err_id)
     {
         int pos=0;
         if(null!=hmErr&&!hmErr.isEmpty())
         {
-            Iterator itepos = hmErr.iterator();
+            Iterator<ErrorElement> itepos = hmErr.iterator();
             while(itepos.hasNext())
             {
                 pos++;
@@ -347,13 +338,13 @@ public class SWBAErrorElementViewer extends GenericResource{
      * @param pos the pos
      * @return the Error Element Id
      */
-    public long getErrID(Vector hmErr, int pos)
+    public long getErrID(ArrayList<ErrorElement> hmErr, int pos)
     {
         long ret=0;
         int cont = 0;
         if(null!=hmErr&&!hmErr.isEmpty())
         {
-            Iterator itepos = hmErr.iterator();
+            Iterator<ErrorElement> itepos = hmErr.iterator();
             while(itepos.hasNext())
             {
                 cont++;

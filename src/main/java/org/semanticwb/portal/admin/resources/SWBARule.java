@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
@@ -31,7 +31,6 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -51,7 +50,6 @@ import org.semanticwb.model.SWBRuleMgr;
 import org.semanticwb.model.User;
 import org.semanticwb.model.UserGroup;
 import org.semanticwb.model.UserRepository;
-import org.semanticwb.model.WebPage;
 import org.semanticwb.model.WebSite;
 import org.semanticwb.platform.SemanticOntology;
 import org.semanticwb.platform.SemanticProperty;
@@ -76,7 +74,7 @@ public class SWBARule extends GenericResource {
     private Logger log = SWBUtils.getLogger(SWBARule.class);
     
     /** The sb tree. */
-    StringBuffer sbTree = null;
+    StringBuilder sbTree = null;
     
     /** The combo att. */
     HashMap comboAtt = null;
@@ -111,15 +109,14 @@ public class SWBARule extends GenericResource {
         String accion = request.getParameter("act");
         String id = request.getParameter("id");
         User user = response.getUser();
-        WebPage WebPage = response.getWebPage();
         String tmparam = request.getParameter("tm");
         try {
             if (id != null) {
                 if (accion.equals("removeit")) {
                     try {
                         SWBContext.getWebSite(tmparam).removeRule(id);
-                        response.setCallMethod(response.Call_CONTENT);
-                        response.setMode(response.Mode_VIEW);
+                        response.setCallMethod(SWBActionResponse.Call_CONTENT);
+                        response.setMode(SWBActionResponse.Mode_VIEW);
 
                         response.setRenderParameter("act", "removemsg");
                         response.setRenderParameter("status", "true");
@@ -128,7 +125,7 @@ public class SWBARule extends GenericResource {
                         response.setRenderParameter("status", "true");
 
                     }
-                    response.setMode(response.Mode_VIEW);
+                    response.setMode(SWBActionResponse.Mode_VIEW);
                 }
                 if (accion.equals("update")) {
                     String tmsid = "global";
@@ -153,7 +150,7 @@ public class SWBARule extends GenericResource {
                     if (request.getParameter("title") != null) {
                         response.setRenderParameter("title", request.getParameter("title"));
                     }
-                    response.setMode(response.Mode_EDIT);
+                    response.setMode(SWBActionResponse.Mode_EDIT);
                 }
 
                 if (accion.trim().equalsIgnoreCase("editadd")) {
@@ -162,9 +159,6 @@ public class SWBARule extends GenericResource {
                         String tmsid = "global";
                         if (request.getParameter("tmsid") != null) {
                             tmsid = request.getParameter("tmsid");
-                        }
-                        if (!tmsid.equals("global")) {
-                            WebSite ptm = SWBContext.getWebSite(tmsid);
                         }
                         WebSite ptm = SWBContext.getWebSite(tmsid);
                         Rule newRule = ptm.createRule(); 
@@ -188,7 +182,7 @@ public class SWBARule extends GenericResource {
                         if (request.getParameter("title") != null) {
                             response.setRenderParameter("title", request.getParameter("title"));
                         }
-                        response.setMode(response.Mode_EDIT);
+                        response.setMode(SWBActionResponse.Mode_EDIT);
                     } catch (Exception ei) {
                         log.error(response.getLocaleString("msgErrorAddNewRule") + ". WBARules.processAction", ei);
                     }
@@ -250,14 +244,9 @@ public class SWBARule extends GenericResource {
 			Rule r = site.getRule(ruleId);
 			//Get request body and generate rule XML
 			String body = SWBUtils.IO.readInputStream(request.getInputStream(), "UTF-8");
-			//System.out.println("------request body-------");
-			//System.out.println(body);
-			//System.out.println("-------------------------");
 			if (null != body) {
 				JSONObject payload = new JSONObject(body);
 				String xml = getRuleXML(payload);
-				//System.out.println("------new rule definition------");
-				//System.out.println(xml);
 				r.setXml(xml);
 				out.println("{\"status\":\"ok\"}");
 			}
@@ -551,12 +540,12 @@ public class SWBARule extends GenericResource {
         WebSite ws = SWBContext.getWebSite(tmid);
         User user = paramRequest.getUser();
         UserRepository usrRepo = ws.getUserRepository();
-        comboAtt = new HashMap();
+        comboAtt = new HashMap<>();
         vecOrderAtt = new Vector(1, 1);
         // Agreando valores iniciales al HashMap como son isloged, isregistered, language, device
-        HashMap hmAttr = new HashMap();
-        HashMap hmOper = new HashMap();
-        HashMap hmValues = new HashMap();
+        HashMap<String, Object> hmAttr = new HashMap<>();
+        HashMap<String, String> hmOper = new HashMap<>();
+        HashMap<String, String> hmValues = new HashMap<>();
         hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgUserRegistered"));  ///////////////////////////
         hmAttr.put("Tipo", "select");
         hmOper.put("=", paramRequest.getLocaleString("msgSameAs"));
@@ -567,9 +556,9 @@ public class SWBARule extends GenericResource {
         hmAttr.put("Valor", hmValues);
         comboAtt.put(SWBRuleMgr.TAG_INT_ISREGISTERED, hmAttr); //RuleMgr.TAG_INT_ISREGISTERED
 
-        hmAttr = new HashMap();
-        hmOper = new HashMap();
-        hmValues = new HashMap();
+        hmAttr = new HashMap<>();
+        hmOper = new HashMap<>();
+        hmValues = new HashMap<>();
         hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgUserSigned"));   ///////////////////////////
         hmAttr.put("Tipo", "select");
         hmOper.put("=", paramRequest.getLocaleString("msgSameAs"));
@@ -581,9 +570,9 @@ public class SWBARule extends GenericResource {
         comboAtt.put(SWBRuleMgr.TAG_INT_ISSIGNED, hmAttr); //RuleMgr.TAG_INT_ISLOGED
 
         // DISPOSITIVOS POR SITIO
-        hmAttr = new HashMap();
-        hmOper = new HashMap();
-        hmValues = new HashMap();
+        hmAttr = new HashMap<>();
+        hmOper = new HashMap<>();
+        hmValues = new HashMap<>();
         hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgDevice"));   ///////////////////////////
         hmAttr.put("Tipo", "select");
         Iterator<Device> eleDev = SWBContext.getWebSite(tmid).listDevices();
@@ -605,9 +594,9 @@ public class SWBARule extends GenericResource {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Grupo de usuarios
         try {
-            hmAttr = new HashMap();
-            hmOper = new HashMap();
-            hmValues = new HashMap();
+            hmAttr = new HashMap<>();
+            hmOper = new HashMap<>();
+            hmValues = new HashMap<>();
             hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgUserGroups"));   ///////////////////////////
             hmAttr.put("Tipo", "select");
             Iterator<UserGroup> enumUsrG = usrRepo.listUserGroups();
@@ -624,15 +613,14 @@ public class SWBARule extends GenericResource {
             vecOrderAtt.add(numero++, SWBRuleMgr.TAG_INT_USERGROUP); 
 
             // Se agrega la parte de roles
-            hmAttr = new HashMap();
-            hmOper = new HashMap();
-            hmValues = new HashMap();
+            hmAttr = new HashMap<>();
+            hmOper = new HashMap<>();
+            hmValues = new HashMap<>();
             hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgRoles"));   ///////////////////////////
             hmAttr.put("Tipo", "select");
             hmOper.put("=", paramRequest.getLocaleString("msgHave"));
             hmOper.put("!=", paramRequest.getLocaleString("msgNotHave"));
             hmAttr.put("Operador", hmOper);
-            //Enumeration enumRoles = DBRole.getInstance().getRoles(TopicMgr.getInstance().getTopicMap(tmid).getDbdata().getRepository());
             Iterator<Role> enumRoles = SWBContext.getWebSite(tmid).getUserRepository().listRoles();
             while (enumRoles.hasNext()) {
                 Role role = enumRoles.next();
@@ -658,9 +646,9 @@ public class SWBARule extends GenericResource {
             }
             log.debug("numReglas:" + numreglas);
             if (numreglas > 0) {
-                hmAttr = new HashMap();
-                hmOper = new HashMap();
-                hmValues = new HashMap();
+                hmAttr = new HashMap<>();
+                hmOper = new HashMap<>();
+                hmValues = new HashMap<>();
                 hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgRules"));   ///////////////////////////
                 hmAttr.put("Tipo", "select");
                 hmOper.put("=", paramRequest.getLocaleString("msgCumpla"));
@@ -683,9 +671,9 @@ public class SWBARule extends GenericResource {
             List<Country> countries = SWBUtils.Collections.copyIterator(SWBContext.getWebSite(tmid).listCountries());
             log.debug("numPais:" + countries.size());
             if (!countries.isEmpty()) {
-                hmAttr = new HashMap();
-                hmOper = new HashMap();
-                hmValues = new HashMap();
+                hmAttr = new HashMap<>();
+                hmOper = new HashMap<>();
+                hmValues = new HashMap<>();
                 hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgCountries"));   ///////////////////////////
                 hmAttr.put("Tipo", "select");
                 hmOper.put("=", paramRequest.getLocaleString("msgIs"));
@@ -702,9 +690,9 @@ public class SWBARule extends GenericResource {
             }
 
             //Se agrega la parte de IP del usuario
-            hmAttr = new HashMap();
-            hmOper = new HashMap();
-            hmValues = new HashMap();
+            hmAttr = new HashMap<>();
+            hmOper = new HashMap<>();
+            hmValues = new HashMap<>();
             hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgIPUser"));
             hmAttr.put("Tipo", "TEXT");
             hmOper.put("=", paramRequest.getLocaleString("msgIs"));
@@ -714,9 +702,9 @@ public class SWBARule extends GenericResource {
             vecOrderAtt.add(numero++, SWBRuleMgr.TAG_INT_USERIP); //falta tag de IP
 
             //Se agrega la parte de WebPage visitada por el usuario
-            hmAttr = new HashMap();
-            hmOper = new HashMap();
-            hmValues = new HashMap();
+            hmAttr = new HashMap<>();
+            hmOper = new HashMap<>();
+            hmValues = new HashMap<>();
             hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgWebPageUser"));
             hmAttr.put("Tipo", "TEXT");
             hmOper.put("=", paramRequest.getLocaleString("msgContains"));
@@ -727,16 +715,15 @@ public class SWBARule extends GenericResource {
 
 
             //Se agrega la parte de Historial de WebPages visitada por el usuario
-            hmAttr = new HashMap();
-            hmOper = new HashMap();
-            hmValues = new HashMap();
+            hmAttr = new HashMap<>();
+            hmOper = new HashMap<>();
+            hmValues = new HashMap<>();
             hmAttr.put("Etiqueta", paramRequest.getLocaleString("msgHistoryWebPageUser"));
             hmAttr.put("Tipo", "TEXT");
             hmOper.put("=", paramRequest.getLocaleString("msgContains"));
             hmOper.put("!=", paramRequest.getLocaleString("msgNotContains"));
             for(int i=1; i<26; i++)
             {
-                //System.out.println("i "+i);
                 hmOper.put("-"+i, "-"+i);
             }
             hmAttr.put("Operador", hmOper);
@@ -752,9 +739,9 @@ public class SWBARule extends GenericResource {
 
                 String uType = usrTypes.next();
                 log.debug("UType: " + uType);
-                hmAttr = new HashMap();
-                hmOper = new HashMap();
-                hmValues = new HashMap();
+                hmAttr = new HashMap<>();
+                hmOper = new HashMap<>();
+                hmValues = new HashMap<>();
                 hmAttr.put("Etiqueta", uType);   ///////////////////////////
                 hmAttr.put("Tipo", "select");
                 hmOper.put("=", paramRequest.getLocaleString("msgSameAs"));
@@ -781,9 +768,9 @@ public class SWBARule extends GenericResource {
                 SemanticProperty usrAtt = iteratt.next();
                 attnum++;
                 log.debug("ListAttributes:" + usrAtt.getName() + ", " + attnum + ", objProp: " + usrAtt.isObjectProperty());
-                hmAttr = new HashMap();
-                hmOper = new HashMap();
-                hmValues = new HashMap();
+                hmAttr = new HashMap<>();
+                hmOper = new HashMap<>();
+                hmValues = new HashMap<>();
 
                 hmAttr.put("Etiqueta", usrAtt.getDisplayName(user.getLanguage()));
                 if (usrAtt.getDisplayProperty() != null) {
@@ -793,7 +780,6 @@ public class SWBARule extends GenericResource {
                     if(!dobj.isHidden())
                     {
                     String selectValues = dobj.getSelectValues(user.getLanguage());
-                    ///////////////////////////
                     if (selectValues != null) {
                         tipoControl = "select";
                         hmAttr.put("Tipo", tipoControl);
@@ -864,154 +850,15 @@ public class SWBARule extends GenericResource {
                                 comboAtt.put(usrAtt.getName(), hmAttr);
                                 vecOrderAtt.add(numero++, usrAtt.getName());
                             }
-
-                            // PARA ObjectType
-
-//                            else {
-//                                tipoControl = "TEXT";
-//                                hmAttr.put("Tipo", tipoControl);
-//                                hmOper.put("=", paramRequest.getLocaleString("msgIs"));
-//                                hmOper.put("!=", paramRequest.getLocaleString("msgNotIs"));
-//                                hmAttr.put("Operador", hmOper);
-//                                comboAtt.put(usrAtt.getName(), hmAttr);
-//                                vecOrderAtt.add(numero++, usrAtt.getName());
-//                            }
                         }
-//                        else if (usrAtt.isObjectProperty()) {
-//                            log.debug("DP: ObjectProperty");
-//                            tipoControl = "select";
-//                            if (usrAtt == User.swb_hasRole) {
-//                                Iterator<Role> itRol = usrRepo.listRoles();
-//                                while (itRol.hasNext()) {
-//                                    Role rol = itRol.next();
-//                                    hmValues.put(rol.getId(), rol.getDisplayTitle(user.getLanguage()));
-//                                }
-//                                hmAttr.put("Valor", hmValues);
-//                            }
-//                        }
                     }
                     log.debug("DP:Tipo --- " + tipoControl);
                   }
                 }
             }
-//
-//            // Atributos Extendidos
-//            iteratt = usrRepo.listExtendedAttributes();
-//            attnum = 0;
-//            while (iteratt.hasNext()) {
-//                String tipoControl = "TEXT";
-//                SemanticProperty usrAtt = iteratt.next();
-//                attnum++;
-//                log.debug("ListAttributes:" + usrAtt.getName() + ", " + attnum + ", objProp: " + usrAtt.isObjectProperty());
-//                hmAttr = new HashMap();
-//                hmOper = new HashMap();
-//                hmValues = new HashMap();
-//                hmAttr.put("Etiqueta", "EX: "+usrAtt.getDisplayName(user.getLanguage()));
-//                if (usrAtt.getDisplayProperty() != null ) {
-//                    log.debug("DisplayProperty");
-//                    DisplayProperty dobj = new DisplayProperty(usrAtt.getDisplayProperty());
-//                    if(!dobj.isHidden())
-//                    {
-//                        String selectValues = dobj.getSelectValues(user.getLanguage());
-//                        ///////////////////////////
-//                        if (selectValues != null) {
-//                            tipoControl = "select";
-//                            hmAttr.put("Tipo", tipoControl);
-//                            hmOper.put("=", paramRequest.getLocaleString("msgSameAs"));
-//                            hmOper.put("!=", paramRequest.getLocaleString("msgNotEqual"));
-//                            hmAttr.put("Operador", hmOper);
-//                            StringTokenizer st = new StringTokenizer(selectValues, "|");
-//                            while (st.hasMoreTokens()) {
-//                                String tok = st.nextToken();
-//                                int ind = tok.indexOf(':');
-//                                String idt = tok;
-//                                String val = tok;
-//                                if (ind > 0) {
-//                                    idt = tok.substring(0, ind);
-//                                    val = tok.substring(ind + 1);
-//                                }
-//                                hmValues.put(idt, val);
-//                            }
-//                            hmAttr.put("Valor", hmValues);
-//                            comboAtt.put(usrAtt.getName(), hmAttr);
-//                            vecOrderAtt.add(numero++, usrAtt.getName());
-//                        } else {
-//                            if (usrAtt.isDataTypeProperty()) {
-//                                log.debug("DP: DataTypeProperty");
-//                                if (usrAtt.isInt()||usrAtt.isFloat()||usrAtt.isLong()) {
-//                                    tipoControl = "TEXT";
-//                                    hmAttr.put("Tipo", tipoControl);
-//                                    hmOper.put("&gt;", paramRequest.getLocaleString("msgGreaterThan"));
-//                                    hmOper.put("&lt;", paramRequest.getLocaleString("msgLessThan"));
-//                                    hmOper.put("=", paramRequest.getLocaleString("msgIs"));
-//                                    hmOper.put("!=", paramRequest.getLocaleString("msgNotIs"));
-//                                    hmAttr.put("Operador", hmOper);
-//                                    comboAtt.put(usrAtt.getName(), hmAttr);
-//                                    vecOrderAtt.add(numero++, usrAtt.getName());
-//                                } else if (usrAtt.isBoolean()) {
-//                                    tipoControl = "select";
-//                                    hmAttr.put("Tipo", tipoControl);
-//                                    hmOper.put("=", paramRequest.getLocaleString("msgIs"));
-//                                    hmOper.put("!=", paramRequest.getLocaleString("msgNotIs"));
-//                                    hmAttr.put("Operador", hmOper);
-//                                    hmValues.put("true", paramRequest.getLocaleString("msgTrue"));
-//                                    hmValues.put("false", paramRequest.getLocaleString("msgFalse"));
-//                                    hmAttr.put("Valor", hmValues);
-//                                    comboAtt.put(usrAtt.getName(), hmAttr);
-//                                    vecOrderAtt.add(numero++, usrAtt.getName());
-//                                } else if (usrAtt.isString()) {
-//                                    tipoControl = "TEXT";
-//                                    hmAttr.put("Tipo", tipoControl);
-//                                    hmOper.put("=", paramRequest.getLocaleString("msgIs"));
-//                                    hmOper.put("!=", paramRequest.getLocaleString("msgNotIs"));
-//                                    hmAttr.put("Operador", hmOper);
-//                                    comboAtt.put(usrAtt.getName(), hmAttr);
-//                                    vecOrderAtt.add(numero++, usrAtt.getName());
-//                                }
-//
-//                                // PARA ObjectType
-//
-//    //                            else {
-//    //                                tipoControl = "TEXT";
-//    //                                hmAttr.put("Tipo", tipoControl);
-//    //                                hmOper.put("=", paramRequest.getLocaleString("msgIs"));
-//    //                                hmOper.put("!=", paramRequest.getLocaleString("msgNotIs"));
-//    //                                hmAttr.put("Operador", hmOper);
-//    //                                comboAtt.put(usrAtt.getName(), hmAttr);
-//    //                                vecOrderAtt.add(numero++, usrAtt.getName());
-//    //                            }
-//                            }
-//    //                        else if (usrAtt.isObjectProperty()) {
-//    //                            log.debug("DP: ObjectProperty");
-//    //                            tipoControl = "select";
-//    //                            if (usrAtt == User.swb_hasRole) {
-//    //                                Iterator<Role> itRol = usrRepo.listRoles();
-//    //                                while (itRol.hasNext()) {
-//    //                                    Role rol = itRol.next();
-//    //                                    hmValues.put(rol.getId(), rol.getDisplayTitle(user.getLanguage()));
-//    //                                }
-//    //                                hmAttr.put("Valor", hmValues);
-//    //                            }
-//    //                        }
-//                        }
-//                        log.debug("DP:Tipo --- " + tipoControl);
-//                    }
-//                }
-//            }
-//        //////////////////////////////////////////////////////////////////////
-
         } catch (Exception e) {
             log.error(paramRequest.getLocaleString("msgErrorLoadingUserAttributeList") + ". SWBARules.loadComboAttr", e);
         }
-
-        // HABILITAR PARA DEBUG
-
-//        Iterator<String> itkeys = comboAtt.keySet().iterator();
-//        while(itkeys.hasNext())
-//        {
-//            log.debug("---- "+itkeys.next());
-//        }
-
     }
     
     /**
@@ -1022,55 +869,54 @@ public class SWBARule extends GenericResource {
     	JSONArray attributes = new JSONArray();
     	
     	for (int i = 0; i < vecOrderAtt.size(); i++) {
-            String valor = (String) vecOrderAtt.get(i);
-            HashMap hmAttr = (HashMap) comboAtt.get(valor);
-            String label = (String) hmAttr.get("Etiqueta");
+        String valor = (String) vecOrderAtt.get(i);
+        HashMap hmAttr = (HashMap) comboAtt.get(valor);
+        String label = (String) hmAttr.get("Etiqueta");
 
         	JSONObject attribute = new JSONObject();
-            attribute.put("type", (String) hmAttr.get("Tipo"));
-            attribute.put("name", valor);
-            attribute.put("title", label);
+        attribute.put("type", (String) hmAttr.get("Tipo"));
+        attribute.put("name", valor);
+        attribute.put("title", label);
 
-            HashMap hmOper = (HashMap) hmAttr.get("Operador");
-            Iterator itOper = hmOper.keySet().iterator();
-            JSONArray operators = new JSONArray();
+        HashMap hmOper = (HashMap) hmAttr.get("Operador");
+        Iterator itOper = hmOper.keySet().iterator();
+        JSONArray operators = new JSONArray();
             
-            while (itOper.hasNext()) {
-                String thisValue = (String) itOper.next();
-                String thisLabel = (String) hmOper.get(thisValue);
-                JSONObject operator = new JSONObject();
-                operator.put("value", thisValue);
-                operator.put("title", thisLabel);
-                operators.put(operator);
-            }
-            attribute.put("operators", operators);
-            
-            hmOper = null;
-            JSONArray attValues = new JSONArray();
-
-            if (!hmAttr.get("Tipo").equals("TEXT")) {
-                HashMap valoresCombo = (HashMap) hmAttr.get("Valor");
-                Iterator itValCombo = valoresCombo.keySet().iterator();
-                
-                while (itValCombo.hasNext()) {
-                    String nomValCombo = (String) itValCombo.next();
-                    String labelValCombo = (String) valoresCombo.get(nomValCombo);
-                    JSONObject attValue = new JSONObject();
-                    attValue.put("title", labelValCombo);
-                    attValue.put("value", nomValCombo);
-                    attValues.put(attValue);
-                }
-                attribute.put("catalog", attValues);
-            } else {
-                //armar text para pedir/mostrar valor
-            	JSONObject attValue = new JSONObject();
-                attValue.put("title", "");
-                attValue.put("value", "TEXT");
-                attValues.put(attValue);
-                attribute.put("catalog", attValues);
-            }
-            attributes.put(attribute);
+        while (itOper.hasNext()) {
+            String thisValue = (String) itOper.next();
+            String thisLabel = (String) hmOper.get(thisValue);
+            JSONObject operator = new JSONObject();
+            operator.put("value", thisValue);
+            operator.put("title", thisLabel);
+            operators.put(operator);
         }
+        attribute.put("operators", operators);
+        hmOper = null;
+        JSONArray attValues = new JSONArray();
+
+        if (!hmAttr.get("Tipo").equals("TEXT")) {
+            HashMap valoresCombo = (HashMap) hmAttr.get("Valor");
+            Iterator itValCombo = valoresCombo.keySet().iterator();
+                
+            while (itValCombo.hasNext()) {
+                String nomValCombo = (String) itValCombo.next();
+                String labelValCombo = (String) valoresCombo.get(nomValCombo);
+                JSONObject attValue = new JSONObject();
+                attValue.put("title", labelValCombo);
+                attValue.put("value", nomValCombo);
+                attValues.put(attValue);
+            }
+            attribute.put("catalog", attValues);
+        } else {
+            //armar text para pedir/mostrar valor
+            	JSONObject attValue = new JSONObject();
+            attValue.put("title", "");
+            attValue.put("value", "TEXT");
+            attValues.put(attValue);
+            attribute.put("catalog", attValues);
+        }
+        attributes.put(attribute);
+    }
         
     	JSONObject ret = new JSONObject();
     	ret.put("attributes", attributes);
