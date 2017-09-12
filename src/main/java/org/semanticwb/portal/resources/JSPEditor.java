@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,18 +18,20 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
-
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.UUID;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -41,8 +43,6 @@ import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
 
-
-// TODO: Auto-generated Javadoc
 /**
  * Muestra las facilidades para editar el c&oacute;digo de un archivo JSP
  * que se ejecutar&aacute; cuando se muestre en el navegador la secci&oacute;n con que
@@ -87,7 +87,7 @@ public class JSPEditor extends GenericAdmResource {
             SWBParamRequest paramReq)
             throws IOException, SWBResourceException {
 
-        StringBuffer ret = new StringBuffer(1000);
+        StringBuilder ret = new StringBuilder(1000);
         String language = paramReq.getUser().getLanguage();
         Resource base = paramReq.getResourceBase();
         String code = "";
@@ -232,7 +232,7 @@ public class JSPEditor extends GenericAdmResource {
         if (code != null && !"".equals(code)) {
             try {
                 if (fileName == null) {
-                    fileName = generateRandomString(10) + ".jsp";
+                    fileName = UUID.randomUUID().toString().replaceAll("-", "") + ".jsp";
                     base.setAttribute("fileName", fileName);
                     base.updateAttributesToDB();
                 }
@@ -288,45 +288,5 @@ public class JSPEditor extends GenericAdmResource {
         } catch (Exception e) {
             log.error("Process error... " + pathToRead, e);
         }
-    }
-
-    /**
-     * Genera, de forma aleatoria, una cadena de <quote>length</quote> caracteres
-     * alfanum&eacute;ricos, incluyendo gui&oacute;n bajo. <p>Generates, randomly,
-     * a <quote>length</quote> character length, alphanumeric (underscore included) string</p>
-     * 
-     * @param length n&uacute;mero de caracteres a seleccionar para formar la cadena a devolver.
-     * Si el valor recibido es menor o igual a cero, se asigna 8 a
-     * esta variable; o si es mayor a 25, se asigna u valor de 25.
-     * <p>number of characters to select to form the returning string.
-     * if this value is less or equal to zero, a value of 8 is asigned
-     * to this variable; or if it's greater than 25, 25 is asigned.</p>
-     * @return una cadena de  (u 8, si length es menor o igual a cero)
-     * caracteres de longitud seleccionados de forma aleatoria. a
-     *  (8, if {@code length} is less or equal to
-     * zero, or 25 if it's greater than 25) character length String, each
-     * of the characters is selected
-     * randomly.
-     */
-    private String generateRandomString(int length) {
-
-        char[] letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-                          'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-                          'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6',
-                          '7', '8', '9', '_', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
-                          'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-                          'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-        if (length <= 0) {
-            length = 8;
-        } else if (length > 25) {
-            length = 25;
-        }
-        char[] generated = new char[length];
-
-        for (int i = 0; i < length; i++) {
-            int j = (int) (Math.random() * letters.length);
-            generated[i] = letters[j];
-        }
-        return new String(generated);
     }
 }
