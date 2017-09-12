@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources.util.JSValidations;
 
@@ -31,7 +31,7 @@ import org.semanticwb.portal.admin.admresources.lib.WBJsValidationsFEAbs;
  * <p>
  * Object that verifies if a html field has a numeric value with JavaScript.
  * 
- * @author  Jorge Alberto Jim�nez
+ * @author  Jorge Alberto Jiménez
  */
 
 public class Js_NumbersValFE extends WBJsValidationsFEAbs
@@ -74,13 +74,11 @@ public class Js_NumbersValFE extends WBJsValidationsFEAbs
      */    
     public String getHtml(java.util.Locale locale)
     {
-        StringBuffer strb = new StringBuffer();
+    		StringBuilder strb = new StringBuilder();
         if(field != null)
         {
             String bundle=getClass().getName();
             strb.append("\n   pCaracter=");
-            //if(formfeName != null) strb.append("document."+formfeName + ".");
-            //strb.append(field + ".value;");
             strb.append("document.getElementById(\""+field+"\").value");
             strb.append("\n   var valid = \"0123456789\";");
             strb.append("\n   var ok = true;");
@@ -101,8 +99,6 @@ public class Js_NumbersValFE extends WBJsValidationsFEAbs
                     strb.append(" "+ SWBUtils.TEXT.getLocaleString(bundle, "msgCharacters", locale));
             }
             strb.append(" '); ");
-            //if(formfeName != null) strb.append("\n     " + "document."+formfeName + ".");
-            //strb.append(field + ".focus();");
             strb.append("document.getElementById(\""+field+"\").focus();");
             strb.append("\n     return false;");
             strb.append("\n      } ");

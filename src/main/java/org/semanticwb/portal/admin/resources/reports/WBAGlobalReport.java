@@ -6,7 +6,7 @@
 * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
 * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
 *
-* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
 * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
 * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
 * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -29,37 +29,47 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
 import java.util.Collection;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
-
-import org.semanticwb.Logger;
-import org.semanticwb.SWBUtils;
-import org.semanticwb.SWBPortal;
-import org.semanticwb.model.Resource;
-import org.semanticwb.model.WebSite;
-import org.semanticwb.model.SWBContext;
-import org.semanticwb.portal.admin.resources.reports.beans.IncompleteFilterException;
-import org.semanticwb.portal.api.GenericResource;
-import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.SWBResourceException;
-import org.semanticwb.portal.admin.resources.reports.beans.WBAFilterReportBean;
-import org.semanticwb.portal.admin.resources.reports.jrresources.*;
-import org.semanticwb.portal.admin.resources.reports.jrresources.data.JRGlobalAccessDataDetail;
-import org.semanticwb.portal.db.SWBRecHit;
-
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-
-import org.semanticwb.portal.api.SWBResourceURL;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.semanticwb.Logger;
+import org.semanticwb.SWBPortal;
+import org.semanticwb.SWBUtils;
+import org.semanticwb.model.Resource;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.WebSite;
+import org.semanticwb.portal.admin.resources.reports.beans.IncompleteFilterException;
+import org.semanticwb.portal.admin.resources.reports.beans.WBAFilterReportBean;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRDataSourceable;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRPdfResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRRtfResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRXlsResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JasperTemplate;
+import org.semanticwb.portal.admin.resources.reports.jrresources.data.JRGlobalAccessDataDetail;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceModes;
+import org.semanticwb.portal.api.SWBResourceURL;
+import org.semanticwb.portal.db.SWBRecHit;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-// TODO: Auto-generated Javadoc
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+
 /**
  * The Class WBAGlobalReport.
  */
@@ -102,7 +112,7 @@ public class WBAGlobalReport extends GenericResource {
      */
     @Override
     public void render(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException{
-        if(!paramsRequest.WinState_MINIMIZED.equals(paramsRequest.getWindowState())) {
+        if(!SWBResourceModes.WinState_MINIMIZED.equals(paramsRequest.getWindowState())) {
             processRequest(request, response, paramsRequest);
         }
     }
@@ -155,7 +165,7 @@ public class WBAGlobalReport extends GenericResource {
         PrintWriter out = response.getWriter();
         Resource base = getResourceBase();
 
-        HashMap hm_sites = new HashMap();
+        HashMap<String, String> hm_sites = new HashMap<>();
         String rtype;
         try{
             // Evaluates if there are sites
@@ -286,17 +296,13 @@ public class WBAGlobalReport extends GenericResource {
                 out.println("}");
 
                 out.println("function doXml(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("xml")+"\"+params,\"graphWindow\",size);    ");
-                /*out.println("   }");*/
                 out.println("}");
 
                 out.println("function doExcel(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("xls")+"\"+params,\"graphWindow\",size);    ");
-                /*out.println("   }");*/
                 out.println("}");
 
                 out.println("function doHistogram(accion, size) { ");
@@ -305,24 +311,18 @@ public class WBAGlobalReport extends GenericResource {
                 out.println(" }");
 
                 out.println("function doGraph(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("graph")+"\"+params,\"graphWindow\",size);    ");
-                /*out.println("   }");*/
                 out.println(" }");
 
                 out.println("function doPdf(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("pdf")+"\"+params,\"graphWindow\",size);    ");
-                /*out.println("   }");*/
                 out.println("}");
 
                 out.println("function doRtf(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("rtf")+"\"+params,\"graphWindow\",size);    ");
-                /*out.println("   }");*/
                 out.println("}");
 
                 //Devuelve el id del radio seleccionado [0,1]
@@ -448,18 +448,9 @@ public class WBAGlobalReport extends GenericResource {
                     out.println("</table>");
                     out.println("</fieldset>");
                     out.println("</form>");
-
-//                    out.println("<fieldset>");
-//                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
-//                    out.println("<tr>");
-//                    out.println("<td colspan=\"4\">");
                     out.println("<div id=\"ctnergrid\" style=\"height:350px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
                     out.println("  <div id=\"gridMaster\" jsid=\"gridMaster\"></div>");
                     out.println("</div>");
-//                    out.println("</td>");
-//                    out.println("</tr>");
-//                    out.println("</table>");
-//                    out.println("</fieldset>");
                     out.println("</div>");
                 }else { // REPORTE MENSUAL
                     GregorianCalendar gc_now = new GregorianCalendar();
@@ -496,21 +487,9 @@ public class WBAGlobalReport extends GenericResource {
                     out.println("</table>");
                     out.println("</fieldset>");
                     out.println("</form>");
-
-//                    out.println("<fieldset>");
-//                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
-//                    out.println("<tr>");
-//                    out.println("<td colspan=\"4\">");
-//                    out.println("<div id=\"ctnergrid\" style=\"height:30%; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
-//                    out.println("  <div id=\"gridMaster\"></div>");
-//                    out.println("</div>");
                     out.println("<div id=\"ctnergrid\" style=\"height:350px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
                     out.println("  <div id=\"gridMaster\" jsid=\"gridMaster\"></div>");
                     out.println("</div>");
-//                    out.println("</td>");
-//                    out.println("</tr>");
-//                    out.println("</table>");
-//                    out.println("</fieldset>");
                     out.println("</div>");
                 }
                 out.println("</div>");
@@ -555,7 +534,7 @@ public class WBAGlobalReport extends GenericResource {
     public void doGraph(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
         response.setContentType("application/pdf");
         Resource base = getResourceBase();
-        HashMap<String,String> params = new HashMap();
+        HashMap<String,String> params = new HashMap<>();
         params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
 
         try {
@@ -610,7 +589,7 @@ public class WBAGlobalReport extends GenericResource {
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "inline; filename=\"gar.xls\"");
         Resource base = getResourceBase();
-        HashMap<String,String> params = new HashMap();
+        HashMap<String,String> params = new HashMap<>();
         params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
 
         try {
@@ -619,7 +598,6 @@ public class WBAGlobalReport extends GenericResource {
                 WBAFilterReportBean filter = buildFilter(request, paramsRequest);
                 params.put("site", filter.getSite());
                 JRDataSourceable dataDetail = new JRGlobalAccessDataDetail(filter);
-                //JasperTemplate jasperTemplate = JasperTemplate.GLOBAL_DAILY;
                 JasperTemplate jasperTemplate = JasperTemplate.GLOBAL_DAILY_EXCEL;
                 try {
                     JRResource jrResource = new JRXlsResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
@@ -638,7 +616,6 @@ public class WBAGlobalReport extends GenericResource {
                 filter. setType(I_REPORT_TYPE);
                 filter.setYearI(year13);
                 JRDataSourceable dataDetail = new JRGlobalAccessDataDetail(filter);
-                //JasperTemplate jasperTemplate = JasperTemplate.GLOBAL_MONTHLY;
                 JasperTemplate jasperTemplate = JasperTemplate.GLOBAL_MONTHLY_EXCEL;
                 try {
                     JRResource jrResource = new JRXlsResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
@@ -821,7 +798,7 @@ public class WBAGlobalReport extends GenericResource {
         response.setContentType("application/rtf");
         response.setHeader("Content-Disposition", "inline; filename=\"gar.rtf\"");
         Resource base = getResourceBase();
-        HashMap<String,String> params = new HashMap();
+        HashMap<String,String> params = new HashMap<>();
         params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
 
         try {
@@ -873,15 +850,12 @@ public class WBAGlobalReport extends GenericResource {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void doHistrogram(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
-        StringBuffer sb_ret = new StringBuffer();
-        StringBuffer sb_app = new StringBuffer();
+        StringBuilder sb_ret = new StringBuilder();
         Resource base = paramsRequest.getResourceBase();
         String monthinyear = null;
         boolean hasBarname = false;
-        int j = 0;
 
         try {
-            String rtype = request.getParameter("wb_rtype")==null? "0":request.getParameter("wb_rtype");
             monthinyear = request.getParameter("wbr_barname");
             if(monthinyear != null){
                 hasBarname = true;
@@ -934,8 +908,8 @@ public class WBAGlobalReport extends GenericResource {
      * @throws SWBResourceException the sWB resource exception
      */
     public String getHistogram(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException {
-        StringBuffer sb_ret = new StringBuffer();
-        StringBuffer sb_app = new StringBuffer();
+	    	StringBuilder sb_ret = new StringBuilder();
+	    	StringBuilder sb_app = new StringBuilder();
         boolean hasBarname = false;
         int j = 0;
 

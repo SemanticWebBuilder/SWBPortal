@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,27 +18,27 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources.lib;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.semanticwb.portal.admin.admresources.*;
 
-// TODO: Auto-generated Javadoc
+import org.semanticwb.portal.admin.admresources.FormFE;
+
 /**
  * Esta es una clase abstracta que implementa la interface WBAdmResource y que es utilizada para los objetos de tipo contenedor(ej. FormFE,SelectFE)
  * <p>
  * This is an abstract class that implements the  WBAdmResource interface and its used in the containers objects (ex. FormFE,SelectFE)
- * @author  Jorge Alberto Jim�nez
+ * @author  Jorge Alberto Jiménez
  * @version 1.0
  */
 
 public abstract class WBContainerFE extends WBAdmResourceAbs {
     
     /** The formelements. */
-    protected ArrayList formelements;
+    protected ArrayList<Object> formelements;
     
     /** The ajsfe. */
     private ArrayList ajsfe;
@@ -47,8 +47,8 @@ public abstract class WBContainerFE extends WBAdmResourceAbs {
      * Instantiates a new wB container fe.
      */
     public WBContainerFE() {
-        formelements = new ArrayList();
-        ajsfe = new ArrayList();
+        formelements = new ArrayList<>();
+        ajsfe = new ArrayList<>();
     }
     
     /**
@@ -66,8 +66,8 @@ public abstract class WBContainerFE extends WBAdmResourceAbs {
      * @return the form e
      */
     public String getFormE() {
-        StringBuffer strb = new StringBuffer();
-        Iterator iobj = formelements.iterator();
+        StringBuilder strb = new StringBuilder();
+        Iterator<Object> iobj = formelements.iterator();
         do {
             if(!iobj.hasNext()){
                 break;
@@ -88,8 +88,8 @@ public abstract class WBContainerFE extends WBAdmResourceAbs {
      * @return the form e
      */
     public String getFormE(String formName) {
-        StringBuffer strb = new StringBuffer();
-        Iterator iobj = formelements.iterator();
+    		StringBuilder strb = new StringBuilder();
+        Iterator<Object> iobj = formelements.iterator();
         do {
             if(!iobj.hasNext()){
                 break;
@@ -122,7 +122,7 @@ public abstract class WBContainerFE extends WBAdmResourceAbs {
      * @return the form
      */
     public FormFE getForm(String formName){
-        Iterator iforms=formelements.iterator();
+        Iterator<Object> iforms=formelements.iterator();
         while(iforms.hasNext()){
             FormFE formfe=(FormFE)iforms.next();
             if(formfe!=null && formfe.getName().equals(formName)){

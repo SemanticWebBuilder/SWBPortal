@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,28 +18,35 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.TreeMap;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Resource;
-import org.w3c.dom.*;
-import org.semanticwb.portal.admin.admresources.db.*;
+import org.semanticwb.portal.admin.admresources.db.AdmDBConnMgr;
 import org.semanticwb.portal.admin.admresources.lib.WBAdmResource;
 import org.semanticwb.portal.admin.admresources.lib.WBContainerFE;
 import org.semanticwb.portal.admin.admresources.lib.WBJsInputFE;
 import org.semanticwb.portal.admin.admresources.lib.WBJsValidationsFE;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
-// TODO: Auto-generated Javadoc
 /**
  * Objeto que administra un elemento de tipo Form de html.
  * <p>
  * Object that administers an html form element
- * @author  Jorge Alberto Jim?nez
+ * @author  Jorge Alberto Jiménez
  */
 
 public class FormFE extends WBContainerFE
@@ -78,17 +85,11 @@ public class FormFE extends WBContainerFE
     /** The tag. */
     private Node tag=null;
     
-    /** The base. */
-    private Resource base=null;
-    
     /** The request. */
     HttpServletRequest request=null;
 
     /** The jsframework. */
     private String jsframework="dojo";
-
-
-    //ArrayList formelements=new ArrayList();
 
     /**
      * Creates a new instance of FormFE.
@@ -116,7 +117,6 @@ public class FormFE extends WBContainerFE
      */
     public FormFE(Node tag, Resource base,String redirect) {
         this.tag=tag;
-        this.base=base;
         this.redirect=redirect;
         setAttributes();
     }
@@ -131,7 +131,6 @@ public class FormFE extends WBContainerFE
      */
     public FormFE(Node tag, Resource base,String redirect, HttpServletRequest request) {
         this.tag=tag;
-        this.base=base;
         this.redirect=redirect;
         setAttributes();
         this.request=request;
@@ -307,7 +306,7 @@ public class FormFE extends WBContainerFE
     @Override
     public String getHtml()
     {
-        StringBuffer strb=new StringBuffer("");
+        StringBuilder strb=new StringBuilder();
         String xml="";
         try
         {
@@ -364,16 +363,14 @@ public class FormFE extends WBContainerFE
      * @return the val html
      */
     private String getValHtml() {
-        StringBuffer strb=new StringBuffer();
+        StringBuilder strb=new StringBuilder();
         strb.append("\n<script type=\"text/javascript\">");
-        //strb.append("\n<!--");
         strb.append("\n<![CDATA[");
         strb.append("\nfunction valida_"+getName()+"(forma) {");
         strb.append("\n     "+getJsFE());
         strb.append("\n     return true;");
         strb.append("\n}");
         strb.append("\n]]>");
-        //strb.append("\n-->");
         strb.append("\n</script>\n");
         return strb.toString();
     }
@@ -385,7 +382,7 @@ public class FormFE extends WBContainerFE
       * @return the js fe
       */
      public String getJsFE(){
-        StringBuffer strb=new StringBuffer();
+        StringBuilder strb=new StringBuilder();
         Iterator ijsfeObj=ajsfe.iterator();
         while(ijsfeObj.hasNext()){
             WBJsValidationsFE js_valfe=(WBJsValidationsFE)ijsfeObj.next();
@@ -486,21 +483,6 @@ public class FormFE extends WBContainerFE
          }
     }
 
-
-    /*
-    private void addJSFormFE(Object obj){
-         if(obj instanceof WBJsInputFE){
-           WBJsInputFE objInJs=(WBJsInputFE)obj;
-           Object js_Obj=(Object)objInJs.getJsValObj();
-           if(js_Obj instanceof WBJsValidationsFE){
-               WBJsValidationsFE js_valfe=(WBJsValidationsFE)js_Obj;
-               js_valfe.setFormFEName(getName());
-               ajsfe.add(js_valfe);
-           }
-         }
-    }
-    */
-
     /**
      * Set attributes to class according with the xml tag element.
      */
@@ -551,7 +533,6 @@ public class FormFE extends WBContainerFE
             if(jsFramework.equalsIgnoreCase("dojo")){
                 child.setAttribute("dojoType","dijit.form.Form");
             }
-//            child.setAttribute("onsubmit","submitForm('"+id+"');return false;");
         }
     }
 }

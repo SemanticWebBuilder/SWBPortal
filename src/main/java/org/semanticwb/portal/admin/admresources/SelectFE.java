@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,25 +18,33 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.StringTokenizer;
 
-import org.semanticwb.portal.admin.admresources.lib.*;
-import java.util.*;
-import org.semanticwb.portal.admin.admresources.db.*;
-import org.w3c.dom.*;
-import java.sql.*;
 import org.semanticwb.Logger;
 import org.semanticwb.SWBUtils;
+import org.semanticwb.portal.admin.admresources.db.AdmDBConnMgr;
+import org.semanticwb.portal.admin.admresources.lib.WBAdmResource;
+import org.semanticwb.portal.admin.admresources.lib.WBContainerFE;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 // TODO: Auto-generated Javadoc
 /**
  * Objeto que administra un elemento html de tipo Select.
  * <p>
  * Object that administers an element Select in a html form
- * @author  Jorge Alberto Jim�nez
+ * @author  Jorge Alberto Jiménez
  */
 
 public class SelectFE extends WBContainerFE
@@ -63,17 +71,11 @@ public class SelectFE extends WBContainerFE
     /** The width. */
     private int width=-1;
     
-    /** The isselected. */
-    private boolean isselected=false;
-    
     /** The xmltag. */
     private String xmltag=null;
     
     /** The tag. */
     protected Node tag=null;
-    
-    /** The query. */
-    private String query=null;
     
     /** The dbconnload. */
     private String dbconnload=null;
@@ -194,7 +196,7 @@ public class SelectFE extends WBContainerFE
      * @param dbconnmgr the new adm db conn mgr2 childs
      */
     private void setAdmDBConnMgr2Childs(AdmDBConnMgr dbconnmgr){
-        Iterator iobj=formelements.iterator();
+        Iterator<Object> iobj=formelements.iterator();
         while(iobj.hasNext()){
             Object obj=iobj.next();
             if(obj instanceof WBAdmResource){
@@ -388,7 +390,7 @@ public class SelectFE extends WBContainerFE
      * @return the html
      */
     public String getHtml(){
-        StringBuffer ret=new StringBuffer("");
+        StringBuilder ret=new StringBuilder("");
         String xml="";
         try 
         {
