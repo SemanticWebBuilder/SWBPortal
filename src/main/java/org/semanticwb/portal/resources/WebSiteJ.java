@@ -20,7 +20,7 @@
  * dirección electrónica:
  *  http://www.semanticwebbuilder.org
  */
-package org.semanticwb.portal.api;
+package org.semanticwb.portal.resources;
 
 /**
  * The Class WebSiteJ.
