@@ -22,31 +22,34 @@
  */
 package org.semanticwb.portal.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.SWBPlatform;
 
-
-// TODO: Auto-generated Javadoc
 /** Esta clase adminsitra las cookies de los usuarios del portal.
  *
  * This class manages user's cookies.
- * @author : Jorge Alberto Jim�nez
+ * @author : Jorge Alberto Jiménez
  */
 public class SWBCookieMgr
 {
     
     /** The cookies. */
-    ArrayList cookies;
+    ArrayList<SWBCookie> cookies;
 
     /**
      * Instantiates a new sWB cookie mgr.
      */
     public SWBCookieMgr()
     {
-        cookies = new ArrayList();
+        cookies = new ArrayList<>();
     }
 
     
@@ -71,7 +74,6 @@ public class SWBCookieMgr
      */
     public boolean setCookie(String cadenaCookie, String host, String resid)
     {
-        //System.out.println("setCookie:"+cadenaCookie+" "+host+" "+resid);
         boolean regresa = false,bexistcookie = false;
         if (cadenaCookie != null)
         {
@@ -82,16 +84,14 @@ public class SWBCookieMgr
             {
                 CookName = cadenaCookie.substring(0, pos);
             }
-            //System.out.println("NCookie:"+CookName);
 
             SWBCookie cookie = null;
-            Iterator itcookies = cookies.iterator();
+            Iterator<SWBCookie> itcookies = cookies.iterator();
             while (itcookies.hasNext())
             {
                 cookie = (SWBCookie) itcookies.next();
                 if (cookie.getName().equalsIgnoreCase(CookName) && cookie.getResID().equals(resid) && (host==null || host.equalsIgnoreCase(cookie.getHost())))
                 {
-                    //System.out.println("Ya existe el objeto Cookie");
                     bexistcookie = true;
                     break;
                 }
@@ -99,14 +99,11 @@ public class SWBCookieMgr
             if (!bexistcookie)
             {
                 cookie = new SWBCookie();
-                //System.out.println("Creo nuevo objeto Cookie");
             }
 
             if (host != null) cookie.setHost(host);
             cookie.setResID(resid);
 
-            //System.out.println("cadenaCookie:"+cadenaCookie);
-            
             StringTokenizer st = new StringTokenizer(cadenaCookie, ";");
             while (st.hasMoreElements())
             {
@@ -119,7 +116,6 @@ public class SWBCookieMgr
                 pos = token.indexOf("=");
                 if(pos>-1)
                 {
-                    //System.out.println("token:"+token);
                     String aName = token.substring(0, pos);
                     String aValue = token.substring(pos + 1);
                     if (aName.equalsIgnoreCase("expires"))
@@ -142,7 +138,6 @@ public class SWBCookieMgr
 
             if (CookName != null && !bexistcookie)
             {
-                //System.out.println("AddCookie:"+cookie);
                 cookies.add(cookie);
                 regresa = true;
             }
@@ -181,8 +176,6 @@ public class SWBCookieMgr
         }
             
     }
-        
-
     
         /**
          * Gets the wBSSO cookies.
@@ -190,14 +183,14 @@ public class SWBCookieMgr
          * @return the wBSSO cookies
          * @return
          */
-    public Iterator getWBSSOCookies()
+    public Iterator<SWBCookie> getWBSSOCookies()
     {
         String startName="_wb_sso";
-        ArrayList ret=new ArrayList();
-        Iterator itkeycokie = cookies.iterator();
+        ArrayList<SWBCookie> ret=new ArrayList<>();
+        Iterator<SWBCookie> itkeycokie = cookies.iterator();
         while (itkeycokie.hasNext())
         {
-            SWBCookie WBC = (SWBCookie) itkeycokie.next();
+            SWBCookie WBC = itkeycokie.next();
             if (WBC != null)
             {    
                 String name = WBC.getName();
@@ -222,19 +215,18 @@ public class SWBCookieMgr
      */
     public String getCookie(String host, String path, Date dfecha, String resid)
     {
-        StringBuffer SBcookie = new StringBuffer();
+        StringBuilder SBcookie = new StringBuilder();
         boolean entry = false;
 
-        Iterator itkeycokie = cookies.iterator();
+        Iterator<SWBCookie> itkeycokie = cookies.iterator();
         while (itkeycokie.hasNext())
         {
-            SWBCookie WBC = (SWBCookie) itkeycokie.next();
+            SWBCookie WBC = itkeycokie.next();
             if (WBC != null)
             {    //Checa si el objeto WBCookie coincide con los datos enviados
                 String WBChost = WBC.getHost();
                 String WBCpath = WBC.getPath();
                 String rid = WBC.getResID();
-                //Date dWBCexpires=new Date(WBC.getExpires());
                 boolean bpath = false,bpath1 = false;
                 if ((host.endsWith(WBChost) && resid.equals(rid) )|| (WBChost.equals("[*]") && rid.equals("")) )
                 {
@@ -267,10 +259,10 @@ public class SWBCookieMgr
      */
     public boolean haveInstanceCookies(String resid)
     {
-        Iterator itkeycokie = cookies.iterator();
+        Iterator<SWBCookie> itkeycokie = cookies.iterator();
         while (itkeycokie.hasNext())
         {
-            SWBCookie WBC = (SWBCookie) itkeycokie.next();
+            SWBCookie WBC = itkeycokie.next();
             if (WBC != null)
             {
                 if(resid.equals(WBC.getResID()))
@@ -289,10 +281,10 @@ public class SWBCookieMgr
      */
     public void removeInstanceCookies(String resid)
     {
-        Iterator itkeycokie = cookies.iterator();
+        Iterator<SWBCookie> itkeycokie = cookies.iterator();
         while (itkeycokie.hasNext())
         {
-            SWBCookie WBC = (SWBCookie) itkeycokie.next();
+            SWBCookie WBC = itkeycokie.next();
             if (WBC != null)
             {
                 if(resid.equals(WBC.getResID()))

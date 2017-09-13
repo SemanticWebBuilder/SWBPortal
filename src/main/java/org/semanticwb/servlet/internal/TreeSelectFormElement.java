@@ -50,7 +50,7 @@ public class TreeSelectFormElement implements InternalServlet {
         response.setHeader("Cache-Control", "no-cache");
         response.setHeader("Pragma", "no-cache");
 
-        StringBuffer ret = new StringBuffer(256);
+        StringBuilder ret = new StringBuilder(256);
         String style= "";
         WebPage tpid = null;
         ArrayList listData = new ArrayList();

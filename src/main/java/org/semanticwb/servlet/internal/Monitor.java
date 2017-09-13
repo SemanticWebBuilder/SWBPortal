@@ -22,14 +22,37 @@
  */
 package org.semanticwb.servlet.internal;
 
-import com.sun.management.GcInfo;
-import java.io.*;
-import static java.lang.management.ManagementFactory.*;
-import java.lang.management.*;
+import static java.lang.management.ManagementFactory.getGarbageCollectorMXBeans;
+import static java.lang.management.ManagementFactory.getMemoryMXBean;
+import static java.lang.management.ManagementFactory.getMemoryPoolMXBeans;
+import static java.lang.management.ManagementFactory.getRuntimeMXBean;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryUsage;
+import java.lang.management.RuntimeMXBean;
+import java.lang.management.ThreadInfo;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.Vector;
+
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyAgreement;
@@ -39,6 +62,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -49,9 +73,14 @@ import org.semanticwb.model.SWBContext;
 import org.semanticwb.platform.SemanticObject;
 import org.semanticwb.platform.SemanticProperty;
 import org.semanticwb.portal.SWBMonitor;
-import org.semanticwb.portal.monitor.*;
+import org.semanticwb.portal.monitor.SWBGCDump;
+import org.semanticwb.portal.monitor.SWBMonitorBeans;
+import org.semanticwb.portal.monitor.SWBMonitorData;
+import org.semanticwb.portal.monitor.SWBSummary;
+import org.semanticwb.portal.monitor.SWBThreadDumper;
 
-// TODO: Auto-generated Javadoc
+import com.sun.management.GcInfo;
+
 /**
  * The Class Monitor.
  * 
@@ -102,11 +131,6 @@ public class Monitor implements InternalServlet
     
     /** The timetaken last. */
     public static long timetakenLast = 0;
-//    private Cipher cipher = null;
-//    //Java 6.0
-//    private ConcurrentHashMap<String, BasureroCtl> basureros;
-//    private Vector<CompositeData> basureroBuff;
-//    private SWBGCDump dumper;
 
     private static Queue<Long> tiempos = new LinkedList<Long>();
     private static Queue<Long> pages = new LinkedList<Long>();
@@ -146,18 +170,14 @@ public class Monitor implements InternalServlet
     public void init(ServletContext config) throws ServletException
     {
         log.event("Initializing InternalServlet Monitor...");
-       // System.out.println("Testing...");
         try {
         monitorbeans = new SWBMonitorBeans();
         }catch (Error err){err.printStackTrace();}
-       // System.out.println("MonitorBeans Up");
         buffer = new Vector<SWBMonitorData>(max);
         try
         {
             SemanticProperty sp = SWBPlatform.getSemanticMgr().getModel(SWBPlatform.getSemanticMgr().SWBAdmin).getSemanticProperty(SWBPlatform.getSemanticMgr().SWBAdminURI + "/PrivateKey");
-            //System.out.println("sp:"+sp);
             String priv = SWBPlatform.getSemanticMgr().getModel(SWBPlatform.getSemanticMgr().SWBAdmin).getModelObject().getProperty(sp);
-            //System.out.println("priv:"+priv);
             if (null==priv)
             {
                 org.semanticwb.SWBPlatform.getSemanticMgr().createKeyPair();
@@ -166,7 +186,7 @@ public class Monitor implements InternalServlet
             
             if (priv != null)
             {
-                priv = priv.substring(priv.indexOf("|") + 1); //System.out.println("priv:"+priv);
+                priv = priv.substring(priv.indexOf("|") + 1);
                 byte[] PKey = SFBase64.decode(priv);
                 byte[] pKey = SFBase64.decode(SWBPlatform.getEnv("swbMonitor/PublicKey", 
                         "MIHfMIGXBgkqhkiG9w0BAwEwgYkCQQCLxCFm00uKxKmedeD9XqiJ1SZ/DoXRtdibiTIv" +
@@ -186,10 +206,8 @@ public class Monitor implements InternalServlet
                     ka.init(privateKey);
                     ka.doPhase(publicKey, true);
                     secretKey = new SecretKeySpec(ka.generateSecret(), 0, 16, "AES");
-                    //SecretKey secretKey = ka.generateSecret("AES");
                 }
             }
-          //  System.out.println("Got Security in place");
             AdminAlert aa = AdminAlert.ClassMgr.getAdminAlert("1", SWBContext.getAdminWebSite());
             if (null==aa){
                 aa = AdminAlert.ClassMgr.createAdminAlert("1", SWBContext.getAdminWebSite());
@@ -202,82 +220,28 @@ public class Monitor implements InternalServlet
             setAlertParameter(aa);
             
         } catch (java.security.GeneralSecurityException gse)
-        //} catch (Exception gse)
         {
             log.error("Security Fail:",gse);
-            // assert (false);
         } catch (java.lang.NullPointerException npe){
             log.error("No access to AdminSite, probably working in Admin Maintenance",npe);
         }
-//        dumper = new SWBGCDump();
-//        //Java 6.0
-//        basureros = new ConcurrentHashMap<String, BasureroCtl>();
-//        basureroBuff=new Vector<CompositeData>(maxgc);
-//        for ( GarbageCollectorMXBean gc :dumper.getCollectors()){
-//            basureros.put(gc.getName(), new BasureroCtl());
-//            BasureroCtl actual =basureros.get(gc.getName());
-//
-//        }
         t = new TimerTask()
         {
 
             public void run()
             {
-               // long current = System.nanoTime();//System.currentTimeMillis();
                 _run();
-               // timetakenLast = System.nanoTime() - current;//System.currentTimeMillis()-current;
-               // System.out.println("tt:"+timetakenLast);
             }
         };
-        //System.out.println("got new timer ready");
         timer = new Timer("Monitoring Facility", true);
         timer.schedule(t, delays, delays);
 
         log.event("Initializing Timer Monitor(" + max + "," + delays + "ms)...");
-//        try
-//        {
-//            mh = MonitoredHost.getMonitoredHost("localhost");
-//            VmIdentifier vmid = new VmIdentifier(java.lang.management.ManagementFactory.getRuntimeMXBean().getName());
-//            mvm= mh.getMonitoredVm(vmid);
-////            mvm.addVmListener(new SWBJvmEventListener());
-////            sun.jvmstat.monitor.Monitor m = mvm.findByName("sun.gc.lastCause");
-////            System.out.println("Monitor:"+m.getName());
-////                //System.out.println("Monitor:"+m.);
-////                System.out.println("Units:"+m.getUnits());
-////                System.out.println("Value:"+m.getValue());
-//
-//        } catch (Exception ex)
-//        {
-//            log.error(ex);
-//        }
 
-//        rmbean = getRuntimeMXBean();
-//        mmbean = getMemoryMXBean();
-//        pools = getMemoryPoolMXBeans();
-//        gcmbeans = getGarbageCollectorMXBeans();
-       // System.out.println("Got beans up and running");
-//        mbs = sun.management.ManagementFactory.createPlatformMBeanServer();
         if (null == summary)
         {
             summary = new SWBSummary();//mvm);
-        }//        Set<ObjectName> names = mbs.queryNames(null, null);
-//        Iterator<ObjectName> it = names.iterator();
-//        System.out.println("Setting.......");
-//        while (it.hasNext()){
-//        try {
-//
-//            ObjectName on = it.next();
-//           // System.out.println("....... "+on.getCanonicalName());
-//            mbs.addNotificationListener(on, new SWBNotificationListener(), null, null);
-//            System.out.println("....... "+on.getCanonicalKeyPropertyListString());
-//        //mbs.addNotificationListener(new ObjectName("java.lang:name=ConcurrentMarkSweep,type=GarbageCollector"),new SWBNotificationListener(),null, null);
-//      //  mbs.addNotificationListener(new ObjectName("java.lang:name=ParNew,type=GarbageCollector"),new SWBNotificationListener(),null, null);
-//
-//        } catch (Exception e) {
-//       // e.printStackTrace();
-//        }
-//        }
-//        System.out.println("Ok.......");
+        }
     }
 
     /**
@@ -298,18 +262,13 @@ public class Monitor implements InternalServlet
             setAlertParameter(aa);
         }
         if (alertOn) {
-            if (cnt>29){// System.out.println("Page Cache: "+Distributor.isPageCache());
+            if (cnt>29){
                 if (alerted_CPU>0)alerted_CPU--;
                 if (alerted_PPS>0)alerted_PPS--;
                 if (alerted_TIME>0)alerted_TIME--;
                 Vector<SWBMonitor.MonitorRecord> vec = SWBPortal.getMonitor().getMonitorRecords();
                 pps = (vec.get(vec.size()-1).getHits()-vec.get(vec.size()-2).getHits())/
                         SWBPortal.getMonitor().getDelay();   
-                
-                //System.out.println("MAX_SIZE:"+MAX_SIZE);
-                //System.out.println("UP_LIMIT:"+UP_LIMIT);
-                //System.out.println("THRESHOLD_PPS:"+THRESHOLD_PPS);
-                //System.out.println("pps:"+pps);
                 
                 if  (Distributor.isPageCache()) { 
                     if (pps<THRESHOLD_PPS){
@@ -360,10 +319,6 @@ public class Monitor implements InternalServlet
                     if (ct>THRESHOLD_PPS) oPages++;
                 }
                 
-                //System.out.println("oPages:"+oPages);
-                //System.out.println("oCPU:"+oCPU);
-                //System.out.println("oTime:"+oTime);
-                
                 if (UP_LIMIT<oCPU && alerted_CPU==0) {
                     try {
                         SWBUtils.EMAIL.sendBGEmail(alertEmail, 
@@ -371,8 +326,6 @@ public class Monitor implements InternalServlet
                                 " is working over the "+THRESHOLD_CPU+"% usage.");
                     } catch (Exception e) {log.error(e);
                     }
-                   // System.out.println("***** ALERTAR CPU ALTO *****");
-                    //uso.clear();
                     alerted_CPU=MAX_SIZE*4;
                 }
                 if (UP_LIMIT<oPages && alerted_PPS==0) {
@@ -382,8 +335,6 @@ public class Monitor implements InternalServlet
                                 " is delivering more than "+THRESHOLD_PPS+" pages per second.");
                     } catch (Exception e) {log.error(e);
                     }
-                  //  System.out.println("***** ALERTAR PAGINAS ALTO *****");
-                    //pages.clear();
                     alerted_PPS=MAX_SIZE*4;
                 }
                 if (UP_LIMIT<oTime && alerted_TIME==0) {
@@ -394,8 +345,6 @@ public class Monitor implements InternalServlet
                                 "ms per page.");
                     } catch (Exception e) {log.error(e);
                     }
-                   // System.out.println("***** ALERTAR TIEMPO ALTO *****");
-                    //tiempos.clear();
                     alerted_TIME=MAX_SIZE*4;
                 }
                 if (!Distributor.isPageCache() && ((modeOnCPU && UP_LIMIT<oCPU) || (modeOnTIME && UP_LIMIT<oTime) 
@@ -414,19 +363,7 @@ public class Monitor implements InternalServlet
             }
             cnt++;
         }
-//        //Java 6.0
-//        for (com.sun.management.GarbageCollectorMXBean gc :dumper.getCollectors()){
-//            BasureroCtl basurero = basureros.get(gc.getName());
-//            GcInfo gcinfo = gc.getLastGcInfo();
-//            if (basurero.idx<gcinfo.getId()){
-//                basurero.idx=gcinfo.getId();
-//                if (basureroBuff.size()==maxgc){
-//                    basureroBuff.remove(0);
-//                }
-//                basureroBuff.add(gcinfo.toCompositeData(gcinfo.getCompositeType()));
-//            }
-//
-//        }   
+ 
     }
 
     /* (non-Javadoc)
@@ -517,34 +454,8 @@ public class Monitor implements InternalServlet
                 {
                     data.writeObject("AAAAAAAAAAAAAAAAA");
                 }
-//            if ("".equals(request.getParameter("cmd")))
-//            {
-//                data.writeObject("");
-//                
-//            }
-//            if ("".equals(request.getParameter("cmd")))
-//            {
-//                data.writeObject("");
-//                
-//            }
-//            if ("".equals(request.getParameter("cmd")))
-//            {
-//                data.writeObject("");
-//                
-//            }
-//            if ("".equals(request.getParameter("cmd")))
-//            {
-//                data.writeObject("");
-//
-//            }
+
                 data.flush();
-//            String datos = new String(cipher.doFinal(summary.getSample().GetSumaryHTML().getBytes()));
-//            System.out.println(datos);
-//            datos = SFBase64.encodeBytes(datos.getBytes(), false);
-//            System.out.println(datos);
-//            PrintWriter out = response.getWriter();
-//
-//            out.println(datos);
                 data.close();
                 out.close();
             } else
@@ -574,51 +485,14 @@ public class Monitor implements InternalServlet
         PrintWriter out = response.getWriter();
 
         out.println("<html><body>Processing...");
-//        try{
-//            if (null!=mvm){
         if (null == summary)
         {
             summary = new SWBSummary();//mvm);
         }
         out.println(summary.getSample().GetSumaryHTML());
-//        List list = mvm.findByPattern("");
-//            Iterator itl = list.iterator();
-//            while(itl.hasNext()){
-//                sun.jvmstat.monitor.Monitor m = (sun.jvmstat.monitor.Monitor)itl.next();
-//
-//                System.out.println("Monitor Name:"+m.getName());
-//                System.out.println("Monitor BaseName:"+m.getBaseName());
-//                //System.out.println("Monitor:"+m.);
-//                System.out.println("Units:"+m.getUnits());
-//                System.out.println("Value:"+m.getValue());
-//            }
-//        }
-//        } catch (Exception e){e.printStackTrace();}
         out.print("<div id=\"DeathLock\"><pre>" + SWBThreadDumper.dumpDeathLock() + "<pre></div>");
         out.print("<div id=\"ThreadDump\"><pre>" + SWBThreadDumper.dumpBLOCKEDThreadWithStackTrace() + "<pre></div>");
         out.print("<div id=\"GC\"><pre>" + SWBGCDump.getVerboseGc() + "<pre></div>");
-//        doMonitor();
-//        ThreadMXBean thbean = java.lang.management.ManagementFactory.getThreadMXBean();
-//        if (thbean.isThreadContentionMonitoringSupported())
-//        {
-//            thbean.setThreadContentionMonitoringEnabled(true);
-//            long[] tiarr = thbean.findMonitorDeadlockedThreads();
-//            if (null != tiarr)
-//            {
-//                System.out.println("DeathLock!");
-//                for (long ct : tiarr)
-//                {
-//                    printThreadInfo(thbean.getThreadInfo(ct));
-//                }
-//            }
-//            System.out.println("ThreadDump");
-//            tiarr = thbean.getAllThreadIds();
-//            for (long ct : tiarr)
-//            {
-//                printThreadInfo(thbean.getThreadInfo(ct));
-//            }
-//
-//        }
         out.print("</body></html>");
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         ObjectOutputStream os = new ObjectOutputStream(buf);
@@ -633,48 +507,9 @@ public class Monitor implements InternalServlet
         {
             ex.printStackTrace();
         }
-//        buf = new ByteArrayOutputStream();
-//        os = new ObjectOutputStream(buf);
-//       os.writeObject(basureros);
-//       os.close();
-//       out.println(buf.toString().length());
-//        is = new ObjectInputStream(new ByteArrayInputStream(buf.toByteArray()));
-//        try
-//        {
-//            Vector<CompositeData> bas = (Vector<CompositeData>)is.readObject();
-//            out.println(bas.size());
-//
-//        } catch (Exception ex)
-//        {
-//            ex.printStackTrace();
-//        }
     }
 
-/*
-    private void doMonitor()
-    {
-        printVerboseGc();
-        Set<ObjectName> names = mbs.queryNames(null, null);
-        Iterator<ObjectName> it = names.iterator();
-        while (it.hasNext())
-        {
-            ObjectName on = it.next();
-            System.out.println(on.getCanonicalName());
-            System.out.println(on.getKeyPropertyListString());
-            try
-            {
-                System.out.println(mbs.getObjectInstance(on).getClassName());
-//                if (mbs.getObjectInstance(on).getClassName().equals("sun.management.HotSpotDiagnostic") ) {
-//                    mbs.invoke(on, INDENT, os, strings)
-//                }
-            } catch (InstanceNotFoundException ex)
-            {
-            }
-        }
-    }
- 
- *
- */
+
     /** The INDENT. */
 private static String INDENT = "    ";
 
@@ -700,17 +535,12 @@ private static String INDENT = "    ";
         {
             sb.append(" (running in native)");
         }
-        //System.out.println(sb.toString());
         if (ti.getLockOwnerName() != null)
         {
-            //System.out.println(INDENT + " owned by " + ti.getLockOwnerName()
-            //        + " Id=" + ti.getLockOwnerId());
         }
         for (StackTraceElement ste : ti.getStackTrace())
         {
-            //System.out.println(INDENT + "at " + ste.toString());
         }
-        //System.out.println();
     }
 
     /**
@@ -746,41 +576,18 @@ private static String INDENT = "    ";
     public static void printVerboseGc()
     {
 
-//        LocalVmManager lvm = new LocalVmManager();
-//        Iterator it = lvm.activeVms().iterator();
-//        //sun.jvmstat.perfdata.monitor
-//        while (it.hasNext()){
-//            Object obj = it.next();
-//            System.out.println("objCls:"+obj.getClass().getCanonicalName());
-//        }
-
-        //System.out.println("Uptime: " + formatMillis(rmbean.getUptime()));
-
-        //System.out.println(mmbean.getHeapMemoryUsage());
         for (GarbageCollectorMXBean gc : gcmbeans)
         {
-            //System.out.print(" [" + gc.getName() + ": ");
-            //System.out.print("Count=" + gc.getCollectionCount());
-            //System.out.print(" GCTime=" + formatMillis(gc.getCollectionTime()));
-            //System.out.println("]");
-//            //System.out.println(gc.getClass().getCanonicalName());
             com.sun.management.GarbageCollectorMXBean gci = (com.sun.management.GarbageCollectorMXBean) gc;
             GcInfo info = gci.getLastGcInfo();
             if (null != info)
             {
                 printGCInfo(info);
             }
-            //System.out.println(info);
         }
-        //System.out.println();
         for (MemoryPoolMXBean p : pools)
         {
-            //System.out.print("  [" + p.getName() + ":");
             MemoryUsage u = p.getUsage();
-
-            //System.out.print(" Used=" + formatBytes(u.getUsed()));
-            //System.out.print(" Committed=" + formatBytes(u.getCommitted()));
-            //System.out.println("]");
         }
     }
 
@@ -796,54 +603,33 @@ private static String INDENT = "    ";
 
         try
         {
-            //= gcMBean.getLastGcInfo();
             long id = gci.getId();
             long startTime = gci.getStartTime();
             long endTime = gci.getEndTime();
             long duration = gci.getDuration();
 
-
-
             if (startTime == endTime)
             {
                 return false;   // no gc
             }
-            //System.out.println("GC ID: " + id);
-            //System.out.println("Start Time: " + startTime);
-            //System.out.println("End Time: " + endTime);
-            //System.out.println("Duration: " + duration);
             Map mapBefore = gci.getMemoryUsageBeforeGc();
             Map mapAfter = gci.getMemoryUsageAfterGc();
 
 
-            //System.out.println("Before GC Memory Usage Details....");
             Set memType = mapBefore.keySet();
             Iterator it = memType.iterator();
             while (it.hasNext())
             {
                 String type = (String) it.next();
-                //System.out.println(type);
                 MemoryUsage mu1 = (MemoryUsage) mapBefore.get(type);
-                //System.out.print("Initial Size: " + mu1.getInit());
-                //System.out.print(" Used: " + mu1.getUsed());
-                //System.out.print(" Max: " + mu1.getMax());
-                //System.out.print(" Committed: " + mu1.getCommitted());
-                //System.out.println(" ");
             }
 
-            //System.out.println("After GC Memory Usage Details....");
             memType = mapAfter.keySet();
             it = memType.iterator();
             while (it.hasNext())
             {
                 String type = (String) it.next();
-                //System.out.println(type);
                 MemoryUsage mu2 = (MemoryUsage) mapAfter.get(type);
-                //System.out.print("Initial Size: " + mu2.getInit());
-                //System.out.print(" Used: " + mu2.getUsed());
-                //System.out.print(" Max: " + mu2.getMax());
-                //System.out.print(" Committed: " + mu2.getCommitted());
-                //System.out.println(" ");
             }
         } catch (RuntimeException re)
         {
@@ -870,7 +656,7 @@ private static String INDENT = "    ";
 	        return null;
 
 	    String pseudo[] = {"0", "1", "2","3", "4", "5", "6", "7", "8","9", "A", "B", "C", "D", "E","F"};
-	    StringBuffer out = new StringBuffer(in.length * 2);
+	    StringBuilder out = new StringBuilder(in.length * 2);
 
 	    while (i < in.length) {
 
@@ -950,5 +736,4 @@ class BasureroCtl implements Serializable
 
     private static final long serialVersionUID = 33233L;
     long idx = 0;
-    // Vector<CompositeData> basureroBuff;
 }

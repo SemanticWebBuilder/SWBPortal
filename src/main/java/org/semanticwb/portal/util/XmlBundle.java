@@ -24,10 +24,11 @@ package org.semanticwb.portal.util;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Locale;
-import java.util.ArrayList;
 import java.util.Vector;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
@@ -219,7 +220,7 @@ public class XmlBundle
             result.addElement(baseName);
             return result;
         }
-        final StringBuffer temp = new StringBuffer(baseName);
+        final StringBuilder temp = new StringBuilder(baseName);
         temp.append('_');
         temp.append(language);
         if (languageLength > 0) 

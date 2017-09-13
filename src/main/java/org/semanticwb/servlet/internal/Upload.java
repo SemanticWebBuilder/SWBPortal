@@ -209,7 +209,7 @@ class UploadFile
     {
         debug("processParam=" + name);
         String s;
-        StringBuffer st = new StringBuffer();
+        StringBuilder st = new StringBuilder();
         while ((s = readLine()) != null)
         {
             if (s.equalsIgnoreCase(finalboundary))
@@ -310,7 +310,7 @@ class UploadFile
 
     public String readLine() throws IOException
     {
-        StringBuffer st = new StringBuffer();
+        StringBuilder st = new StringBuilder();
         int got = 0;
         int ch;
         while (got < 8192)

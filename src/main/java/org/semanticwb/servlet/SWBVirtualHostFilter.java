@@ -612,7 +612,7 @@ public class SWBVirtualHostFilter implements Filter
         {
             return ("VirtualHostFilter()");
         }
-        StringBuffer sb = new StringBuffer("VirtualHostFilter(");
+        StringBuilder sb = new StringBuilder("VirtualHostFilter(");
         sb.append(filterConfig);
         sb.append(")");
         return (sb.toString());

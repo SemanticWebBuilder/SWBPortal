@@ -22,18 +22,31 @@
  */
 package org.semanticwb.portal.util;
 
-import javax.servlet.http.*;
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.portal.lib.SWBBridgeResponse;
 
 
-// TODO: Auto-generated Javadoc
 /** Esta clase sirve de puente entre un servidor WebBuilder y otro servidor del cual
- * obtien el c�digo html para presentarlo en WebBuilder.
+ * obtien el código html para presentarlo en WebBuilder.
  *
  * This class is used like a bridge between a WebBuilder server and other server.
  * extracts html source from other server and displays it in WebBuilder.
@@ -269,17 +282,9 @@ public class SWBBridge
                 } else if (name.equalsIgnoreCase("referer"))
                 {
                     String s = url.toString();
-                    //System.out.println(s);
                     String f = "";
-//                    if (url.getQuery() != null)
-//                    {
-//                        //System.out.println(url.getQuery());
-//                        f = s.substring(1, s.length() - url.getQuery().length());
-//                    } else
-//                    {
-                        f = s;
-//                    }
-                    //System.out.println(f);
+
+                    f = s;
                     con.setRequestProperty(name, f);
                 } else if(!acceptEncoding && name.equalsIgnoreCase("Accept-Encoding"))
                 {
@@ -296,14 +301,12 @@ public class SWBBridge
                 if(createCookieMgr==true)
                 {
                     String wbcookie=request.getHeader(cookieTag);
-                    //System.out.println("wbcookie:"+wbcookie);
                     SWBCookieMgr aux=new SWBCookieMgr();
                     aux.addCookies(wbcookie,"[*]","");
                     Iterator it=aux.getWBSSOCookies();
                     while(it.hasNext())
                     {
                         SWBCookie wbc=(SWBCookie)it.next();
-                        //System.out.println("wbc:"+wbc.getName()+"="+wbc.getValue());
                         cookiemgr.addCookie(wbc);
                     }
                 }
@@ -314,13 +317,11 @@ public class SWBBridge
         while (it.hasNext())
         {
             String name=(String)it.next();
-            //System.out.println("Head:"+name+"="+headers.get(name));
             con.setRequestProperty(name, (String)headers.get(name));
         }
         
 
         String cookie = cookiemgr.getCookie(host, path, date, instance);
-        //System.out.println("getCookie:"+cookie);
         log.debug("getCookie:" + cookie);
         String lcookie = getLocaleCookies();
         if (cookie != null && cookie.length() > 0)
@@ -342,7 +343,6 @@ public class SWBBridge
         int length = request.getContentLength();
         if (length > 0)
         {
-            //System.out.println("*************** post *********************************");
             con.setDoOutput(true);
             InputStream in = request.getInputStream();
             OutputStream outb = con.getOutputStream();
@@ -350,7 +350,6 @@ public class SWBBridge
             int r = 0;
             while ((r = in.read(buff)) != -1)
             {
-                //System.out.println(new String(buff,0,r));
                 outb.write(buff, 0, r);
             }
             outb.flush();
@@ -398,13 +397,9 @@ public class SWBBridge
         {
             InputStream st=con.getErrorStream();
             if(st!=null)ret.setErrorMessage(SWBUtils.IO.readInputStream(st));            
-            //System.out.println("*************** redirect *********************************");
-            //System.out.println(con.getHeaderField("Location"));
             if (usedResponse && out!=null) response.sendRedirect(con.getHeaderField("Location"));
-            //ret="302:"+con.getHeaderField("Location");
         } else if (resc == 200)
         {
-            //System.out.println("*************** contenido *********************************");
             ret.setContentType(con.getContentType());
             if (usedResponse)
             {
@@ -426,25 +421,21 @@ public class SWBBridge
                 while ((r = in.read(buff)) != -1)
                 {
                     out.write(buff, 0, r);
-                    //System.out.print(new String(buff,0,r));
                 }
             }else
             {
                 ret.setInputStream(in);
             }
-            //ret="200:"+con.getContentType();
         } else
         {
             InputStream st=con.getErrorStream();
             if(st!=null)ret.setErrorMessage(SWBUtils.IO.readInputStream(st));
             if (usedResponse) response.sendError(resc, resm);
-            //ret=con.getResponseCode()+":"+con.getResponseMessage();
         }
 
         //********************** Find Cookies ************************************
         for (int x = 1; con.getHeaderFieldKey(x) != null; x++)
         {
-            //System.out.println(con.getHeaderFieldKey(x)+":"+con.getHeaderField(x));
             if (con.getHeaderFieldKey(x).equalsIgnoreCase("Set-Cookie"))
             {
                 cookiemgr.setCookie(con.getHeaderField(x), host, instance);
@@ -452,8 +443,6 @@ public class SWBBridge
             }
         }
 
-        //System.out.println("Ret:"+ret);
-        //System.out.println(""+System.currentTimeMillis()+": "+"ExitBridge:"+remoteURL);
         return ret;
     }
 
