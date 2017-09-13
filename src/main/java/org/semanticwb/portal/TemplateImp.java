@@ -22,9 +22,6 @@
  */
 package org.semanticwb.portal;
 
-import com.arthurdo.parser.HtmlException;
-import com.arthurdo.parser.HtmlStreamTokenizer;
-import com.arthurdo.parser.HtmlTag;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
@@ -34,9 +31,11 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBException;
 import org.semanticwb.SWBPlatform;
@@ -57,7 +56,10 @@ import org.semanticwb.servlet.SWBHttpServletRequestWrapper;
 import org.semanticwb.servlet.SWBHttpServletResponseWrapper;
 import org.semanticwb.servlet.internal.DistributorParams;
 
-// TODO: Auto-generated Javadoc
+import com.arthurdo.parser.HtmlException;
+import com.arthurdo.parser.HtmlStreamTokenizer;
+import com.arthurdo.parser.HtmlTag;
+
 /**
  * The Class TemplateImp.
  */
@@ -130,7 +132,7 @@ public class TemplateImp extends Template
             parts = parse(getFileName(getActualVersion()));
         } else
         {
-            parts = new ArrayList();
+            parts = new ArrayList<>();
         }
     }
 
@@ -141,7 +143,7 @@ public class TemplateImp extends Template
      * @param objects the objects
      * @return the object
      */
-    public Object identifyObject(String val, HashMap objects)
+    public Object identifyObject(String val, HashMap<String, Object> objects)
     {
         try
         {
@@ -177,11 +179,11 @@ public class TemplateImp extends Template
      * @param objects the objects
      * @return the string buffer
      */
-    public StringBuffer replaceObjectsValues(String value, StringBuffer auxparts, ArrayList parts, HashMap objects)
+    public StringBuilder replaceObjectsValues(String value, StringBuilder auxparts, ArrayList<Object> parts, HashMap<String, Object> objects)
     {
 
-        ArrayList p = SWBUtils.TEXT.regExpSplit(value, "\\{([^\\{]+?)\\}");
-        Iterator it = p.iterator();
+        ArrayList<String> p = SWBUtils.TEXT.regExpSplit(value, "\\{([^\\{]+?)\\}");
+        Iterator<String> it = p.iterator();
         while (it.hasNext())
         {
             String sp = (String) it.next();
@@ -215,7 +217,7 @@ public class TemplateImp extends Template
                     {
                         parts.add(auxparts.toString());
                         parts.add(obj);
-                        auxparts = new StringBuffer();
+                        auxparts = new StringBuilder();
                     }
                 }
             }
@@ -283,10 +285,10 @@ public class TemplateImp extends Template
      * @return the array list
      * @return
      */
-    public ArrayList parse(String filename)
+    public ArrayList<Object> parse(String filename)
     {
-        ArrayList parts = new ArrayList();
-        LinkedList<SWBIFMethod> ifs = new LinkedList();
+        ArrayList<Object> parts = new ArrayList<>();
+        LinkedList<SWBIFMethod> ifs = new LinkedList<>();
         try
         {
             HtmlStreamTokenizer tok = null;
@@ -294,7 +296,7 @@ public class TemplateImp extends Template
                 tok = new HtmlStreamTokenizer(SWBPortal.getFileFromWorkPath(filename));
             else
                 tok = new HtmlStreamTokenizer(SWBPortal.getFileFromWorkPath(actRelWorkPath + "/" + filename));
-            StringBuffer auxpart = new StringBuffer();
+            StringBuilder auxpart = new StringBuilder();
 
             boolean textpart = false;
             boolean objectpart = false;
@@ -314,7 +316,7 @@ public class TemplateImp extends Template
                         {
                             if (!resourcepart)
                                 parts.add(auxpart.toString());
-                            auxpart = new StringBuffer();
+                            auxpart = new StringBuilder();
                             textpart = false;
                         }
                         SWBResourceMgr obj = SWBPortal.getResourceMgr();
@@ -324,7 +326,7 @@ public class TemplateImp extends Template
                             {
                                 if (!tag.isEmpty()) resourcepart = true;
 
-                                HashMap params = new HashMap();
+                                HashMap<String, String> params = new HashMap<>();
                                 Enumeration en = tag.getParamNames();
                                 while (en.hasMoreElements())
                                 {
@@ -348,7 +350,7 @@ public class TemplateImp extends Template
                         if (textpart)
                         {
                             if(!tag.isEndTag())parts.add(auxpart.toString());
-                            auxpart = new StringBuffer();
+                            auxpart = new StringBuilder();
                             textpart = false;
                         }
                         try
@@ -377,7 +379,7 @@ public class TemplateImp extends Template
                             {
                                 if (!textpart) textpart = true;
                                 parts.add(auxpart.toString());
-                                auxpart = new StringBuffer();
+                                auxpart = new StringBuilder();
                                 //Guardar partes y crear temporal
                                 SWBIFMethod ifp=new SWBIFMethod(tag, parts, this);
                                 parts.add(ifp);
@@ -386,7 +388,7 @@ public class TemplateImp extends Template
                             }else
                             {
                                 parts.add(auxpart.toString());
-                                auxpart = new StringBuffer();
+                                auxpart = new StringBuilder();
                                 SWBIFMethod ifp=ifs.removeLast();
                                 parts=ifp.getBaseParts();
                             }
@@ -396,7 +398,7 @@ public class TemplateImp extends Template
                             {
                                 if (!objectpart)
                                     parts.add(auxpart.toString());
-                                auxpart = new StringBuffer();
+                                auxpart = new StringBuilder();
                                 textpart = false;
                             }
                             try
@@ -410,7 +412,7 @@ public class TemplateImp extends Template
                                     else
                                         cls = obj.getClass();
 
-                                    HashMap params = new HashMap();
+                                    HashMap<String, Object> params = new HashMap<>();
                                     Enumeration en = tag.getParamNames();
                                     boolean objArgs = false;
                                     while (en.hasMoreElements())
@@ -463,7 +465,7 @@ public class TemplateImp extends Template
                         {
                             if (!contentpart)
                                 parts.add(auxpart.toString());
-                            auxpart = new StringBuffer();
+                            auxpart = new StringBuilder();
                             textpart = false;
                         }
                         SWBResourceMgr obj = SWBPortal.getResourceMgr();
@@ -472,7 +474,7 @@ public class TemplateImp extends Template
                             if (!tag.isEndTag())
                             {
                                 if (!tag.isEmpty()) contentpart = true;
-                                HashMap params = new HashMap();
+                                HashMap<String, String> params = new HashMap<>();
                                 Enumeration en = tag.getParamNames();
                                 while (en.hasMoreElements())
                                 {
@@ -495,7 +497,7 @@ public class TemplateImp extends Template
                         if (textpart)
                         {
                             if(!tag.isEndTag())parts.add(auxpart.toString());
-                            auxpart = new StringBuffer();
+                            auxpart = new StringBuilder();
                             textpart = false;
                         }
                         try
@@ -507,11 +509,11 @@ public class TemplateImp extends Template
                                 {
                                     if(!(src.endsWith(".jsp")||src.contains(".jsp?")||src.endsWith(".php")||src.contains(".php?")||src.endsWith(".py")||src.contains(".py?")||src.endsWith(".groovy")||src.contains(".groovy?")))
                                     {
-                                        ArrayList arr = parse(tag.getParam("src"));
+                                        ArrayList<Object> arr = parse(tag.getParam("src"));
                                         parts.addAll(arr);
                                     }else
                                     {
-                                        HashMap params = new HashMap();
+                                        HashMap<String, String> params = new HashMap<>();
                                         Enumeration en = tag.getParamNames();
                                         while (en.hasMoreElements())
                                         {
@@ -697,7 +699,7 @@ public class TemplateImp extends Template
      */
     private String findImagesInScript(String value, String ext)
     {
-        StringBuffer aux = new StringBuffer(value.length());
+        StringBuilder aux = new StringBuilder(value.length());
         int off = 0;
         int f = 0;
         int i = 0;
@@ -887,14 +889,14 @@ public class TemplateImp extends Template
      */
     public void build(HttpServletRequest request, HttpServletResponse response, PrintWriter out, User user, WebPage topic, boolean savelog, String content, DistributorParams distparams) 
     {
-        StringBuffer logbuf = null;
-        StringBuffer resbuf = null;
+        StringBuilder logbuf = null;
+        StringBuilder resbuf = null;
         long tini = 0;
         if (savelog)
         {
             tini = System.currentTimeMillis();
-            resbuf = new StringBuffer(300);
-            logbuf = new StringBuffer(300);
+            resbuf = new StringBuilder(300);
+            logbuf = new StringBuilder(300);
             logbuf.append("log|");
             logbuf.append(request.getRemoteAddr());
             logbuf.append("|");
@@ -956,10 +958,10 @@ public class TemplateImp extends Template
      * @param parts the parts
      * @param resbuf the resbuf
      */
-    public void build(HttpServletRequest request, HttpServletResponse response, PrintWriter out, User user, WebPage topic, boolean savelog, String content, DistributorParams distparams, ArrayList parts, StringBuffer resbuf)
+    public void build(HttpServletRequest request, HttpServletResponse response, PrintWriter out, User user, WebPage topic, boolean savelog, String content, DistributorParams distparams, ArrayList parts, StringBuilder resbuf)
     {
         if(parts==null)return;
-        HashMap antresrc = new HashMap(5);                    //recursos evaluados anteriormente
+        HashMap antresrc = new HashMap(5); //recursos evaluados anteriormente
         try
         {
             Iterator en = parts.iterator();
@@ -1097,17 +1099,6 @@ public class TemplateImp extends Template
 
                                         SWBPortal.getResourceMgr().getResourceTraceMgr().renderTraced(wbres, req, res, resParams);
                                         out.print(res.toString());
-
-//                                        byte arr[]=res.toByteArray();
-//                                        String r=res.toString();
-//                                        int ri=r.indexOf("Jei ");
-//                                        String f=r.substring(ri,ri+10);
-//                                        System.out.println("res:"+f);
-//                                        for(int x=0;x<f.length();x++)
-//                                        {
-//                                            System.out.println(" "+(int)f.charAt(x)+" "+arr[ri+x]);
-//                                        }
-//                                        //System.out.println("res:"+new String(res.toByteArray(),"UTF-8"));
 
                                         String intraBR=(String)args.get("intrabr");
                                         if(it.hasNext() && (intraBR==null || intraBR.equalsIgnoreCase("true")))
@@ -1284,18 +1275,16 @@ public class TemplateImp extends Template
      */
     public static void buildContents(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response, PrintWriter out, DistributorParams distparams, boolean savelog, String content) 
     {
-        StringBuffer logbuf = null;
-        StringBuffer resbuf = null;
+        StringBuilder logbuf = null;
+        StringBuilder resbuf = null;
         
         WebPage topic=distparams.getWebPage();
         User user=distparams.getUser();
         
-        long tini = 0;
         if (savelog)
         {
-            tini = System.currentTimeMillis();
-            resbuf = new StringBuffer(300);
-            logbuf = new StringBuffer(300);
+            resbuf = new StringBuilder(300);
+            logbuf = new StringBuilder(300);
             logbuf.append("log|");
             logbuf.append(request.getRemoteAddr());
             logbuf.append("|");
@@ -1468,7 +1457,7 @@ public class TemplateImp extends Template
      * @param map the map
      * @return the string
      */
-    public String setHeaders(HashMap map)
+    public String setHeaders(HashMap<String, Object> map)
     {
         try
         {
