@@ -21,11 +21,11 @@
                     <directory>src/main/java</directory>
                     <includes>
                         <include>**/*.owl</include>
+                        <include>**/*.jasper</include>
+                        <include>**/*.jrxml</include>
                         <include>**/*.properties</include>
                         <include>**/*.xml</include>
                         <include>**/*.xslt</include>
-                        <include>**/*.jasper</include>
-                        <include>**/*.jrxml</include>
                         <include>**/*.jpg</include>
                     </includes>
                 </resource>
@@ -118,13 +118,11 @@
                 <artifactId>freetts</artifactId>
                 <version>1.2.2</version>
             </dependency>
-<!--            
-            <dependency>
+            <!--dependency>
                 <groupId>dwr</groupId>
                 <artifactId>dwr</artifactId>
                 <version>1.1.3</version>
-            </dependency>
--->            
+            </dependency-->
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-web-api</artifactId>
@@ -150,11 +148,11 @@
                     <directory>src/main/java</directory>
                     <includes>
                         <include>**/*.owl</include>
+                        <include>**/*.jasper</include>
+                        <include>**/*.jrxml</include>
                         <include>**/*.properties</include>
                         <include>**/*.xml</include>
                         <include>**/*.xslt</include>
-                        <include>**/*.jasper</include>
-                        <include>**/*.jrxml</include>
                         <include>**/*.jpg</include>
                     </includes>
                 </resource>
@@ -248,13 +246,11 @@
                 <artifactId>freetts</artifactId>
                 <version>1.2.2</version>
             </dependency>
-<!--            
-            <dependency>
+            <!--dependency>
                 <groupId>dwr</groupId>
                 <artifactId>dwr</artifactId>
                 <version>1.1.3</version>
-            </dependency>
--->            
+            </dependency-->
             <dependency>
               <groupId>com.mortennobel</groupId>
               <artifactId>java-image-scaling</artifactId>
@@ -287,11 +283,11 @@
                     <directory>src/main/java</directory>
                     <includes>
                         <include>**/*.owl</include>
+                        <include>**/*.jasper</include>
+                        <include>**/*.jrxml</include>
                         <include>**/*.properties</include>
                         <include>**/*.xml</include>
                         <include>**/*.xslt</include>
-                        <include>**/*.jasper</include>
-                        <include>**/*.jrxml</include>
                         <include>**/*.jpg</include>
                     </includes>
                 </resource>
@@ -384,13 +380,11 @@
                 <artifactId>freetts</artifactId>
                 <version>1.2.2</version>
             </dependency>
-<!--            
-            <dependency>
+            <!--dependency>
                 <groupId>dwr</groupId>
                 <artifactId>dwr</artifactId>
                 <version>1.1.3</version>
-            </dependency>
--->            
+            </dependency-->
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-web-api</artifactId>
@@ -418,11 +412,11 @@
                     <directory>src/main/java</directory>
                     <includes>
                         <include>**/*.owl</include>
+                        <include>**/*.jasper</include>
+                        <include>**/*.jrxml</include>
                         <include>**/*.properties</include>
                         <include>**/*.xml</include>
                         <include>**/*.xslt</include>
-                        <include>**/*.jasper</include>
-                        <include>**/*.jrxml</include>
                         <include>**/*.jpg</include>
                     </includes>
                 </resource>
@@ -515,13 +509,11 @@
                 <artifactId>freetts</artifactId>
                 <version>1.2.2</version>
             </dependency>
-<!--            
-            <dependency>
+            <!--dependency>
                 <groupId>dwr</groupId>
                 <artifactId>dwr</artifactId>
                 <version>1.1.3</version>
-            </dependency>
--->            
+            </dependency-->
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-web-api</artifactId>
