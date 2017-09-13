@@ -24,6 +24,9 @@
                         <include>**/*.properties</include>
                         <include>**/*.xml</include>
                         <include>**/*.xslt</include>
+                        <include>**/*.jasper</include>
+                        <include>**/*.jrxml</include>
+                        <include>**/*.jpg</include>
                     </includes>
                 </resource>
             </resources>
@@ -150,6 +153,9 @@
                         <include>**/*.properties</include>
                         <include>**/*.xml</include>
                         <include>**/*.xslt</include>
+                        <include>**/*.jasper</include>
+                        <include>**/*.jrxml</include>
+                        <include>**/*.jpg</include>
                     </includes>
                 </resource>
             </resources>
@@ -284,6 +290,9 @@
                         <include>**/*.properties</include>
                         <include>**/*.xml</include>
                         <include>**/*.xslt</include>
+                        <include>**/*.jasper</include>
+                        <include>**/*.jrxml</include>
+                        <include>**/*.jpg</include>
                     </includes>
                 </resource>
             </resources>
@@ -412,6 +421,9 @@
                         <include>**/*.properties</include>
                         <include>**/*.xml</include>
                         <include>**/*.xslt</include>
+                        <include>**/*.jasper</include>
+                        <include>**/*.jrxml</include>
+                        <include>**/*.jpg</include>
                     </includes>
                 </resource>
             </resources>
