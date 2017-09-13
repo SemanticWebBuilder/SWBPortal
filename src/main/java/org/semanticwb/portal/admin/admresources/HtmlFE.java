@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,25 +18,28 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.semanticwb.portal.admin.admresources.lib.WBAdmResourceAbs;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Resource;
-import org.w3c.dom.*;
+import org.semanticwb.portal.admin.admresources.lib.WBAdmResourceAbs;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-// TODO: Auto-generated Javadoc
 /**
  * Objeto que administra Html estatico en una forma de html.
  * <p>
  * Object that administers static html  in a form
- * @author  Jorge Alberto Jim�nez
+ * @author  Jorge Alberto Jiménez
  */
 
 public class HtmlFE extends WBAdmResourceAbs 
@@ -44,9 +47,6 @@ public class HtmlFE extends WBAdmResourceAbs
     
     /** The log. */
     private static Logger log = SWBUtils.getLogger(HtmlFE.class);
-    
-    /** The html. */
-    private String html=null;
     
     /** The tag. */
     protected Node tag=null;
@@ -61,7 +61,7 @@ public class HtmlFE extends WBAdmResourceAbs
     protected String src=null;
     
     /** The a attrs. */
-    protected ArrayList aAttrs=new ArrayList();
+    protected ArrayList<String> aAttrs=new ArrayList<>();
     
     /** The base. */
     protected Resource base=null;
@@ -70,7 +70,6 @@ public class HtmlFE extends WBAdmResourceAbs
      * Instantiates a new html fe.
      */
     public HtmlFE() {
-        html = null;
     }
     
     /**
@@ -283,7 +282,7 @@ public class HtmlFE extends WBAdmResourceAbs
     private String getFullText(Node node) 
     {
         if(node== null || (node!=null && !node.hasChildNodes())) return null;
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder();
         NodeList children = node.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) 
         {

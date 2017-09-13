@@ -51,7 +51,7 @@ import org.semanticwb.repository.Workspace;
 // TODO: Auto-generated Javadoc
 /**
  * The Class SWBImportWebSite.
- * 
+ *
  * @author jorge.jimenez
  */
 public class SWBImportWebSite extends GenericResource {
@@ -310,7 +310,7 @@ public class SWBImportWebSite extends GenericResource {
                         site.begin();
                         ResourceType ptype = site.createResourceType("Menu");
                         ptype.setResourceBundle("org.semanticwb.portal.resources.WBMenu");
-                        ptype.setResourceMode(ptype.MODE_STRATEGY);
+                        ptype.setResourceMode(ResourceType.MODE_STRATEGY);
                         ptype.setTitle("Menu");
                         site.commit();
                         ptype.setResourceClassName("org.semanticwb.portal.resources.WBMenu");
@@ -582,14 +582,17 @@ public class SWBImportWebSite extends GenericResource {
                         ptype.setResourceClassName("org.semanticwb.portal.resources.RSSResource");
                     }
 
+                	//EHSP: Added validation to create resuorce only when old resources support is enabled
                     if (site.getResourceType("DataBaseResource") == null) {
-                        site.begin();
-                        ResourceType ptype = site.createResourceType("DataBaseResource");
-                        ptype.setResourceBundle("com.infotec.wb.resources.database.DataBaseResource");
-                        ptype.setResourceMode(ResourceType.MODE_SYSTEM);
-                        ptype.setTitle("DataBaseResource");
-                        site.commit();
-                        ptype.setResourceClassName("com.infotec.wb.resources.database.DataBaseResource");
+                      if (SWBPlatform.getEnv("swb/oldResourcesSupport", "false").equals("true")) {
+                          site.begin();
+                          ResourceType ptype = site.createResourceType("DataBaseResource");
+                          ptype.setResourceBundle("com.infotec.wb.resources.database.DataBaseResource");
+                          ptype.setResourceMode(ResourceType.MODE_SYSTEM);
+                          ptype.setTitle("DataBaseResource");
+                          site.commit();
+                          ptype.setResourceClassName("com.infotec.wb.resources.database.DataBaseResource");
+                      }
                     }
 
                     if (site.getResourceType("SWBBlog") == null) {
@@ -806,13 +809,13 @@ public class SWBImportWebSite extends GenericResource {
 
     /**
      * Gets the step1.
-     * 
+     *
      * @param out the out
      * @param url the url
      * @param paramRequest the param request
      * @return the step1
      */
-    private void getStep1(PrintWriter out, SWBResourceURL url, SWBParamRequest paramRequest) 
+    private void getStep1(PrintWriter out, SWBResourceURL url, SWBParamRequest paramRequest)
     {
         String lang=paramRequest.getUser().getLanguage();
         try {

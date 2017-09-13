@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,22 +18,21 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources.util;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Locale;
-import java.util.ArrayList;
 import java.util.Vector;
-//import com.infotec.wb.core.WBLoader;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 
-// TODO: Auto-generated Javadoc
 /**
  * Objeto que maneja el lenguaje en la api de administración de recursos para la utilización adecuada de xml's
  * <p>
@@ -71,12 +70,12 @@ public class XmlBundle
      */
     public void init(String className, String baseName)
     {
-        ArrayList languages=SWBPortal.getAppLanguages();
+        ArrayList<String> languages=SWBPortal.getAppLanguages();
         if(!languages.isEmpty())
         {
             for(int i=0; i < languages.size() ;i++)
             {
-                findBundle(className, baseName, new Locale((String)languages.get(i)));
+                findBundle(className, baseName, new Locale(languages.get(i)));
             }
         }
         findBundle(className, baseName, new Locale("", ""));
@@ -119,12 +118,12 @@ public class XmlBundle
      */
     public static String getBundleImpl(String baseName, Locale locale)
     {
-        final Vector names = calculateBundleNames(baseName, locale);
+        final ArrayList<String> names = calculateBundleNames(baseName, locale);
         if (names.size()>0) 
         {
             for (int i = 0; i < names.size(); i++) 
             {
-                String bundleName = (String)names.elementAt(i);
+                String bundleName = names.get(i);
                 if(bundles.containsKey(bundleName)) 
                 {
                     PropertyXmlBundle lookup=(PropertyXmlBundle)bundles.get(bundleName);
@@ -182,12 +181,12 @@ public class XmlBundle
     {
         try 
         {
-            final Vector names = calculateBundleNames(baseName, locale);
+            final ArrayList<String> names = calculateBundleNames(baseName, locale);
             if (names.size()>0) 
             {
                 for (int i = 0; i < names.size(); i++) 
                 {
-                    String bundleName = (String)names.elementAt(i);
+                    String bundleName = (String)names.get(i);
                     PropertyXmlBundle lookup = loadBundle(loader, bundleName, baseName);
                     if (lookup != null) {
                         bundles.put(bundleName, lookup);
@@ -205,9 +204,9 @@ public class XmlBundle
      * @param locale the locale
      * @return the vector
      */
-    private static Vector calculateBundleNames(String baseName, Locale locale) 
+    private static ArrayList<String> calculateBundleNames(String baseName, Locale locale) 
     {
-        final Vector result = new Vector();
+        final ArrayList<String> result = new ArrayList<>();
         final String language = locale.getLanguage();
         final int languageLength = language.length();
         final String country = locale.getCountry();
@@ -217,15 +216,15 @@ public class XmlBundle
 
         if (languageLength + countryLength + variantLength == 0) 
         {
-            result.addElement(baseName);
+            result.add(baseName);
             return result;
         }
-        final StringBuffer temp = new StringBuffer(baseName);
+        final StringBuilder temp = new StringBuilder(baseName);
         temp.append('_');
         temp.append(language);
         if (languageLength > 0) 
         {
-            result.addElement(temp.toString());
+            result.add(temp.toString());
         }
         if (countryLength + variantLength == 0) 
         {
@@ -235,7 +234,7 @@ public class XmlBundle
         temp.append(country);
         if (countryLength > 0) 
         {
-            result.addElement(temp.toString());
+            result.add(temp.toString());
         }
         if (variantLength == 0) 
         {
@@ -243,7 +242,7 @@ public class XmlBundle
         }
         temp.append('_');
         temp.append(variant);
-        result.addElement(temp.toString());
+        result.add(temp.toString());
         return result;
     }
 
@@ -280,17 +279,9 @@ public class XmlBundle
             try 
             {
                 String xml=SWBUtils.IO.readInputStream(stream);
-                //if(WBAdmResourceUtils.getInstance().xmlVerifierDefault(xml)) 
-                //{
-                    PropertyXmlBundle bundle=new PropertyXmlBundle(xml);
-                    bundle.setLocale(baseName, bundleName);
-                    return bundle;
-                //}
-                //else
-//                {
-//                    AFUtils.log("XML is not valid in resource: "+bundleName,true);
-//                    return null;
-//                }
+                PropertyXmlBundle bundle=new PropertyXmlBundle(xml);
+                bundle.setLocale(baseName, bundleName);
+                return bundle;
             } 
             catch (Exception e) {}
             finally 
@@ -310,8 +301,6 @@ public class XmlBundle
      */
     private static ClassLoader getLoader(String className) 
     {
-        //ClassLoader cl = WBLoader.getInstance().getClassLoader();
-        //if (cl == null)  cl = ClassLoader.getSystemClassLoader();
         ClassLoader cl = SWBPortal.getResourceMgr().getResourceLoader(className);
         if (cl == null)  {
             cl = SWBPortal.class.getClassLoader();

@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
@@ -26,27 +26,28 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
-import java.util.Enumeration;
 import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.base.util.SFBase64;
 import org.semanticwb.model.User;
+import org.semanticwb.platform.SemanticMgr;
 import org.semanticwb.portal.api.GenericResource;
 import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBParamRequestImp;
 import org.semanticwb.portal.api.SWBResourceException;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PasswordManager.
  * 
- * @author serch
+ * @author Sergio Martínez {serch}
  */
 public class PasswordManager extends GenericResource {
 
@@ -64,14 +65,13 @@ public class PasswordManager extends GenericResource {
 
     static {
         generator.setSeed(System.currentTimeMillis());
-//        SemanticProperty sp = SWBPlatform.getSemanticMgr().getModel(SWBPlatform.getSemanticMgr().SWBAdmin).getSemanticProperty(SWBPlatform.getSemanticMgr().SWBAdmin + "/PrivateKey");
-        priv = SWBPlatform.getSemanticMgr().getModel(SWBPlatform.getSemanticMgr().SWBAdmin).getModelObject().getProperty(SWBPlatform.getSemanticMgr().getModel(SWBPlatform.getSemanticMgr().SWBAdmin).getSemanticProperty(
-                SWBPlatform.getSemanticMgr().SWBAdminURI + "/PrivateKey"));
+        priv = SWBPlatform.getSemanticMgr().getModel(SemanticMgr.SWBAdmin).getModelObject().getProperty(SWBPlatform.getSemanticMgr().getModel(SemanticMgr.SWBAdmin).getSemanticProperty(
+                SemanticMgr.SWBAdminURI + "/PrivateKey"));
         if (priv==null)priv="TOO MANY SECRETS";
     }
     
     /** The log. */
-    static Logger log = SWBUtils.getLogger(PasswordManager.class);
+    static final Logger log = SWBUtils.getLogger(PasswordManager.class);
     
     /** The Constant FRM_CHGPWD. */
     private static final String FRM_CHGPWD = "frmchgpwd";
@@ -124,16 +124,9 @@ public class PasswordManager extends GenericResource {
      */
     @Override
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
-        //System.out.println("En ProcessAction");
-        Enumeration enumera = request.getSession(true).getAttributeNames();
-        while (enumera.hasMoreElements()) {
-            String name = (String) enumera.nextElement();
-            //System.out.println("" + name + ":" + request.getSession(true).getAttribute(name));
-        }
         String cadcontrol = (String) request.getSession(true).getAttribute("cadcontrol");
         if (cadcontrol != null && cadcontrol.equals(request.getParameter("cadcontrol"))) {
             if (response.getAction().equals("UPG")) {
-                //System.out.println("en UPG");
                 String pwd1 = request.getParameter("swb_newPassword");
                 String pwd2 = request.getParameter("swb_newPassword2");
                 if (pwd2.equals(pwd1)) {
@@ -144,7 +137,6 @@ public class PasswordManager extends GenericResource {
                 }
             }
             if (response.getAction().equals("ADD")) {
-                //System.out.println("en ADD");
                 String login = (String) request.getSession(true).getAttribute("login");
                 if (null != login) {
                     User usr = response.getWebPage().getWebSite().getUserRepository().getUserByLogin(login);
@@ -159,7 +151,6 @@ public class PasswordManager extends GenericResource {
                 }
             }
             if (response.getAction().equals("SML")) {
-                //System.out.println("en SML");
                 String frmmailms = getResourceBase().getAttribute(FRM_MAILMS);
                 if (null == frmmailms) {
                     frmmailms = TXT_mailms;
@@ -176,7 +167,6 @@ public class PasswordManager extends GenericResource {
                                     (request.getServerPort() == 80 ? "" : ":" + request.getServerPort()) + response.getWebPage().getRealUrl() + "/_tkn/" + generateToken(usr.getLogin());
                             SWBParamRequestImp paramRequest = new SWBParamRequestImp(request, getResourceBase(),response.getWebPage(), usr);
                             String texto = replaceTags(frmmailms, request, paramRequest, token);
-                            //System.out.println("URL:" + texto);
                             SWBUtils.EMAIL.sendBGEmail(email, "Recuperar password", texto);
                             request.getSession(true).setAttribute("message", "<br /><p>Te llegar&aacute; un correo electr&oacute;nico a tu cuenta, indic&aacute;ndote c&oacute;mo recuperarla.</p>");
                         } catch (GeneralSecurityException ex) {
@@ -266,39 +256,38 @@ public class PasswordManager extends GenericResource {
      * @return the string
      */
     String replaceTags(String str, HttpServletRequest request, SWBParamRequest paramRequest, String url) {
-        //System.out.print("\nstr:"+str+"-->");
         if (str == null || str.trim().length() == 0) {
             return null;
         }
         str = str.trim();
         //TODO: codificar cualquier atributo o texto
-        Iterator it = SWBUtils.TEXT.findInterStr(str, "{encodeB64(\"", "\")}");
+        Iterator<String> it = SWBUtils.TEXT.findInterStr(str, "{encodeB64(\"", "\")}");
         while (it.hasNext()) {
-            String s = (String) it.next();
+            String s = it.next();
             str = SWBUtils.TEXT.replaceAll(str, "{encodeB64(\"" + s + "\")}", SFBase64.encodeString(replaceTags(s, request, paramRequest, url)));
         }
 
         it = SWBUtils.TEXT.findInterStr(str, "{request.getParameter(\"", "\")}");
         while (it.hasNext()) {
-            String s = (String) it.next();
+            String s = it.next();
             str = SWBUtils.TEXT.replaceAll(str, "{request.getParameter(\"" + s + "\")}", request.getParameter(replaceTags(s, request, paramRequest, url)));
         }
 
         it = SWBUtils.TEXT.findInterStr(str, "{session.getAttribute(\"", "\")}");
         while (it.hasNext()) {
-            String s = (String) it.next();
+            String s = it.next();
             str = SWBUtils.TEXT.replaceAll(str, "{session.getAttribute(\"" + s + "\")}", (String) request.getSession().getAttribute(replaceTags(s, request, paramRequest, url)));
         }
 
         it = SWBUtils.TEXT.findInterStr(str, "{getEnv(\"", "\")}");
         while (it.hasNext()) {
-            String s = (String) it.next();
+            String s = it.next();
             str = SWBUtils.TEXT.replaceAll(str, "{getEnv(\"" + s + "\")}", SWBPlatform.getEnv(replaceTags(s, request, paramRequest, url)));
         }
 
         it = SWBUtils.TEXT.findInterStr(str, "{?", "}");
         while (it.hasNext()) {
-            String s = (String) it.next();
+            String s = it.next();
             str = SWBUtils.TEXT.replaceAll(str, "{?" + s + "}", url);
         }
 
@@ -322,7 +311,6 @@ public class PasswordManager extends GenericResource {
             str = SWBUtils.TEXT.replaceAll(str, "{actionurlSML}", paramRequest.getActionUrl().setAction("SML").toString());
         }
         str = SWBUtils.TEXT.replaceAll(str, "{?url}", url);
-        //System.out.println(str);
         return str;
     }
 
@@ -476,17 +464,12 @@ public class PasswordManager extends GenericResource {
         String ret = null;
         if (url.lastIndexOf("_tkn/") > 1) {
             String value = url.substring(url.lastIndexOf("_tkn/") + 5);
-            //System.out.println("val:" + value);
             value = new String(SWBUtils.CryptoWrapper.PBEAES128Decipher(priv, SFBase64.decode(value)));
             String[] lista = value.split("\\|");
 
             if (System.currentTimeMillis() < Long.valueOf(lista[1]) && SWBPlatform.getVersion().equals(lista[2])) {
                 ret = lista[0];
             }
-            //System.out.println(value);
-            //System.out.println(lista[0]);
-            //System.out.println(lista[1]);
-            //System.out.println(lista[2]);
         }
         return ret;
     }

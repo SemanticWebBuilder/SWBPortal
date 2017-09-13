@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
@@ -34,10 +34,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -49,10 +51,12 @@ import org.semanticwb.base.util.ImageResizer;
 import org.semanticwb.model.Resource;
 import org.semanticwb.portal.TemplateImp;
 import org.semanticwb.portal.admin.admresources.util.WBAdmResourceUtils;
-import org.semanticwb.portal.admin.resources.StyleInner;
-import org.semanticwb.portal.api.*;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBParameters;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceURL;
 
-// TODO: Auto-generated Javadoc
 /**
  * ImageGallery se encarga de desplegar y administrar una colección de imágenes
  * dispuestas en un carrusel.
@@ -83,10 +87,10 @@ public class ImageGallery extends GenericResource
         if (str.indexOf("{") > -1)
         {
 
-            Iterator it = SWBUtils.TEXT.findInterStr(str, "{request.getParameter(\"", "\")}");
+            Iterator<String> it = SWBUtils.TEXT.findInterStr(str, "{request.getParameter(\"", "\")}");
             while (it.hasNext())
             {
-                String s = (String) it.next();
+                String s = it.next();
                 str = SWBUtils.TEXT.replaceAll(str, "{request.getParameter(\"" + s + "\")}", request.getParameter(replaceTags(s, request, paramRequest)));
             }
 
@@ -152,11 +156,6 @@ public class ImageGallery extends GenericResource
      * The Constant _thumbnail.
      */
     private static final String _thumbnail = "thumbn_";
-
-    /**
-     * The si.
-     */
-    private StyleInner si;
 
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#setResourceBase(org.semanticwb.model.Resource)
@@ -282,7 +281,6 @@ public class ImageGallery extends GenericResource
                 request.setAttribute("thumbnails", imgpath_tmb);
                 request.setAttribute("descriptions", descriptions);
                 
-                //request.getRequestDispatcher(path).include(request, response);
                 RequestDispatcher requestDispatcher=request.getRequestDispatcher(path);
                 if(requestDispatcher!=null)
                 {
@@ -391,8 +389,6 @@ public class ImageGallery extends GenericResource
         out.append("-->\n");
         out.append("</script>\n");
 
-        //out.append("<div class=\"swb-galeria\"> ");
-        //out.append("<div style=\""+ titlestyle +"\">"+ title +"</div> ");
         out.append("<div class=\"swb-galeria_" + base.getId() + "\"> ");
         out.append("<div class=\"title_" + base.getId() + "\">" + title + "</div> ");
         out.append("<div id=\"imggallery_" + oid + "\" style=\"position:relative; visibility:hidden\"></div> ");
@@ -530,8 +526,6 @@ public class ImageGallery extends GenericResource
                 value = null != getValue("titlestyle", formItems) && !"".equals(getValue("titlestyle", formItems).trim()) ? getValue("titlestyle", formItems).trim() : null;
                 base.setAttribute("titlestyle", value);
 
-                int width = Integer.parseInt(base.getAttribute("width"));
-                //String filenameAttr, removeChk;
                 String prefix = "imggallery_" + base.getId() + "_";
 
                 value = null != getValue("deleteall", formItems) && !"".equals(getValue("deleteall", formItems).trim()) ? getValue("deleteall", formItems).trim() : null;
@@ -640,7 +634,6 @@ public class ImageGallery extends GenericResource
                     base.removeAttribute("desc_"+filenameAttr);
                 }
 
-                //String prefix = "imggallery_" + base.getId() + "_";
                 List<FileItem> imagesAdd = new ArrayList<FileItem>();
                 for (FileItem item : formItems)
                 {
@@ -723,7 +716,6 @@ public class ImageGallery extends GenericResource
     {
         StringBuilder htm = new StringBuilder();
         Resource base = getResourceBase();
-//        try {
         SWBResourceURL url = paramRequest.getRenderUrl().setMode(SWBParamRequest.Mode_ADMIN);
         url.setAction("update");
 
@@ -739,23 +731,6 @@ public class ImageGallery extends GenericResource
         htm.append("\n<div class=\"swbform\"> ");
         htm.append("\n<form id=\"frmIG_" + base.getId() + "\" method=\"post\" enctype=\"multipart/form-data\" action=\"" + url.toString() + "\"> ");
 
-
-        /*htm.append("\n<fieldset> ");
-         htm.append("\n<legend>"+paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_LaF")+"</legend>");
-         String cssResPath = "/"+SWBUtils.TEXT.replaceAll(getClass().getName(), ".", "/")+".css";
-         si = new StyleInner(getResourceBase());
-         String script = null;
-         try {
-         script = si.render(paramRequest, cssResPath);
-         }catch(NullPointerException e) {
-         log.error("Tal vez no exite el archivo "+cssResPath+" en el recurso: "+base.getId() +"-"+ base.getTitle(), e);
-         }catch(IOException e) {
-         log.error("Error al leer el archivo "+cssResPath+" en el recurso: "+base.getId() +"-"+ base.getTitle(), e);
-         }catch(Exception e) {
-         log.error("Error en el recurso: "+base.getId() +"-"+ base.getTitle(), e);
-         }
-         htm.append(script);
-         htm.append("\n</fieldset> ");*/
         htm.append("\n<fieldset> ");
         htm.append("\n<legend>" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_legendData") + "</legend>");
         htm.append("\n<table width=\"100%\"  border=\"0\" cellpadding=\"5\" cellspacing=\"5\"> ");
@@ -764,7 +739,6 @@ public class ImageGallery extends GenericResource
         htm.append("\n<td width=\"200\" align=\"right\">");
         htm.append("<label for=\"jspPath\" class=\"swbform-label\">" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_Path_JSP") + "</label>");
         htm.append("\n</td>");
-        //htm.append("<label for=\"imgWidth\" class=\"swbform-label\">"+    +"</label>");
         htm.append("\n<td>");
         htm.append("<input id=\"jspPath\" dojotype=\"dijit.form.TextBox\" name=\"jspPath\" value=\"" + base.getAttribute("jspPath", "") + "\"/>");//.append(base.getAttribute("jspPath","")).append(" value=\"true\" type=\"text\" />");
         htm.append("\n</td> ");
@@ -774,7 +748,6 @@ public class ImageGallery extends GenericResource
         htm.append("\n<td width=\"200\" align=\"right\">");
         htm.append("<label for=\"title\" class=\"swbform-label\">" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_showtitle") + "</label>");
         htm.append("\n</td>");
-        //htm.append("<label for=\"imgWidth\" class=\"swbform-label\">"+    +"</label>");
         htm.append("\n<td>");
         htm.append("<input id=\"title\" dojotype=\"dijit.form.CheckBox\" name=\"title\" ").append(Boolean.parseBoolean(base.getAttribute("title")) ? "checked=\"checked\"" : "").append(" value=\"true\" type=\"checkbox\" />");
         htm.append("\n</td> ");
@@ -883,7 +856,6 @@ public class ImageGallery extends GenericResource
         htm.append("\n    <th align=\"center\" scope=\"col\" style=\"text-align:center;\" width=\"10\" height=\"20\" nowrap=\"nowrap\">&nbsp;</th> ");
         htm.append("\n    <th align=\"center\" scope=\"col\" style=\"text-align:center;\" width=\"20\" height=\"20\" nowrap=\"nowrap\">" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_colEdit") + "</th> ");
         htm.append("\n    <th align=\"center\" scope=\"col\" style=\"text-align:center;\" width=\"30\" height=\"20\" nowrap=\"nowrap\">" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_colRemove") + "</th> ");
-        //htm.append("\n    <th align=\"center\" scope=\"col\" style=\"text-align:center;\" width=\"40%\" height=\"20\" nowrap=\"nowrap\">" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_colFile") + "</th> ");
         htm.append("\n    <th align=\"center\" scope=\"col\" style=\"text-align:center;\" width=\"40%\" height=\"20\" nowrap=\"nowrap\">" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_colDescription") + "</th> ");
         htm.append("\n    <th align=\"center\" scope=\"col\" style=\"text-align:center;\" width=\"40%\" height=\"20\" nowrap=\"nowrap\">" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_colImage") + "</th> ");
         htm.append("\n  </tr> ");
@@ -896,23 +868,7 @@ public class ImageGallery extends GenericResource
         htm.append("\n<tr><td colspan=\"2\" height=\"10\"></td></tr>");
         htm.append("\n</table> ");
         htm.append("\n</fieldset> ");
-
-//            htm.append("\n<fieldset> ");
-//            htm.append("\n<legend>"+paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_LaF")+"</legend>");
-//            String cssResPath = "/"+SWBUtils.TEXT.replaceAll(getClass().getName(), ".", "/")+".css";
-//            si = new StyleInner(getResourceBase());
-//            String script = null;
-//            try {
-//                script = si.render(paramRequest, cssResPath);
-//            }catch(NullPointerException e) {
-//                log.error("Tal vez no exite el archivo "+cssResPath+" en el recurso: "+base.getId() +"-"+ base.getTitle(), e);
-//            }catch(IOException e) {
-//                log.error("Error al leer el archivo "+cssResPath+" en el recurso: "+base.getId() +"-"+ base.getTitle(), e);
-//            }catch(Exception e) {
-//                log.error("Error en el recurso: "+base.getId() +"-"+ base.getTitle(), e);
-//            }
-//            htm.append(script);
-//            htm.append("\n</fieldset> ");
+        
         htm.append("\n<fieldset> ");
         htm.append("\n<table width=\"100%\"  border=\"0\" cellpadding=\"5\" cellspacing=\"0\"> ");
         htm.append("\n <tr><td>");
@@ -945,7 +901,6 @@ public class ImageGallery extends GenericResource
         htm.append("\n    var tbl = document.getElementById(tblId); ");
         htm.append("\n    var lastRow = tbl.rows.length; ");
         htm.append("\n    var icolDisplay = lastRow-1; // descontar el renglon de titulo ");
-//        htm.append("\n    var iteration = generateUUID();");
         htm.append("\n    var row = tbl.insertRow(lastRow); ");
         htm.append("\n    row.style.backgroundColor = '#F4F4DD'; ");
         htm.append("\n ");
@@ -960,29 +915,11 @@ public class ImageGallery extends GenericResource
         htm.append("\n    editCheckCell.style.textAlign = 'center'; ");
         htm.append("\n    var editCheckInput = document.createElement('input'); ");
         htm.append("\n    editCheckInput.type = 'checkbox'; ");
-//        htm.append("\n    if(cellSufix) { ");
         htm.append("\n        editCheckInput.name = 'edit_'+cellSufix; ");
         htm.append("\n        editCheckInput.id = 'edit_'+cellSufix; ");
-//        htm.append("\n    }else { ");
-//        htm.append("\n        editCheckInput.name = 'edit_" + base.getId() + "_'+iteration; ");
-//        htm.append("\n        editCheckInput.id = 'edit_" + base.getId() + "_'+iteration; ");
-//        htm.append("\n    }");
+
         htm.append("\n    editCheckInput.alt = '" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_altEdit") + "'; ");
         htm.append("\n    editCheckInput.disabled = true; ");
-        
-        /*htm.append("\n    if(!img) ");
-        htm.append("\n    { ");
-        
-        htm.append("\n        var idEditImg='';");
-        htm.append("\n        var imghtml=row.cells[row.cells.length-1].innerHTML; ");
-        htm.append("\n        var pos=imghtml.indexOf('id=\"'); ");
-        htm.append("\n        if(pos!=-1){ ");
-        htm.append("\n                  var pos2=imghtml.indexOf('\"',pos+6); ");
-        htm.append("\n                  idEditImg=imghtml.substring(pos+4,pos2);");
-        htm.append("\n        } ");
-        htm.append("\n            row.cells[4].innerHTML = '<input type=\"file\" id=\"'+idEditImg+'\" name=\"'+idEditImg+'\" size=\"40\" />'; ");
-        htm.append("\n    } ");*/
-        
         
         htm.append("\n    editCheckInput.onclick = function(){ ");
         htm.append("\n        if(editCheckInput.checked) { ");
@@ -993,7 +930,6 @@ public class ImageGallery extends GenericResource
         htm.append("\n                  var pos2=imghtml.indexOf('\"',pos+6); ");
         htm.append("\n                  idEditImg=imghtml.substring(pos+4,pos2);");
         htm.append("\n        } ");
-        //htm.append("\n        alert(idEditImg); ");
         htm.append("\n            row.cells[row.cells.length-1].innerHTML = '<input type=\"file\" id=\"'+idEditImg+'\" name=\"'+idEditImg+'\" size=\"40\" />'; ");
         htm.append("\n            editCheckInput.checked = false; ");
         htm.append("\n            editCheckInput.disabled = true; ");
@@ -1006,13 +942,9 @@ public class ImageGallery extends GenericResource
         htm.append("\n    removeCheckCell.style.textAlign = 'center'; ");
         htm.append("\n    var removeCheckInput = document.createElement('input'); ");
         htm.append("\n    removeCheckInput.type = 'checkbox'; ");
-//        htm.append("\n    if(cellSufix) { ");
         htm.append("\n        removeCheckInput.name = 'remove_'+cellSufix; ");
         htm.append("\n        removeCheckInput.id = 'remove_'+cellSufix; ");
-//        htm.append("\n    }else { ");
-//        htm.append("\n        removeCheckInput.name = 'remove_" + base.getId() + "_'+iteration; ");
-//        htm.append("\n        removeCheckInput.id = 'remove_" + base.getId() + "_'+iteration; ");
-//        htm.append("\n    }");
+
         htm.append("\n    removeCheckInput.alt = '" + paramRequest.getLocaleString("usrmsg_ImageGallery_doAdmin_altRemove") + "'; ");
         htm.append("\n    if(filename && img) { ");
         htm.append("\n        removeCheckInput.disabled = false; ");
@@ -1023,14 +955,6 @@ public class ImageGallery extends GenericResource
         htm.append("\n    removeCheckCell.appendChild(removeCheckInput); ");
         htm.append("\n ");
 
-        /*htm.append("\n    // celda nombre de archivo ");
-         htm.append("\n    var filenameCell = row.insertCell(3); ");
-         htm.append("\n    if(filename) { ");
-         htm.append("\n        var fnTxt = document.createTextNode(filename); ");
-         htm.append("\n        filenameCell.appendChild(fnTxt); ");
-         htm.append("\n    } ");
-         htm.append("\n    filenameCell.style.textAlign = 'left'; ");
-         htm.append("\n ");*/
         htm.append("\n    // celda nombre de descripcion ");
         
         htm.append("\n        var descriptionCell = row.insertCell(3); ");
@@ -1048,8 +972,6 @@ public class ImageGallery extends GenericResource
         htm.append("\n        descriptionInput.style.width='95%';");
         htm.append("\n        descriptionInput.value = unescape(desc); ");
         htm.append("\n        descriptionCell.appendChild(descriptionInput); ");
-        //htm.append("\n    } ");
-        //htm.append("\n    filenameCell.style.textAlign = 'left'; ");
         htm.append("\n ");
 
         htm.append("\n    var imgCell = row.insertCell(4); ");
@@ -1098,9 +1020,6 @@ public class ImageGallery extends GenericResource
         }
         htm.append("\n</script>");
         htm.append(getScript());
-//        }catch(Exception e) {
-//            log.error(e);
-//        }
         return htm.toString();
     }
 
@@ -1111,7 +1030,7 @@ public class ImageGallery extends GenericResource
      */
     private String getScript()
     {
-        StringBuffer htm = new StringBuffer();
+        StringBuilder htm = new StringBuilder();
         try
         {
             htm.append("\n<script type=\"text/javascript\">");
@@ -1159,42 +1078,7 @@ public class ImageGallery extends GenericResource
      */
     public void doEditStyle(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
-//        Resource base = getResourceBase();
-//        String stel = request.getParameter("stel");
-//        String[] tkns = stel.split("@",3);
-//
-//        HashMap tabs = (HashMap)si.getMm(base.getId());
-//        if( tabs!=null && tkns[1].length()>0 ) {
-//            try {
-//                HashMap t = (HashMap)tabs.get(tkns[0]);
-//                if(tkns[2].equalsIgnoreCase("empty") || tkns[2].length()==0)
-//                    t.remove(tkns[1]);
-//                else
-//                    t.put(tkns[1], tkns[2]);
-//                StringBuilder css = new StringBuilder();
-//                Iterator<String> ittabs = tabs.keySet().iterator();
-//                while(ittabs.hasNext()) {
-//                    String tab = ittabs.next();
-//                    css.append(tab);
-//                    css.append("{");
-//                    HashMap selectors = (HashMap)tabs.get(tab);
-//                    Iterator<String> its = selectors.keySet().iterator();
-//                    while(its.hasNext()) {
-//                        String l = its.next();
-//                        css.append(l+":"+selectors.get(l)+";");
-//                    }
-//                    css.append("}");
-//                }
-//                base.setAttribute("css", css.toString());
-//                try{
-//                    base.updateAttributesToDB();
-//                }catch(Exception e){
-//                    log.error("Error al guardar la hoja de estilos del recurso: "+base.getId() +"-"+ base.getTitle(), e);
-//                }
-//            }catch(IndexOutOfBoundsException iobe) {
-//                log.error("Error al editar la hoja de estilos del recurso: "+base.getId() +"-"+ base.getTitle(), iobe);
-//            }
-//        }
+    		throw new UnsupportedOperationException("Method not implemented");
     }
 
     /**
@@ -1320,15 +1204,12 @@ public class ImageGallery extends GenericResource
 
     public boolean uploadFile(Resource base, String fileName, String pInForm, FileItem item)
     {
-
-        //String strWorkPath = workPath;
         boolean bOk = false;
         try
         {
 
             if (fileName != null && !fileName.trim().equals(""))
             {
-                //strWorkPath += base.getWorkPath() + "/";
                 File file = new File(workPath);
 
                 if (!file.exists())
@@ -1353,7 +1234,6 @@ public class ImageGallery extends GenericResource
                     fileoutputstream.write(content, 0, content.length);
                     fileoutputstream.close();
                     return true;
-
                 }
 
             }
@@ -1370,7 +1250,7 @@ public class ImageGallery extends GenericResource
         {
             return "";
         }
-        StringBuffer out = new StringBuffer("");
+        StringBuilder out = new StringBuilder("");
         char[] chars = original.toCharArray();
         for (int i = 0; i < chars.length; i++)
         {

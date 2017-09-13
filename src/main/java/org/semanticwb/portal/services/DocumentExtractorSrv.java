@@ -22,15 +22,26 @@
  */
 package org.semanticwb.portal.services;
 
-import org.apache.poi.poifs.filesystem.*;
-import org.apache.poi.hssf.eventusermodel.*;
-import org.apache.poi.hssf.record.*;
-import org.apache.poi.hpsf.*;
-import org.apache.poi.poifs.eventfilesystem.*;
-import org.apache.poi.util.LittleEndian;
-import java.io.*;
-import org.apache.poi.POIDocument;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+
+import org.apache.poi.hpsf.PropertySet;
+import org.apache.poi.hpsf.PropertySetFactory;
+import org.apache.poi.hssf.eventusermodel.HSSFListener;
+import org.apache.poi.hssf.record.BOFRecord;
+import org.apache.poi.hssf.record.BoundSheetRecord;
+import org.apache.poi.hssf.record.LabelSSTRecord;
+import org.apache.poi.hssf.record.NumberRecord;
+import org.apache.poi.hssf.record.Record;
+import org.apache.poi.hssf.record.RowRecord;
+import org.apache.poi.hssf.record.SSTRecord;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.eventfilesystem.POIFSReaderEvent;
+import org.apache.poi.poifs.eventfilesystem.POIFSReaderListener;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.util.LittleEndian;
 import org.apache.poi.xslf.XSLFSlideShow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -41,7 +52,7 @@ import org.semanticwb.SWBUtils;
 /**
  * Utils to find in ms documents (word, excel, power point, pdf) via poi api.
  *
- * @author jorge.jimenez
+ * @author Jorge Jiménez {jorge.jimenez}
  * @since version 3.0
  */
 public class DocumentExtractorSrv implements HSSFListener {
@@ -49,7 +60,7 @@ public class DocumentExtractorSrv implements HSSFListener {
     /**
      * The log.
      */
-    private static Logger log = SWBUtils.getLogger(DocumentExtractorSrv.class);
+    private static final Logger log = SWBUtils.getLogger(DocumentExtractorSrv.class);
     /**
      * The sstrec.
      */
@@ -57,7 +68,7 @@ public class DocumentExtractorSrv implements HSSFListener {
     /**
      * The excel buf.
      */
-    private static StringBuffer excelBuf = new StringBuffer();
+    private static StringBuilder excelBuf = new StringBuilder();
 
     /**
      * Extrae el string de un archivo pdf
@@ -128,7 +139,6 @@ public class DocumentExtractorSrv implements HSSFListener {
                 break;
             case LabelSSTRecord.sid:
                 LabelSSTRecord lrec = (LabelSSTRecord) record;
-                //System.out.println("String cell found with value " + sstrec.getString(lrec.getSSTIndex()));
                 excelBuf.append(sstrec.getString(lrec.getSSTIndex()) + " ");
                 break;
         }
@@ -212,7 +222,6 @@ public class DocumentExtractorSrv implements HSSFListener {
         try {
             fis = new FileInputStream(file);
             returnData = SWBUtils.IO.readInputStream(fis);
-            //System.out.println("Text extractor: " + returnData);
             return returnData;
         } catch (Exception e) {
             log.error("Error al extraer el texto del documento de Text. ", e);
@@ -223,17 +232,15 @@ public class DocumentExtractorSrv implements HSSFListener {
 
 class MyPOIFSReaderListener implements POIFSReaderListener {
 
-    private static StringBuffer pptBuf = new StringBuffer();
+    private static StringBuilder pptBuf = new StringBuilder();
     SavePPTString saveStrig = null;
 
-    public MyPOIFSReaderListener(StringBuffer pptBuf) {
+    public MyPOIFSReaderListener(StringBuilder pptBuf) {
         this.pptBuf = pptBuf;
         saveStrig = new SavePPTString();
     }
 
     public void processPOIFSReaderEvent(POIFSReaderEvent event) {
-        PropertySet ps = null;
-
         try {
 
             org.apache.poi.poifs.filesystem.DocumentInputStream dis = null;
@@ -249,7 +256,6 @@ class MyPOIFSReaderListener implements POIFSReaderListener {
             btoWrite = new byte[dis.available()];
             dis.read(btoWrite, 0, dis.available());
 
-            String strBytes = "";
             for (int i = 0; i < btoWrite.length - 20; i++) {
                 long type = LittleEndian.getUShort(btoWrite, i + 2);
                 long size = LittleEndian.getUInt(btoWrite, i + 4);
@@ -257,8 +263,6 @@ class MyPOIFSReaderListener implements POIFSReaderListener {
                     int offset = i + 4 + 1;
                     int length = (int) size + 3;
                     int end = offset + length;
-
-                    byte[] textBytes = new byte[length];
 
                     for (int j = offset; j < end; j++) {
                         byte b = btoWrite[j];
@@ -277,7 +281,6 @@ class MyPOIFSReaderListener implements POIFSReaderListener {
             if (pptBuf.toString().length() > 0) {
                 saveStrig.setSavePPTString(pptBuf.toString());
             }
-            //AFUtils.log(e,"No property set stream: \"" + event.getPath() + event.getName());
         }
     }
 

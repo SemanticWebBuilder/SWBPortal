@@ -510,9 +510,9 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
         int versionNumber = Integer.parseInt(request.getParameter("numversion"));
         String fileName = null;
         String action = paramRequest.getAction();
-        StringBuilder pathToRead = new StringBuilder(64);
+        StringBuilder pathToRead = new StringBuilder();
         //comentar siguiente linea
-        StringBuilder pathToWrite = new StringBuilder(64);
+        StringBuilder pathToWrite = new StringBuilder();
         String content = "";
         //Para mostrar el contenido de una versión temporal
         String tmpPath = request.getParameter("tmpPath");
@@ -563,7 +563,7 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
             RequestDispatcher rd = request.getRequestDispatcher("/swbadmin/jsp/HtmlContentSemAdmin.jsp");
             rd.include(request, response);
         } catch (Exception e) {
-            log.debug(e);
+            log.error(e);
         }
     }
 

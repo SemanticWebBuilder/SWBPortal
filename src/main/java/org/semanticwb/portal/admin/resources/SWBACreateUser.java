@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,17 +18,17 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
 import java.io.IOException;
 import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.semanticwb.Logger;
+
 import org.semanticwb.SWBPlatform;
-import org.semanticwb.SWBUtils;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.User;
 import org.semanticwb.model.UserRepository;
@@ -38,7 +38,6 @@ import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SWBACreateUser.
  * 
@@ -46,9 +45,6 @@ import org.semanticwb.portal.api.SWBResourceURL;
  */
 public class SWBACreateUser extends GenericResource {
     
-    /** The log. */
-    private Logger log = SWBUtils.getLogger(SWBACreateUser.class);
-
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#doView(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
      */
@@ -56,7 +52,7 @@ public class SWBACreateUser extends GenericResource {
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest)
             throws SWBResourceException, IOException
     {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         SWBResourceURL url = paramRequest.getActionUrl();
                  ret.append("<script type=\"text/javascript\">\n"+
         "dojo.require(\"dojo.parser\");\n"+
@@ -94,7 +90,6 @@ public class SWBACreateUser extends GenericResource {
         "    return isValidPwd(pwd);" + 
         "  }\n"+
         "        </script>\n");
-      //http://www.semanticwebbuilder.org/swb4/ontology#User
         ret.append("<form id=\""+User.swb_User.getClassName()+"/create\" dojoType=\"dijit.form.Form\" class=\"swbform\" ");
         ret.append("action=\""+url+"\" ");
         ret.append("onSubmit=\"submitForm('"+User.swb_User.getClassName()+"/create');return false;\" method=\"POST\">");
@@ -136,7 +131,6 @@ public class SWBACreateUser extends GenericResource {
     @Override
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException
     {
-        //System.out.println("PA:UserCreate");
         String usrep = request.getParameter("userRepository");
         String login = request.getParameter("login");
         String password = request.getParameter("passwd");
@@ -145,13 +139,11 @@ public class SWBACreateUser extends GenericResource {
             return;
         }
         UserRepository ur = SWBContext.getUserRepository(usrep);
-        //System.out.println("UR:"+ur);
         if (null!=ur.getUserByLogin(login)){
             response.setMode(SWBResourceURL.Mode_VIEW);
             return;
         }
         User user = ur.createUser();
-        //System.out.println("UC:"+user);
         user.setLogin(login);
         user.setPassword(password);
         response.setMode(SWBResourceURL.Mode_EDIT);
@@ -165,7 +157,7 @@ public class SWBACreateUser extends GenericResource {
     @Override
     public void doEdit(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         ret.append("<script type=\"text/javascript\">\ndijit.byId('swbDialog').hide();\nshowStatus('"+paramRequest.getLocaleString("userOkMsg")+"');\n");
         ret.append("addNewTab('"+request.getParameter("suri")+"','"+SWBPlatform.getContextPath()+"/swbadmin/jsp/objectTab.jsp','"+request.getParameter("login")+"');\n");
         ret.append("</script>");

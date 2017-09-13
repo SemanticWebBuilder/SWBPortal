@@ -6,7 +6,7 @@
 * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación 
 * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite. 
 * 
-* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’), 
+* INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'), 
 * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición; 
 * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software, 
 * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización 
@@ -18,47 +18,59 @@
 * 
 * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente 
 * dirección electrónica: 
-*  http://www.semanticwebbuilder.org
+*  http://www.semanticwebbuilder.org.mx
 **/ 
  
 package org.semanticwb.portal.admin.resources.reports;
 
-import java.util.*;
-import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+
 import javax.servlet.http.HttpServletRequest;
-
-import org.semanticwb.Logger;
-import org.semanticwb.SWBUtils;
-import org.semanticwb.model.Device;
-import org.semanticwb.model.Resource;
-import org.semanticwb.model.WebSite;
-import org.semanticwb.model.SWBContext;
-import org.semanticwb.portal.api.GenericResource;
-import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.SWBResourceException;
-import org.semanticwb.portal.admin.resources.reports.beans.WBAFilterReportBean;
-import org.semanticwb.portal.admin.resources.reports.beans.IncompleteFilterException;
-import org.semanticwb.portal.admin.resources.reports.jrresources.*;
-import org.semanticwb.portal.admin.resources.reports.jrresources.data.JRDeviceAccessDataDetail;
-import org.semanticwb.portal.api.SWBResourceURL;
-import org.semanticwb.portal.db.SWBRecHit;
-
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-
-import org.semanticwb.SWBPortal;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.semanticwb.Logger;
+import org.semanticwb.SWBPortal;
+import org.semanticwb.SWBUtils;
+import org.semanticwb.model.Device;
+import org.semanticwb.model.Resource;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.WebSite;
+import org.semanticwb.portal.admin.resources.reports.beans.IncompleteFilterException;
+import org.semanticwb.portal.admin.resources.reports.beans.WBAFilterReportBean;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRDataSourceable;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRPdfResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRRtfResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JRXlsResource;
+import org.semanticwb.portal.admin.resources.reports.jrresources.JasperTemplate;
+import org.semanticwb.portal.admin.resources.reports.jrresources.data.JRDeviceAccessDataDetail;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceURL;
+import org.semanticwb.portal.db.SWBRecHit;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-// TODO: Auto-generated Javadoc
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+
 /** Esta clase genera el reporte de dispositivos, toma la informaci�n de los
  * objetos de WebBuilder de acuerdo con los par�metros recibidos del usuario. Este
  * archivo es usado en la parte de reportes.
@@ -73,7 +85,7 @@ import org.json.JSONObject;
 public class WBADeviceReport extends GenericResource {
     
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(WBADeviceReport.class);
+    private static final Logger log = SWBUtils.getLogger(WBADeviceReport.class);
     
     /** The Constant UNKNOW. */
     public static final String UNKNOW = "Desconocido";
@@ -227,7 +239,7 @@ public class WBADeviceReport extends GenericResource {
         Resource base = getResourceBase();
                
         GregorianCalendar gc_now = new GregorianCalendar();
-        HashMap hm_sites = new HashMap();
+        HashMap<String, String> hm_sites = new HashMap<>();
         String rtype = null;
 
         try {
@@ -292,7 +304,7 @@ public class WBADeviceReport extends GenericResource {
                 }
                 
                 SWBResourceURL url=paramsRequest.getRenderUrl();
-                url.setCallMethod(url.Call_DIRECT);
+                url.setCallMethod(SWBResourceURL.Call_DIRECT);
 
                 out.println("<script type=\"text/javascript\">");                
                 out.println("dojo.require(\"dijit.form.DateTextBox\");");
@@ -374,35 +386,15 @@ public class WBADeviceReport extends GenericResource {
                 out.println("   }");
                 out.println("   return params;");
                 out.println("}");
-                
-                /*out.println("function validate(accion) {");
-                out.println("    var fecha1 = null;");
-                out.println("    var fecha2 = null;");
-                out.println("    var fecha3 = null;");
-                out.println("    if(accion=='0') {");
-                out.println("       fecha1 = new String(dojo.byId('wb_fecha1').value);");
-                out.println("       fecha2 = new String(dojo.byId('wb_fecha11').value);");
-                out.println("       fecha3 = new String(dojo.byId('wb_fecha12').value);");
-                out.println("       if( (fecha1.length==0) && (fecha2.length==0 || fecha3.length==0) ) {");
-                out.println("          alert('Especifique la fecha o el rango de fechas que desea consultar');");
-                out.println("          return false;");
-                out.println("       }");
-                out.println("    }");
-                out.println("    return true;");
-                out.println("}");*/
 
                 out.println("function doXml(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("xml")+"\"+params,\"graphWindow\",size);");
-                /*out.println("   }");*/
                 out.println("}");
 
                 out.println("function doExcel(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("xls")+"\"+params,\"graphWindow\",size);");
-                /*out.println("   }");*/
                 out.println("}");
 
                 out.println("function doHistogram(accion, size) { ");
@@ -411,24 +403,18 @@ public class WBADeviceReport extends GenericResource {
                 out.println(" }");
 
                 out.println("function doGraph(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("graph")+"\"+params,\"graphWindow\",size);");
-                /*out.println("   }");*/
                 out.println("}");
 
                 out.println("function doPdf(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("pdf")+"\"+params,\"graphWindow\",size);");
-                /*out.println("   }");*/
                 out.println("}");
 
                 out.println("function doRtf(accion, size) { ");
-                /*out.println("   if(validate(accion)) {");*/
                 out.println("      var params = getParams(accion);");
                 out.println("      window.open(\""+url.setMode("rtf")+"\"+params,\"graphWindow\",size);    ");
-                /*out.println("   }");*/
                 out.println("}");
 
                 out.println(" function getTypeSelected(){");
@@ -562,21 +548,11 @@ public class WBADeviceReport extends GenericResource {
                     out.println("</table>");
                     out.println("</fieldset>");
                     out.println("</form>");
-                    
-//                    out.println("<fieldset>");
-//                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
-//                    out.println("<tr>");
-//                    out.println("<td colspan=\"4\">");
-//                    out.println("<div id=\"ctnergrid\" style=\"height:600px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
-//                    out.println("  <div id=\"gridMaster\"></div>");
-//                    out.println("</div>");
+                  
                     out.println("<div id=\"ctnergrid\" style=\"height:350px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
                     out.println("  <div id=\"gridMaster\" jsid=\"gridMaster\"></div>");
                     out.println("</div>");
-//                    out.println("</td>");
-//                    out.println("</tr>");
-//                    out.println("</table>");
-//                    out.println("</fieldset>");
+
                     out.println("</div>");
                 }else { // REPORTE MENSUAL                    
                     int year13 = request.getParameter("wb_year13")==null ? gc_now.get(Calendar.YEAR):Integer.parseInt(request.getParameter("wb_year13"));
@@ -612,21 +588,11 @@ public class WBADeviceReport extends GenericResource {
                     out.println("</table>");
                     out.println("</fieldset>");
                     out.println("</form>");
-                    
-//                    out.println("<fieldset>");
-//                    out.println("<table border=\"0\" width=\"95%\" align=\"center\">");
-//                    out.println("<tr>");
-//                    out.println("<td colspan=\"4\">");
-//                    out.println("<div id=\"ctnergrid\" style=\"height:400px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
-//                    out.println("  <div id=\"gridMaster\"></div>");
-//                    out.println("</div>");
+                   
                     out.println("<div id=\"ctnergrid\" style=\"height:350px; width:98%; margin: 1px; padding: 0px; border: 1px solid #DAE1FE;\">");
                     out.println("  <div id=\"gridMaster\" jsid=\"gridMaster\"></div>");
                     out.println("</div>");
-//                    out.println("</td>");
-//                    out.println("</tr>");
-//                    out.println("</table>");
-//                    out.println("</fieldset>");
+
                     out.println("</div>");
                 }
                 out.println("</div>");
@@ -669,7 +635,7 @@ public class WBADeviceReport extends GenericResource {
     public void doGraph(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
         response.setContentType("application/pdf");
         Resource base = getResourceBase();
-        HashMap<String,String> params = new HashMap();
+        HashMap<String,String> params = new HashMap<>();
         params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
         params.put("site", request.getParameter("wb_site"));
 
@@ -725,7 +691,7 @@ public class WBADeviceReport extends GenericResource {
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", "inline; filename=\"lar.xls\"");
         Resource base = getResourceBase();
-        HashMap<String,String> params = new HashMap();
+        HashMap<String,String> params = new HashMap<>();
         params.put("swb", SWBUtils.getApplicationPath()+"/swbadmin/images/swb-logo-hor.jpg");
         params.put("site", request.getParameter("wb_site"));
 
@@ -734,7 +700,6 @@ public class WBADeviceReport extends GenericResource {
             if(rtype == 0) { // by day
                 WBAFilterReportBean filter = buildFilter(request, paramsRequest);
                 JRDataSourceable dataDetail = new JRDeviceAccessDataDetail(filter);
-                //JasperTemplate jasperTemplate = JasperTemplate.DEVICE_DAILY;
                 JasperTemplate jasperTemplate = JasperTemplate.DEVICE_DAILY_EXCEL;
                 JRResource jrResource = new JRXlsResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                 jrResource.prepareReport();
@@ -757,7 +722,6 @@ public class WBADeviceReport extends GenericResource {
                 filter.setYearI(year13);
                 
                 JRDataSourceable dataDetail = new JRDeviceAccessDataDetail(filter);
-                //JasperTemplate jasperTemplate = JasperTemplate.DEVICE_MONTHLY;
                 JasperTemplate jasperTemplate = JasperTemplate.DEVICE_MONTHLY_EXCEL;
                 JRResource jrResource = new JRXlsResource(jasperTemplate.getTemplatePath(), params, dataDetail.orderJRReport());
                 jrResource.prepareReport();
@@ -1002,15 +966,12 @@ public class WBADeviceReport extends GenericResource {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void doHistrogram(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
-        StringBuffer sb_ret = new StringBuffer();
-        /*StringBuffer sb_app = new StringBuffer();*/
+        StringBuilder sb_ret = new StringBuilder();
         Resource base = paramsRequest.getResourceBase();
         String monthinyear = null;
         boolean hasBarname = false;
-        /*int j = 0;*/
 
         try {
-            /*String rtype = request.getParameter("wb_rtype")==null? "0":request.getParameter("wb_rtype");*/
             monthinyear = request.getParameter("wbr_barname");
             if(monthinyear != null){
                 hasBarname = true;
@@ -1062,8 +1023,8 @@ public class WBADeviceReport extends GenericResource {
      * @throws SWBResourceException the sWB resource exception
      */
     public String getHistogram(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException {
-        StringBuffer sb_ret = new StringBuffer();
-        StringBuffer sb_app = new StringBuffer();
+	    	StringBuilder sb_ret = new StringBuilder();
+	    	StringBuilder sb_app = new StringBuilder();
         boolean hasBarname = false;
         int j = 0;
 
@@ -1164,7 +1125,7 @@ public class WBADeviceReport extends GenericResource {
             SWBRecHit rh;
             for(int k=0; k<rep.size(); ) {
                 ArrayList<String> devices = (ArrayList<String>)paternDevs.clone();
-                HashMap<String,SWBRecHit> m = new HashMap();
+                HashMap<String,SWBRecHit> m = new HashMap<>();
                 do {
                     rh = rep.get(k);
                     m.put(rh.getItem(), rh);
@@ -1327,7 +1288,7 @@ public class WBADeviceReport extends GenericResource {
      * @return the array list
      */
     public static ArrayList<String> listDevices(String websiteId, String language) {
-        ArrayList devices = new ArrayList();
+        ArrayList<String> devices = new ArrayList<>();
         WebSite ws = SWBContext.getWebSite(websiteId);
         Iterator<Device> devs = ws.listDevices();
         while(devs.hasNext()) {

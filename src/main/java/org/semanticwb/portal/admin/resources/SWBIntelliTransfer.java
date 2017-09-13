@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,11 +18,10 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
-import com.hp.hpl.jena.rdf.model.Model;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,8 +39,10 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -61,7 +62,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-// TODO: Auto-generated Javadoc
+import com.hp.hpl.jena.rdf.model.Model;
+
 /**
  * Clase que exporta e importa elementos que se escojan de un sitio.
  * 
@@ -71,7 +73,7 @@ import org.w3c.dom.NodeList;
 public class SWBIntelliTransfer extends GenericResource {
 
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(SWBImportWebSite.class);
+    private static final Logger log = SWBUtils.getLogger(SWBIntelliTransfer.class);
     /** The PATH. */
     String PATH = SWBPortal.getWorkPath() + "/";
     /** The WEBPATH. */
@@ -80,8 +82,6 @@ public class SWBIntelliTransfer extends GenericResource {
     String MODELS = PATH + "models/";
     /** The ZIPDIRECTORY. */
     String ZIPDIRECTORY = PATH + "sitetemplates/";
-
-
 
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#processRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
@@ -114,7 +114,7 @@ public class SWBIntelliTransfer extends GenericResource {
         WebSite site = SWBContext.getWebSite(uri);
         String path = SWBPortal.getWorkPath() + "/";
         String zipdirectory = path + "sitetemplates/";
-        LinkedList lListObjts = null;
+        LinkedList<String> lListObjts = null;
         //-------------Generación de archivo rdf del sitio especificado----------------
         File file = null;
         try {
@@ -139,7 +139,7 @@ public class SWBIntelliTransfer extends GenericResource {
         out.println("<p align=\"center\">");
         out.println("<table width=\"60%\" align=\"left\">");
         if (lListObjts != null && lListObjts.size()>0) {
-            Iterator itlhmObjts=lListObjts.iterator();
+            Iterator<String> itlhmObjts=lListObjts.iterator();
             while (itlhmObjts.hasNext()) {
                 String sObjs = (String) itlhmObjts.next();
                 out.println("<tr align=\"left\">");
@@ -192,8 +192,8 @@ public class SWBIntelliTransfer extends GenericResource {
      * @param file the file
      * @return the linked list
      */
-    private LinkedList parseFile(File file) {
-        LinkedList<String> lListObjts = new LinkedList();
+    private LinkedList<String> parseFile(File file) {
+        LinkedList<String> lListObjts = new LinkedList<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line = "";
@@ -254,13 +254,10 @@ public class SWBIntelliTransfer extends GenericResource {
             }
             SWBResourceURL url = paramRequest.getRenderUrl();
             SWBResourceURL urlAction = paramRequest.getActionUrl();
-            StringBuffer strbf = new StringBuffer();
+            StringBuilder strbf = new StringBuilder();
             File file = new File(SWBPortal.getWorkPath() + "/sitetemplates/");
             File[] files = file.listFiles();
             urlAction.setAction("upload");
-            //out.println("<iframe id=\"templates\">");
-            //out.println("<div id=\"vtemplates\" dojoType=\"dijit.TitlePane\" title=\"Templates existentes de Sitios \" class=\"admViewTemplates\" open=\"true\" duration=\"150\" minSize_=\"20\" splitter_=\"true\" region=\"bottom\">");
-
 
             out.println("<script type=\"text/javascript\">"
                     + "dojo.require(\"dojo.parser\");"
@@ -319,7 +316,6 @@ public class SWBIntelliTransfer extends GenericResource {
             out.println("</fieldset>");
             out.println("<fieldset><span align=\"center\">");
             out.println("" + paramRequest.getLocaleString("upload") + "<input type=\"file\" name=\"zipmodel\" value=\"" + paramRequest.getLocaleString("new") + "\"/><br/>");
-            //out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id=\"send\" type=\"submit\"dojoType=\"dijit.form.Button\">"+paramRequest.getLocaleString("up")+"</button>");
             out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"submit\" id=\"send\" value=\"" + paramRequest.getLocaleString("up") + "\"/>");
             out.println("</fieldset>");
             out.println("</form>");
@@ -330,14 +326,12 @@ public class SWBIntelliTransfer extends GenericResource {
             out.println("<legend>" + paramRequest.getLocaleString("existTpls") + "</legend>");
             out.println("<div class=\"swbform\">");
             out.println("<table width=\"75%\">");
-            //urlAction.setAction("savesite");
             Iterator<WebSite> itws = SWBContext.listWebSites();
             while (itws.hasNext()) {
                 WebSite ws = itws.next();
                 url.setMode("AdvancedMode");
                 url.setParameter("wsid", ws.getId());
                 out.println("<tr><td>");
-                //urlAction.setParameter("wsid", ws.getId());
                 out.println("<a href=\"" + url.toString() + "\" onclick=\"submitUrl('" + url.toString() + "',this);return false;\">" + ws.getDisplayTitle(paramRequest.getUser().getLanguage()) + "</a>");
                 out.println("</td>");
                 out.println("</tr>");
@@ -474,7 +468,7 @@ public class SWBIntelliTransfer extends GenericResource {
                     installAdvZip(wsite, zipFile);
                 }
 
-                response.setMode(response.Mode_VIEW);
+                response.setMode(SWBActionResponse.Mode_VIEW);
                 response.setRenderParameter("msgKey", "siteCreated");
                 response.setRenderParameter("wsUri", wsite.getURI());
             } catch (Exception e) {
@@ -482,7 +476,7 @@ public class SWBIntelliTransfer extends GenericResource {
             }
         } else if (response.getAction().equals("saveAdvanceMode")) {
             try {
-                ArrayList aSWBObjs=new ArrayList();
+                ArrayList<String> aSWBObjs=new ArrayList<>();
                 Enumeration enParams=request.getParameterNames();
                 while(enParams.hasMoreElements()){
                     String strParam=(String)enParams.nextElement();
@@ -499,9 +493,8 @@ public class SWBIntelliTransfer extends GenericResource {
                 WebSite wsite = (WebSite) semObject.createGenericInstance();
                 createNewFile(new File(request.getParameter("tmpFile")), wsite, aSWBObjs);
 
-                response.setMode(response.Mode_VIEW);
+                response.setMode(SWBActionResponse.Mode_VIEW);
                 response.setRenderParameter("msgKey", "siteCreated");
-                //response.setRenderParameter("wsUri", website.getURI());
             } catch (Exception e) {
                 log.error(e);
             }
@@ -544,8 +537,8 @@ public class SWBIntelliTransfer extends GenericResource {
 
             //Se lee el archivo .nt descomprimido y genero HashMap con llave igual a un uri unico del token 1(ej. xxx:template:2 y xxx:template:3)
             //y como valor se pone un ArrayList con todas las lineas que correspondan a ese uri
-            LinkedHashMap linkHmapObjs=new LinkedHashMap();
-            LinkedHashMap linkedHashMap=new LinkedHashMap(); //En este se pondran los antiguos Uris de Objetos
+            LinkedHashMap<String, ArrayList<String>> linkHmapObjs=new LinkedHashMap<>();
+            LinkedHashMap<String, String> linkedHashMap=new LinkedHashMap<>(); //En este se pondran los antiguos Uris de Objetos
             //String objUri=null;
             File fileModel = new File(modelspath + wsite.getId()+"_i_tmp" + "/" + oldIDModel + ".nt");
             BufferedReader reader = new BufferedReader(new FileReader(fileModel));
@@ -613,7 +606,7 @@ public class SWBIntelliTransfer extends GenericResource {
                                 if(!bisWebPageHome)
                                 {
                                     if(!linkHmapObjs.containsKey(objUri)){
-                                        ArrayList newArray=new ArrayList();
+                                        ArrayList<String> newArray=new ArrayList<>();
                                         newArray.add(line);
                                         linkHmapObjs.put(objUri, newArray);
 
@@ -625,7 +618,7 @@ public class SWBIntelliTransfer extends GenericResource {
                                             linkedHashMap.put(objUri, wsite.getHomePage().getURI());
                                         }
                                     }else{ //Agrega la linea a el arraylist
-                                        ArrayList alist=(ArrayList)linkHmapObjs.get(objUri);
+                                        ArrayList<String> alist=linkHmapObjs.get(objUri);
                                         alist.add(line);
                                         linkHmapObjs.remove(objUri);
                                         linkHmapObjs.put(objUri, alist);
@@ -638,8 +631,6 @@ public class SWBIntelliTransfer extends GenericResource {
             }
 
             reader.close();
-
-
             
             //Barrer Hash para para crear cada objeto y crear todas sus propiedades en un archivo
             File fileModified=new File(modelspath + wsite.getId()+"_i_tmp" + "/"+wsite.getId()+"_tmp.nt");
@@ -648,7 +639,7 @@ public class SWBIntelliTransfer extends GenericResource {
             while(itObjs.hasNext()){
                 String sobjOld=itObjs.next();
                 String uri2create=(String)linkedHashMap.get(sobjOld);
-                Iterator<String> itLines=((ArrayList)linkHmapObjs.get(sobjOld)).iterator();
+                Iterator<String> itLines=(linkHmapObjs.get(sobjOld)).iterator();
                 while(itLines.hasNext()){
                     String strLine=itLines.next();
                    
@@ -827,9 +818,9 @@ public class SWBIntelliTransfer extends GenericResource {
      */
     private void createNewFile(File file, WebSite wsite, ArrayList aSWBObjs) {
         try {
-            ArrayList aBlackList=new ArrayList();
+            ArrayList<String> aBlackList=new ArrayList<>();
             String wsid=wsite.getId();
-            LinkedList<String> linkedList=new LinkedList();
+            LinkedList<String> linkedList=new LinkedList<>();
             String path = SWBPortal.getWorkPath() + "/";
             String zipdirectory = path + "sitetemplates/";
             File filterdFile=new File(zipdirectory+wsid+".nt");
@@ -855,7 +846,7 @@ public class SWBIntelliTransfer extends GenericResource {
             File[] files2add = new File[2];
             File siteInfoFile = new File(zipdirectory + "siteInfo.xml");
             FileOutputStream siteInfoOut = new FileOutputStream(siteInfoFile);
-            StringBuffer strbr = new StringBuffer();
+            StringBuilder strbr = new StringBuilder();
             try {
                 strbr.append("<model>\n");
                 strbr.append("<id>" + wsid + "</id>\n");

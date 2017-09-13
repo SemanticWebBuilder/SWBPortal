@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.servlet.internal;
 
@@ -27,13 +27,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
-import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.portal.util.MultipartInputStream;
@@ -54,48 +55,7 @@ public class Upload implements InternalServlet
      * @see org.semanticwb.servlet.internal.InternalServlet#doProcess(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.servlet.internal.DistributorParams)
      */
     public void doProcess(HttpServletRequest request, HttpServletResponse response, DistributorParams dparams) throws IOException, ServletException {
-        //String repository=com.infotec.wb.core.db.DBUser.getInstance().getDefaultRepository();
-        //com.infotec.wb.core.WBUser admuser = com.infotec.wb.core.WBUserMgr.getInstance().getUser(request, repository);
-
-
-
         UploadFile upload = new UploadFile();
-
-        /*
-        if (admuser == null)
-        {
-            String sessionId = null;
-            if (request.getHeader("wbcookie") != null)
-            {
-                sessionId = request.getHeader("wbcookie");
-            } else if (request.getRequestURI().indexOf(";jsession=") > -1)
-            {
-                sessionId = request.getRequestURI().substring(request.getRequestURI().indexOf(";jsession="));
-            } else if (request.getParameter("jsession") != null)
-            {
-                sessionId = request.getParameter("jsession");
-            }
-
-            if (sessionId != null)
-            {
-                int pos = sessionId.indexOf("=");
-                if (pos != -1) sessionId = sessionId.substring(pos + 1);
-                admuser = com.infotec.wb.core.WBUserMgr.getInstance().getUser(sessionId,repository);
-                /*   ******************** checar metodo wb3
-                if (admuser != null)
-                {
-                    com.infotec.wb.core.WBUserMgr.getInstance().setRecHashMap(request.getSession().getId(), admuser);
-                }
-                * /
-            }
-        }
-        //System.out.println("admuser:"+admuser);
-        if (admuser == null)
-        {
-            response.sendError(500, "El usuario no existe... ");
-            return;
-        }
-        */
         upload.processRequest(request, response);
     }
 
@@ -204,7 +164,6 @@ class UploadFile
         length = req.getContentLength();
         boundary = s1.substring(s1.indexOf("boundary=") + 9);
         sis = new BufferedInputStream(req.getInputStream(), boundary.length() + 4);
-        //sis = req.getInputStream();
         debug("ContentType:" + s1);
         debug("length:" + length);
         debug("boundary:" + boundary);
@@ -222,7 +181,6 @@ class UploadFile
     public void processFile(String name) throws IOException
     {
         debug("processFile=" + name);
-        String s;
 
         MultipartInputStream mu = new MultipartInputStream(sis, boundary.getBytes());
 
@@ -236,7 +194,6 @@ class UploadFile
             byte b[] = new byte[5000];
             while ((ch = mu.read(b, 0, b.length)) != -1)
             {
-                //debug((char)ch);
                 f.write(b, 0, ch);
             }
         } catch (IOException e)
@@ -252,7 +209,7 @@ class UploadFile
     {
         debug("processParam=" + name);
         String s;
-        StringBuffer st = new StringBuffer();
+        StringBuilder st = new StringBuilder();
         while ((s = readLine()) != null)
         {
             if (s.equalsIgnoreCase(finalboundary))
@@ -353,7 +310,7 @@ class UploadFile
 
     public String readLine() throws IOException
     {
-        StringBuffer st = new StringBuffer();
+        StringBuilder st = new StringBuilder();
         int got = 0;
         int ch;
         while (got < 8192)

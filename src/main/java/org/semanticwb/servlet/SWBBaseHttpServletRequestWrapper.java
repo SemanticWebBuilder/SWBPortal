@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.servlet;
 
@@ -96,7 +96,7 @@ public class SWBBaseHttpServletRequestWrapper extends HttpServletRequestWrapper
             }
             return serverName;
         }
-        return super.getServerName();//com.infotec.appfw.util.AFUtils.getInstance().getEnv("wb/distributor");
+        return super.getServerName();
     }
 
     @Override

@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
@@ -31,9 +31,9 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Templates;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -44,42 +44,32 @@ import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-// TODO: Auto-generated Javadoc
 /**
  * Promo se encarga de desplegar y administrar un texto promocional con una
- * imagen opcional bajo ciertos criterios(configuraci?n de recurso). Es un recurso
- * que viene de la versi?n 2 de WebBuilder y puede ser instalado como recurso de
+ * imagen opcional bajo ciertos criterios(configuración de recurso). Es un recurso
+ * que viene de la versión 2 de WebBuilder y puede ser instalado como recurso de
  * estrategia o recurso de contenido.
  *
  * Promo displays and administrate a promocional text with an optional image
  * under criteria like configuration. This resource comes from WebBuilder 2 and can
  * be installed as content resource or a strategy resource.
  *
- * @Autor:Jorge Jiménez,Carlos Ramos
+ * @Autor:Jorge Jiménez
+ * @Autor:Carlos Ramos
  */
 
 public class Promo extends GenericResource {
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(Promo.class);
+    private static final Logger log = SWBUtils.getLogger(Promo.class);
 
     /** The tpl. */
     private Templates tpl;
 
-    /** The work path. */
-    private String workPath;
-
     /** The web work path. */
     private String webWorkPath;
-
-    /** The path. */
-    private String path = SWBPlatform.getContextPath() +"/swbadmin/xsl/Promo/";
-
-    /** The restype. */
-    private static String restype;
 
     private static final String Action_UPDATE = "update";
 
@@ -92,27 +82,15 @@ public class Promo extends GenericResource {
     public void setResourceBase(Resource base) {
         try {
             super.setResourceBase(base);
-            workPath    = SWBPortal.getWorkPath()+base.getWorkPath()+"/";
             webWorkPath = SWBPortal.getWebWorkPath()+base.getWorkPath()+"/";
-            restype = base.getResourceType().getResourceClassName();
         }catch(Exception e) {
             log.error("Error while setting resource base: "+base.getId() +"-"+ base.getTitle(), e);
         }
-//        if(!"".equals(base.getAttribute("template","").trim())) {
-//            try {
-//                tpl = SWBUtils.XML.loadTemplateXSLT(SWBPortal.getFileFromWorkPath(base.getWorkPath() +"/"+ base.getAttribute("template").trim()));
-//                path = webWorkPath;
-//            }catch(Exception e) {
-//                log.error("Error while loading resource template: "+base.getId(), e);
-//            }
-//        }
-//        if( tpl==null || Boolean.parseBoolean(base.getAttribute("deftmp"))) {
-            try {
-                tpl = SWBUtils.XML.loadTemplateXSLT(SWBPortal.getAdminFileStream("/swbadmin/xsl/Promo/PromoRightAligned.xsl"));
-            }catch(Exception e) {
-                log.error("Error while loading default resource template: "+base.getId(), e);
-            }
-//        }
+        try {
+            tpl = SWBUtils.XML.loadTemplateXSLT(SWBPortal.getAdminFileStream("/swbadmin/xsl/Promo/PromoRightAligned.xsl"));
+        }catch(Exception e) {
+            log.error("Error while loading default resource template: "+base.getId(), e);
+        }
     }
 
     /**
@@ -205,7 +183,6 @@ public class Promo extends GenericResource {
             Templates curtpl;
             try {
                 curtpl = SWBUtils.XML.loadTemplateXSLT(SWBPortal.getFileFromWorkPath(base.getWorkPath() +"/"+ base.getAttribute("template").trim()));
-                path = webWorkPath;
             }catch(Exception e) {
                 curtpl = tpl;
             }
@@ -536,22 +513,7 @@ public class Promo extends GenericResource {
     private String render(SWBParamRequest paramRequest) throws SWBResourceException {
         StringBuilder out = new StringBuilder();
         Resource base=getResourceBase();
-
-        int width;
-        try {
-            width = Integer.parseInt(base.getAttribute("width","0"));
-        }catch(NumberFormatException nfe) {
-            width = 0;
-        }
-        int height;
-        try {
-            height = Integer.parseInt(base.getAttribute("height","0"));
-        }catch(NumberFormatException nfe) {
-            height = 0;
-        }
-
         String title = base.getAttribute("title");
-
         String subtitle = base.getAttribute("subtitle");
 
         if(base.getAttribute("imgfile")==null)
@@ -597,7 +559,6 @@ public class Promo extends GenericResource {
             }
 
             //image
-            String margin = "";
             StringBuilder img = new StringBuilder("");
             if(imgfile != null) {
                 boolean hasLink = base.getAttribute("more")==null && url!=null;
@@ -619,7 +580,6 @@ public class Promo extends GenericResource {
                     if(caption != null)
                         img.append("<h6><span>"+caption+"</span></h6> \n");
                     img.append("</div>\n");
-                    margin = "margin-right:"+(imgWidth+20)+"px;";
                     out.append(img);
                 }else if(imgPos == 4) {
                     img.append("<div style=\"text-align:center; float:left; margin:10px\">");
@@ -639,7 +599,6 @@ public class Promo extends GenericResource {
                     if(caption != null)
                         img.append("<h6><span>"+caption+"</span></h6> \n");
                     img.append("</div>\n");
-                    margin = "margin-left:"+(imgWidth+20)+"px;";
                     out.append(img);
                 }else if(imgPos == 2) {
                     img.append("<div style=\"text-align:center; float:right; margin:10px;\">");
@@ -776,203 +735,6 @@ public class Promo extends GenericResource {
     }
 
     /**
-     * Obtiene las ligas de redireccionamiento del promocional.
-     *
-     * @param paramRequest the param request
-     * @param base the base
-     * @return the url html
-     */
-//    private String getUrlHtml(SWBParamRequest paramRequest, Resource base) {
-//        StringBuffer ret = new StringBuffer("");
-//        SWBResourceURL wburl = paramRequest.getActionUrl();
-//
-//        ret.append("<a href=\"" + wburl.toString() + "\"");
-//        if("0".equals(base.getAttribute("uline", "0").trim())) {
-//            ret.append(" style=\"text-decoration:none;\"");
-//        }
-//        if(Boolean.parseBoolean(base.getAttribute("target","true"))) {
-//            ret.append(" target=\"_blank\"");
-//        }
-//        ret.append("> \n");
-//        return ret.toString();
-//    }
-
-    /**
-     * Obtiene la imagen del promocional asi como su posicionamiento (en caso de
-     * existir).
-     *
-     * @param reqParams the req params
-     * @param base the base
-     * @return the img promo
-     */
-//    private String getImgPromo(SWBParamRequest reqParams, Resource base) {
-//        StringBuilder ret = new StringBuilder("");
-//        String position = base.getAttribute("pos", "3").trim();
-//        String img=base.getAttribute("img", "").trim();
-//        String url=base.getAttribute("url", "").trim();
-//
-//        if("1".equals(position)) {
-//            ret.append(getImgHtml(reqParams, base));
-//            if(!img.endsWith(".swf")) {
-//                ret.append(" align=\"left\" vspace=\"1\" hspace=\"5\" /> \n");
-//            }
-//            ret.append(getTextHtml(base));
-//        }else if("2".equals(position)) {
-//            ret.append(getTextHtml(base));
-//            if(!"".equals(url)) {
-//                ret.append("</a> \n");
-//            }
-//            ret.append("</td> \n");
-//            ret.append("<td> \n");
-//            if(!"".equals(url)) {
-//                ret.append(getUrlHtml(reqParams, base));
-//            }
-//            ret.append(getImgHtml(reqParams, base));
-//            if(!img.endsWith(".swf")) {
-//                ret.append(" align=\"left\" vspace=\"1\" hspace=\"5\" /> \n");
-//            }
-//        }else if("3".equals(position)) {
-//            ret.append("<center> \n");
-//            ret.append(getImgHtml(reqParams, base));
-//            if(!img.endsWith(".swf")) {
-//                ret.append(" align=\"left\" /> \n");
-//            }
-//            ret.append("</center> \n");
-//            if(!"".equals(url)) {
-//                ret.append("</a> \n");
-//            }
-//            ret.append("</td> \n");
-//            ret.append("</tr> \n");
-//            ret.append("<tr> \n");
-//            ret.append("<td> \n");
-//            if(!"".equals(url)) {
-//                ret.append(getUrlHtml(reqParams, base));
-//            }
-//            ret.append(getTextHtml(base));
-//        }else if ("4".equals(position)) {
-//            ret.append(getImgHtml(reqParams, base));
-//            if(!img.endsWith(".swf")) {
-//                ret.append(" align=\"right\" vspace=\"1\" hspace=\"10\" /> \n");
-//            }
-//            ret.append(getTextHtml(base));
-//        }else if("5".equals(position)) {
-//            ret.append(getImgHtml(reqParams, base));
-//            if(!img.endsWith(".swf")) {
-//                ret.append(" /> \n");
-//            }
-//            if(!"".equals(url)) {
-//                ret.append("</a> \n");
-//            }
-//            ret.append("</td> \n");
-//            ret.append("<td> \n");
-//            if(!"".equals(url)) {
-//                ret.append(getUrlHtml(reqParams, base));
-//            }
-//            ret.append(getTextHtml(base));
-//        }else if("6".equals(position)) {
-//            ret.append(getTextHtml(base));
-//            if(!"".equals(url)) {
-//                ret.append("</a> \n");
-//            }
-//            ret.append("</td> \n");
-//            ret.append("</tr> \n");
-//            ret.append("<tr> \n");
-//            ret.append("<td> \n");
-//            if(!"".equals(url)) {
-//                ret.append(getUrlHtml(reqParams, base));
-//            }
-//            ret.append(getImgHtml(reqParams, base));
-//            if(!img.endsWith(".swf")) {
-//                ret.append(" /> \n");
-//            }
-//        }else if("7".equals(position)) {
-//            ret.append(getTextHtml(base));
-//            ret.append(getImgHtml(reqParams, base));
-//            if(!img.endsWith(".swf")) {
-//                ret.append(" align=\"left\" vspace=\"1\" hspace=\"5\" /> \n");
-//            }
-//        }else if("8".equals(position)) {
-//            ret.append(getTextHtml(base));
-//            ret.append(getImgHtml(reqParams, base));
-//            if(!img.endsWith(".swf")) {
-//                ret.append(" align=\"right\" vspace=\"1\" hspace=\"10\" /> \n");
-//            }
-//        }
-//        return ret.toString();
-//    }
-
-    /**
-     * Obtiene el html de la imagen.
-     *
-     * @param paramRequest the param request
-     * @param base the base
-     * @return the img html
-     */
-//    private String getImgHtml(SWBParamRequest paramRequest, Resource base) {
-//        StringBuilder ret = new StringBuilder("");
-//        String width=base.getAttribute("width", "");
-//        String height=base.getAttribute("height", "");
-//
-//        if(base.getAttribute("img", "").trim().endsWith(".swf")) {
-//            ret.append("<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=5,0,0,0\"");
-//            if(!"".equals(width)) {
-//                ret.append(" width=\"" + width + "\"");
-//            }
-//            if(!"".equals(height)) {
-//                ret.append(" height=\"" + height + "\"");
-//            }
-//            ret.append("> \n");
-//            ret.append("<param name=movie value=\""+ webWorkPath +"/"+ base.getAttribute("img").trim() +"\"> \n");
-//            ret.append("<param name=quality value=high> \n");
-//            ret.append("<embed src=\""+ webWorkPath +"/"+ base.getAttribute("img").trim());
-//            ret.append("\" quality=high pluginspage=\"http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash\" type=\"application/x-shockwave-flash\"");
-//            if (!"".equals(width)) ret.append(" width=\"" + width + "\"");
-//            if (!"".equals(height)) ret.append(" height=\"" + height + "\"");
-//            ret.append("> \n");
-//            ret.append("</embed> \n");
-//            ret.append("</object> \n");
-//        }else {
-//            String border = (String)paramRequest.getArguments().get("border");
-//            ////ret.append("<div>");
-//            ret.append("<img alt=\"\" src=\""+ webWorkPath +"/"+ base.getAttribute("img").trim() +"\"");
-//            if(border != null && !"".equals(border.trim())) {
-//                ret.append(" border=\""+ border +"\"");
-//            }else {
-//                ret.append(" border=\"0\"");
-//            }
-//            if(!"".equals(width)) {
-//                ret.append(" width=\""+ width +"\"");
-//            }
-//            if(!"".equals(height)) {
-//                ret.append(" height=\""+ height +"\"");
-//            }
-//       }
-//        return ret.toString();
-//    }
-
-    /**
-     * Obtiene el texto del promocional ya armado.
-     *
-     * @param base the base
-     * @return the text html
-     */
-//    private String getTextHtml(Resource base) {
-//        StringBuilder ret = new StringBuilder("");
-//        if(!"".equals(base.getAttribute("text", ""))) {
-//            if(!"".equals(base.getAttribute("textcolor", ""))) {
-//                ret.append("<font color=\""+base.getAttribute("textcolor")+"\"> \n");
-//            }
-//            ////ret.append("<h2 style=\"text-align:justify\">" + base.getAttribute("text").trim() + "</h2>");
-//            ret.append(base.getAttribute("text")+"\n");
-//            if(!"".equals(base.getAttribute("textcolor", ""))) {
-//                ret.append("</font> \n");
-//            }
-//        }
-//        return ret.toString();
-//    }
-
-
-    /**
      * Process action.
      *
      * @param request the request
@@ -991,28 +753,13 @@ public class Promo extends GenericResource {
                 response.sendRedirect(url);
             }
         }else if(SWBActionResponse.Action_EDIT.equals(action)) {
-            /*try {
-                edit(request, response);
-                if( Boolean.parseBoolean(base.getAttribute("wbNoFile_imgfile")) ) {
-                    File file = new File(SWBPortal.getWorkPath()+base.getWorkPath()+"/"+base.getAttribute("imgfile"));
-                    if(file.exists() && file.delete()) {
-                        base.removeAttribute("imgfile");
-                        base.removeAttribute("wbNoFile_imgfile");
-                    }
-                }
-                base.updateAttributesToDB();
-                response.setAction(Action_UPDATE);
-            }catch(FileNotFoundException fne) {
-                log.info(fne.getMessage());
-            }catch(Exception e) {
-                log.error(e);
-            }*/
+            
         }
     }
 
     @Override
     public void doAdmin(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        response.setContentType("text/html; charset=utf-8");//ISO-8859-1
+        response.setContentType("text/html; charset=utf-8");
         response.setHeader("Cache-Control","no-cache");
         response.setHeader("Pragma","no-cache");
         
@@ -1067,8 +814,6 @@ public class Promo extends GenericResource {
         Resource base=getResourceBase();
         StringBuilder htm = new StringBuilder();
         final String path = SWBPortal.getWebWorkPath()+base.getWorkPath()+"/";
-
-        //final SWBResourceURL url = paramRequest.getActionUrl().setAction(SWBParamRequest.Action_EDIT);
         final SWBResourceURL url = paramRequest.getRenderUrl().setAction("update");
 
         htm.append("<script type=\"text/javascript\">\n");
@@ -1249,41 +994,6 @@ public class Promo extends GenericResource {
         htm.append("              <area title=\"6\" shape=\"rect\" coords=\"48,21,68,40\" alt=\"6.- Abajo\" onclick=\"dojo.byId('imgPos').value='6'\"/>\n");
         htm.append("          </map>\n");
         htm.append("        </li>\n");
-//        htm.append("        <li>\n");
-//        htm.append("          <table border=\"0\" width=\"100%\">\n");
-//        htm.append("          <tr>\n");
-//        htm.append("             <td class=\"datos\" width=\"200px\" align=\"right\">\n");
-//        htm.append("                Color del texto(hexadecimal)\n");
-//        htm.append("             </td>\n");
-//        htm.append("             <td class=\"valores\">\n");
-//        htm.append("                <input type=\"text\" id=\"textcolor\" name=\"textcolor\" value=\""+base.getAttribute("textcolor","#000000")+"\" maxlength=\"7\" />\n");
-//        htm.append("                <span style=\"background-color:"+base.getAttribute("textcolor","#000000")+";\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>\n");
-//        htm.append("             </td>\n");
-//        htm.append("          </tr>\n");
-//        htm.append("          </table>\n");
-//        htm.append("        </li>\n");
-//        htm.append("        <li>\n");
-//        htm.append("          <script type=\"text/javascript\">\n");
-//        htm.append("          <!--\n");
-//        htm.append("          dojo.require(\"dijit.ColorPalette\");\n");
-//        htm.append("          dojo.addOnLoad(function(){\n");
-//        htm.append("            var myPalette = new dijit.ColorPalette( {palette:\"7x10\", onChange: function(val){ dojo.byId('textcolor').value=val; dojo.byId('pselcolor').style.color=val;\n");
-//        htm.append("            dojo.byId('pselcolor').innerHTML=val;}}, \"cptextcolor\" );\n");
-//        htm.append("          });\n");
-//        htm.append("          -->\n");
-//        htm.append("          </script>\n");
-//        htm.append("          <table border=\"0\" width=\"100%\">\n");
-//        htm.append("            <tr>\n");
-//        htm.append("                <td class=\"datos\" width=\"200\" align=\"right\">\n");
-//        htm.append("                    Otro color de texto\n");
-//        htm.append("                    <span id=\"pselcolor\"></span>\n");
-//        htm.append("                </td>\n");
-//        htm.append("                <td class=\"valores\">\n");
-//        htm.append("                    <div id=\"cptextcolor\"></div>\n");
-//        htm.append("                </td>\n");
-//        htm.append("             </tr>\n");
-//        htm.append("          </table>\n");
-//        htm.append("        </li>\n");
         
         htm.append("        <li class=\"swbform-li\">\n");
         htm.append("            <script type=\"text/javascript\">\n");
@@ -1542,7 +1252,6 @@ public class Promo extends GenericResource {
         htm.append("</map>\n");
         htm.append("        </li>        \n");
         
-        
         htm.append("   </ul>\n");
         htm.append("</fieldset>\n");
         htm.append("</div>\n");
@@ -1552,7 +1261,13 @@ public class Promo extends GenericResource {
         htm.append("    <legend>Plantilla</legend>\n");
         htm.append("    <ul class=\"swbform-ul\">\n");
         htm.append("      <li class=\"swbform-li\">\n");
-        htm.append("        <label for=\"deftmp\" class=\"swbform-label\">Usar plantilla por defecto: <a href=\"#\">PromoRightAligned.xsl</a></label>\n");
+        
+        htm.append("        <label for=\"deftmp\" class=\"swbform-label\">Usar plantilla por defecto: <a href=\"");
+        htm.append(SWBPlatform.getContextPath());
+        htm.append("/showfile?file=/swbadmin/xsl/Promo/PromoRightAligned.xsl&pathType=def&resUri=");
+        htm.append(this.getResourceBase().getSemanticObject().getEncodedURI());
+        htm.append("&attr=template");
+        htm.append("\">PromoRightAligned.xsl</a></label>\n");
         htm.append("        <input type=\"checkbox\" id=\"deftmp\" name=\"deftmp\" value=\"true\" ");
         if(Boolean.parseBoolean(base.getAttribute("deftmp")))
             htm.append(" checked=\"checked\" ");
@@ -1564,8 +1279,13 @@ public class Promo extends GenericResource {
         htm.append("      </li>\n");
         htm.append("      <li class=\"swbform-li\">\n");
         htm.append("        <label class=\"swbform-label\"></label>\n");
-        if(base.getAttribute("template")!=null)
-          htm.append("      <a href=\"#\">"+base.getAttribute("template")+"</a>\n");
+        if (base.getAttribute("template")!=null) {
+            htm.append("      <a href=\"");
+            htm.append(SWBPlatform.getContextPath());
+            htm.append(("/showfile?file=" + base.getWorkPath() + "/" + base.getAttribute("template") + "&pathType=res&resUri="));
+            htm.append(this.getResourceBase().getSemanticObject().getEncodedURI());
+            htm.append(("&attr=template\">"+base.getAttribute("template") + "</a>"));
+        }
         htm.append("      </li>\n");
         if(base.getAttribute("template")!=null) {
             htm.append("  <li class=\"swbform-li\">\n");

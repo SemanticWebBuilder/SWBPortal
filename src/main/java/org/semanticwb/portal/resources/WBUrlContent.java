@@ -22,35 +22,43 @@
  */
 package org.semanticwb.portal.resources;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Enumeration;
 import java.util.Properties;
-import javax.servlet.http.*;
+import java.util.StringTokenizer;
 
-import org.w3c.dom.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
+import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Resource;
 import org.semanticwb.model.WebPage;
+import org.semanticwb.portal.admin.admresources.util.XmlBundle;
 import org.semanticwb.portal.api.GenericAdmResource;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
-import org.semanticwb.portal.admin.admresources.util.XmlBundle;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
-import com.arthurdo.parser.*;
-import org.semanticwb.SWBPortal;
+import com.arthurdo.parser.HtmlStreamTokenizer;
+import com.arthurdo.parser.HtmlTag;
 
-// TODO: Auto-generated Javadoc
 /**
  * WBUrlContent recupera el contenido de una página web externa y la incrusta como contenido local.
  *
  * WBUrl retrieve a external web page and embeded it like local content.
  *
- * @Autor:  Jorge Jimenez
+ * @Autor: Jorge Jimenez
  */
 
 public class WBUrlContent extends GenericAdmResource {
@@ -125,7 +133,7 @@ public class WBUrlContent extends GenericAdmResource {
         if(base.getAttribute("msg2")!=null) msg2=base.getAttribute("msg2");
         if(msg1==null) msg1 = paramRequest.getLocaleString("msg1") + ":";
         if(msg2==null) msg2 = paramRequest.getLocaleString("msg2") + ":";
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         try{
             //TODO. cambiar SWBUtils.XML.xmlToDom(base.getXml()) por el método base.getDom()
             Document dom = SWBUtils.XML.xmlToDom(base.getXml());
@@ -134,7 +142,7 @@ public class WBUrlContent extends GenericAdmResource {
             }
             ret.append("<!-- <content id=\"" + base.getId() + "\"/> -->");
             String param = "";
-            StringBuffer othersparam = new StringBuffer();
+            StringBuilder othersparam = new StringBuilder();
             try {
                 if(request.getParameter("urlwb") == null) {
                     NodeList url = dom.getElementsByTagName("url");
@@ -206,7 +214,7 @@ public class WBUrlContent extends GenericAdmResource {
      * @throws SWBResourceException the sWB resource exception
      * @return
      */    
-    public StringBuffer CorrigeRuta(String surl, WebPage topic, String param, StringBuffer othersparam, HttpServletRequest request, SWBParamRequest paramRequest) throws SWBResourceException {
+    public StringBuilder CorrigeRuta(String surl, WebPage topic, String param, StringBuilder othersparam, HttpServletRequest request, SWBParamRequest paramRequest) throws SWBResourceException {
         Resource base=getResourceBase();
         String OriPath = surl;
         String cadCod = null;
@@ -226,8 +234,7 @@ public class WBUrlContent extends GenericAdmResource {
         String valueHex = "";
         String surlfile = "";
         String surlfileHex = "";
-        String sruta = "";
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         NodeList tagbcawb = dom.getElementsByTagName("tagbcawb");
         String stagbcawb = "bca";
         if(tagbcawb.getLength() > 0)
@@ -238,9 +245,6 @@ public class WBUrlContent extends GenericAdmResource {
         if(NInfoSource.getLength() > 0)
             iInfoSource = Integer.parseInt(NInfoSource.item(0).getChildNodes().item(0).getNodeValue().trim());
         
-        String baserut = (String) SWBPlatform.getContextPath();
-        sruta = (String) SWBPlatform.getEnv("wb/distributor") + "/";
-        //String envia = baserut + sruta + topic.getMap().getId() + "/" + topic.getId() + "/" + base.getId();
         String envia = paramRequest.getRenderUrl().toString();
         if (!surl.toLowerCase().startsWith("http://") && !surl.toLowerCase().startsWith("https://"))
             surl = "http://" + surl;
@@ -384,7 +388,7 @@ public class WBUrlContent extends GenericAdmResource {
                         if (tag.getTagString().toLowerCase().equals(stagbcawb)) {
                             if (!tag.isEndTag()) {
                                 ret = null;
-                                ret = new StringBuffer();
+                                ret = new StringBuilder();
                                 if (iInfoSource == 1) {
                                     ret.append("\n<br><font face=\"Arial\" color=\"#666666\" size=\"1\">" + msg1 + "</font><a href=\"" + host + "\" target=\"newWindowOriginal\"><font face=\"Arial\" color=\"#666666\" size=\"1\">" + host + "</font></a>,<br>");
                                     ret.append("<font face=\"Arial\" color=\"#666666\" size=\"1\">" + msg2 + "</font><a href=\"" + OriPath + "\" target=\"newWindowOriginal\"><font face=\"Arial\" color=\"#666666\" size=\"1\">" + OriPath + "</font></a><p>");
@@ -421,7 +425,7 @@ public class WBUrlContent extends GenericAdmResource {
                                 }
                                 if (value.startsWith("http://localhost") || value.startsWith("https://localhost")) {
                                     pos = -1;
-                                    pos = value.indexOf("/", 7); // 7 es numero m�gico
+                                    pos = value.indexOf("/", 7); // 7 es numero mágico
                                     if (pos != -1)
                                         value = host + value.substring(pos + 1);
                                 }
@@ -433,7 +437,7 @@ public class WBUrlContent extends GenericAdmResource {
                                 ret.append(name);
                                 ret.append("=\"");
                                 boolean hexa = true;
-                                String cadena = null; // por que esta tabulaci�n?
+                                String cadena = null; // por que esta tabulación?
                                 int lenghthost = 0;
                                 if (value != null && host != null && value.length() >= host.length() && value.startsWith("http://")) {
                                     lenghthost = host.length();
@@ -443,7 +447,7 @@ public class WBUrlContent extends GenericAdmResource {
                                 } else if (value != null && host != null && value.length() < host.length() && value.startsWith("http://"))
                                     hexa = false;
                                 
-                                //Para imprimir codificaci�n correcta
+                                //Para imprimir codificación correcta
                                 if (tag.getTagString().toLowerCase().equals("meta")) {
                                     int posCodifica = -1;
                                     posCodifica = tag.toString().indexOf("charset=");
@@ -562,8 +566,7 @@ public class WBUrlContent extends GenericAdmResource {
             return null;
         }
         if (cadCod != null) {
-            StringBuffer ret1 = new StringBuffer();
-            int posCod = -1;
+            StringBuilder ret1 = new StringBuilder();
             pos = cadCod.indexOf("charset=");
             if (pos != -1) {
                 try {
@@ -581,7 +584,7 @@ public class WBUrlContent extends GenericAdmResource {
             if (ret1 != null)
                 return ret1;
         }else if(base.getAttribute("charset")!=null){
-            StringBuffer ret1 = new StringBuffer();
+            StringBuilder ret1 = new StringBuilder();
             try {
                 ret1.append(SWBUtils.TEXT.decode(ret.toString(), base.getAttribute("charset")));
             } catch (Exception e) {
@@ -630,7 +633,7 @@ public class WBUrlContent extends GenericAdmResource {
      * @return the string
      */
     String ParseWord(String value, String ext, String ruta) { // Parsea locations de javascript.
-        StringBuffer aux = new StringBuffer(value.length());
+        StringBuilder aux = new StringBuilder(value.length());
         int off = 0;
         int f = 0;
         int i = 0;
@@ -693,28 +696,20 @@ public class WBUrlContent extends GenericAdmResource {
      * @return the string
      */    
     private String findImagesInScript(String value, String ext, String ruta) {
-        StringBuffer aux = new StringBuffer(value.length());
+        StringBuilder aux = new StringBuilder(value.length());
         int off = 0;
         int f = 0;
         int i = 0;
-        int j = 0;
         do {
             f = value.indexOf(ext, off);
             i = value.lastIndexOf("'", f);
-            j = value.lastIndexOf("/", f);
             if (f > 0 && i >= 0) {
                 i++;
                 if (value.startsWith("http://", i)) {
                     aux.append(value.substring(off, f + ext.length()));
                 } else {
-                    //aux.append(value.substring(off,i)+ruta+value.substring(j+1,f+ext.length()));
                     aux.append(value.substring(off, i) + ruta + value.substring(i, f + ext.length()));
                 }
-                /*
-                else if(value.startsWith("/",i)){
-                    aux.append(value.substring(off,i)+ruta+value.substring(i,f+ext.length()));
-                }
-                 */
                 off = f + ext.length();
             }
         } while (f > 0 && i > 0);
@@ -726,11 +721,11 @@ public class WBUrlContent extends GenericAdmResource {
     /**
      * Codifica un String.
      * @param cadena El String a codificar.
-     * @return Regresa la representaci�n en String del argumento en hexadecimal (base 16).
+     * @return Regresa la representación en String del argumento en hexadecimal (base 16).
      * @see java.lang.Integer#toHexString(int)
      */
     public String CodificaCadena(String cadena) {
-        StringBuffer cadeCodHex = new StringBuffer();
+        StringBuilder cadeCodHex = new StringBuilder();
         byte[] cadenaB = cadena.getBytes();
         for (int i = 0; i < cadenaB.length; i++) {
             Integer numbyte = new Integer(cadenaB[i]);
@@ -749,7 +744,7 @@ public class WBUrlContent extends GenericAdmResource {
      * @return
      */    
     public String DeCodificaCadena(String cadena, WebPage topic) throws SWBResourceException {
-        StringBuffer cadeDecoHex = new StringBuffer();
+        StringBuilder cadeDecoHex = new StringBuilder();
         try {
             for (int i = 0; i < cadena.length(); i = i + 2) {
                 int pedazo = Integer.parseInt(cadena.substring(i, i + 2), 16);
@@ -769,7 +764,6 @@ public class WBUrlContent extends GenericAdmResource {
      * @return the url encode params
      */
     String getUrlEncodeParams(String params) {
-        //String post = "_url_gracias=" + URLEncoder.encode( "gracias.html" ) + "&que=" + URLEncoder.encode( "Comentario" );
         if (params != null && params.length() > 1) {
             if (params.charAt(0) == '?') params = params.substring(1);
             StringTokenizer st = new StringTokenizer(params, "&");

@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources.sem.calendar;
 
@@ -38,8 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.servlet.RequestDispatcher;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.fileupload.FileItem;
 import org.json.JSONObject;
 import org.semanticwb.Logger;
@@ -51,7 +54,10 @@ import org.semanticwb.base.util.SWBMail;
 import org.semanticwb.model.User;
 import org.semanticwb.model.WebPage;
 import org.semanticwb.platform.SemanticObject;
-import org.semanticwb.portal.api.*;
+import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceURL;
 import org.semanticwb.servlet.internal.UploadFormElement;
 
 public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.CalendarBase 
@@ -117,23 +123,23 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
         response.setHeader("Pragma", "no-cache");
         String page = request.getParameter("pagen");
         
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         SWBResourceURL url = paramRequest.getRenderUrl();
 
         url.setCallMethod(SWBResourceURL.Call_CONTENT);
         SWBResourceURL url1 = paramRequest.getActionUrl();
         url.setCallMethod(SWBResourceURL.Call_CONTENT);
         org.semanticwb.portal.resources.sem.calendar.Calendar calen = (org.semanticwb.portal.resources.sem.calendar.Calendar)getSemanticObject().createGenericInstance();
-        Iterator it = calen.listEventses();
-        ArrayList ordEvts = new ArrayList();
+        Iterator<Event> it = calen.listEventses();
+        ArrayList<Event> ordEvts = new ArrayList<>();
         while(it.hasNext()) {
-            Event ev = (Event)it.next();
+            Event ev = it.next();
             ordEvts.add(ev);
         }
-        Collections.sort(ordEvts, new Comparator() {
-            public int compare(Object o1, Object o2) {
-                Event p1 = (Event) o1;
-                Event p2 = (Event) o2;
+        Collections.sort(ordEvts, new Comparator<Event>() {
+            public int compare(Event o1, Event o2) {
+                Event p1 = o1;
+                Event p2 = o2;
                 int i = -(new Long(p1.getUpdated().getTime()).compareTo(new Long(p2.getUpdated().getTime())));
                 if (i == 0) {
                     i = -(new Long(p1.getCreated().getTime()).compareTo(new Long(p2.getCreated().getTime())));
@@ -144,7 +150,6 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
 
         it = ordEvts.listIterator();
         int ps = calen.getPaginationEvents() == 0 ? 15 : calen.getPaginationEvents();
-        //int l = evts.size();
         int l = ordEvts.size();
         int p = 0;
         if(page != null) {
@@ -171,7 +176,6 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
             String evEnd = ev.getEventEndDate() == null ? " " : ev.getEventEndDate();
             buf.append("<div class=\"listBoxes\">");
             buf.append("   <div class=\"listBox1\">" + SWBUtils.TEXT.encode(title,SWBUtils.TEXT.CHARSET_UTF8) + "</div>");
-            //SWBUtils.TEXT.encode(site.getDisplayTitle(lang), SWBUtils.TEXT.CHARSET_UTF8)
             buf.append("   <div class=\"listBox1\">" + evInit + "</div>");
             buf.append("   <div class=\"listBox1\">" + evEnd + "</div>");
             buf.append("   <div class=\"listBox2\">");
@@ -245,7 +249,7 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
         org.semanticwb.portal.resources.sem.calendar.Calendar cal = (org.semanticwb.portal.resources.sem.calendar.Calendar)getSemanticObject().createGenericInstance();//(org.semanticwb.portal.resources.sem.calendar.Calendar) base.getSemanticObject().createGenericInstance();
         String value = request.getParameter("month");
         int mont = 0, year=0;
-        HashMap eventMonth = new HashMap();
+        HashMap<Integer, ArrayList<Event>> eventMonth = new HashMap<>();
         try {
             mont = Integer.parseInt(value);
         } catch(NumberFormatException e) {
@@ -258,12 +262,12 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
             log.error("Error while convert year in ScheduledEvents: " + e);
         }
         if(mont > 0 && year > 0) {
-            Iterator ist=null;
+            Iterator<Event> ist=null;
 
             ist = cal.listEventses();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             while(ist.hasNext()) {
-                Event ev = (Event)ist.next();
+                Event ev = ist.next();
                 try {
                     if(ev.getEventInitDate() != null) {
                         int valueMonth=sdf.parse(ev.getEventInitDate()).getMonth()+1;
@@ -286,10 +290,10 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
                         }
 
                         if(((mont == valueMonth) && (year == year1)) || (isYearly && year >= year2) || (isMonthly && year >= year2 ) || (isWeekly && year >= year2)) {
-                            ArrayList listEvents = new ArrayList();
+                            ArrayList<Event> listEvents = new ArrayList<>();
                             if((!isWeekly && year <= year2 && mont <= valMonthEndEvt && mont >= valueMonth && year >= year1) || (!isWeekly && mont >= valueMonth && year >= year1 && ev.getEventEndDate() == null)) {
                                 if(eventMonth.containsKey(valueDay)) {
-                                    listEvents = (ArrayList)eventMonth.get(valueDay);
+                                    listEvents = eventMonth.get(valueDay);
                                     listEvents.add(ev);
                                     eventMonth.remove(valueDay);
                                 } else {
@@ -302,7 +306,7 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
                                 while(it.hasNext()) {
                                     int day = Integer.parseInt(it.next().toString());
                                     if(eventMonth.containsKey(day)) {
-                                        listEvents = (ArrayList)eventMonth.get(day);
+                                        listEvents = eventMonth.get(day);
                                         listEvents.add(ev);
                                         eventMonth.remove(day);
                                     } else {
@@ -384,7 +388,7 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
         return objJSONEvents;
     }
     private ArrayList getWeekly(Event event, int month, int year){
-        ArrayList daysWeekly = new ArrayList();
+        ArrayList daysWeekly = new ArrayList<>();
         int dayInEvt, dayInMonth = 0;
         if(event.getPeriodicity().equals("weekly")) {
             try {
@@ -720,7 +724,7 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
             cal.removeEvents(evt);
 
             response.setMode("viewEvts");
-            response.setCallMethod(response.Call_CONTENT);
+            response.setCallMethod(SWBActionResponse.Call_CONTENT);
         } else if(action.equals("saveSubCal")) {
             Calendar cal = (Calendar)getSemanticObject().createGenericInstance();
 
@@ -742,7 +746,7 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
     private void sendMailEvt(Event ev, String subjEs, String subjEn, String bodyEs, String bodyEn) {
             org.semanticwb.portal.resources.sem.calendar.Calendar cal = (Calendar) getSemanticObject().createGenericInstance();
             Iterator <CalendarSubscription> subs = CalendarSubscription.ClassMgr.listCalendarSubscriptionByCalendarSubscription(cal);
-            ArrayList usersCalSubs = new ArrayList();
+            ArrayList<User> usersCalSubs = new ArrayList<>();
 
             while(subs.hasNext()) {
                 CalendarSubscription subscription = subs.next();
@@ -805,7 +809,6 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
             while (itfilesUploaded.hasNext()) {
                 FileItem item = (FileItem) itfilesUploaded.next();
                 if (!item.isFormField()) { //Es un campo de tipo file
-                    int fileSize = ((Long) item.getSize()).intValue();
                     String value = item.getName();
                     if (value != null && value.trim().length() > 0) {
                         value = value.replace("\\", "/");
@@ -837,9 +840,6 @@ public class Calendar extends org.semanticwb.portal.resources.sem.calendar.base.
                             try {
                                 item.write(fichero);
                                 ImageResizer.shrinkTo(fichero, 120, 97, fichero, ext);
-                                //ImageResizer.resize(fichero, 336, 224, true, fichero, ext);
-                                //ImageResizer.shrinkTo(fichero, 281, 187, fichero, ext);
-                                //ImageResizer.shrinkTo(fichero, 90, 67, fichero, ext);
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 log.debug(e);

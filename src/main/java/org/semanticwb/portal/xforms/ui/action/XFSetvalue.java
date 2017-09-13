@@ -97,7 +97,7 @@ public class XFSetvalue extends XformsBaseImp
      */
     @Override
     public String getXml() {
-        StringBuffer strbXml=new StringBuffer();
+        StringBuilder strbXml=new StringBuilder();
         try {
             strbXml.append("<setvalue");
             

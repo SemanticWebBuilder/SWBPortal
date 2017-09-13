@@ -70,7 +70,7 @@ public class XFForm extends WBXformsContainer
      */
     @Override
     public String getXml() {
-        StringBuffer strb=new StringBuffer();
+        StringBuilder strb=new StringBuilder();
         strb.append(show());
         return strb.toString();
     }

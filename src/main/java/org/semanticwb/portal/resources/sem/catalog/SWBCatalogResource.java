@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,13 +18,10 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources.sem.catalog;
 
-import com.hp.hpl.jena.rdf.model.NodeIterator;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import org.semanticwb.model.User;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -36,8 +33,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBUtils;
@@ -49,6 +48,7 @@ import org.semanticwb.model.Resource;
 import org.semanticwb.model.SWBComparator;
 import org.semanticwb.model.SWBModel;
 import org.semanticwb.model.Traceable;
+import org.semanticwb.model.User;
 import org.semanticwb.model.UserRepository;
 import org.semanticwb.model.WebSite;
 import org.semanticwb.model.base.FormElementBase;
@@ -58,13 +58,14 @@ import org.semanticwb.platform.SemanticObject;
 import org.semanticwb.platform.SemanticOntology;
 import org.semanticwb.platform.SemanticProperty;
 import org.semanticwb.platform.SemanticVocabulary;
-import org.semanticwb.portal.SWBFormButton;
 import org.semanticwb.portal.SWBFormMgr;
-import org.semanticwb.portal.SWBForms;
 import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
+
+import com.hp.hpl.jena.rdf.model.NodeIterator;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 
 public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.catalog.base.SWBCatalogResourceBase {
 
@@ -75,7 +76,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
     /** The hm form ele. */
     private HashMap<String, SemanticObject> hmFormEle = null;
     private Resource base = null;
-    private static String COLL_ID = "collid";
     static final String FE_MODE_VIEW = "view";
     static final String FE_MODE_EDIT = "edit";
     static final String FE_DEFAULT = "generico";
@@ -141,13 +141,12 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             busqueda = "";
         }
         busqueda = busqueda.trim();
-        HashMap<String, SemanticProperty> hmConfcol = new HashMap();
-        HashMap<String, String> hmConfcolFE = new HashMap();
-        HashMap<String, SemanticProperty> hmConfbus = new HashMap();
-        HashMap<String, SemanticProperty> hmConfbusOrder = new HashMap();
-        HashMap<String, SemanticObject> hmfiltro = new HashMap();
-        HashMap<String, SemanticObject> hmSearchParam = new HashMap();
-        HashMap<String, String> hmSearchParamBoo = new HashMap();
+        HashMap<String, SemanticProperty> hmConfcol = new HashMap<>();
+        HashMap<String, String> hmConfcolFE = new HashMap<>();
+        HashMap<String, SemanticProperty> hmConfbus = new HashMap<>();
+        HashMap<String, SemanticProperty> hmConfbusOrder = new HashMap<>();
+        HashMap<String, SemanticObject> hmSearchParam = new HashMap<>();
+        HashMap<String, String> hmSearchParamBoo = new HashMap<>();
 
         if (semobj != null) {
             SemanticClass sccol = getCatalogClass().transformToSemanticClass();
@@ -175,7 +174,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 }
             }
 
-            ArrayList list = new ArrayList(hmConfcol.keySet());
+            ArrayList<String> list = new ArrayList<>(hmConfcol.keySet());
             Collections.sort(list);
 
             semProphm = null;
@@ -238,7 +237,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 //////////////
                 ////////////////////////////////////////////////////////////////////////////////////
 
-                ArrayList<String> listfilters = new ArrayList(hmConfbusOrder.keySet());
+                ArrayList<String> listfilters = new ArrayList<>(hmConfbusOrder.keySet());
                 Collections.sort(listfilters);
 
                 Iterator<String> itsprops = null; //hmConfbus.values().iterator();
@@ -427,7 +426,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                         urlr.setParameter("suri", id);
                         urlr.setParameter("sval", semO.getURI());
                         urlr.setParameter("ract", action);
-                        //urlr.setParameter("page", ""+p);
                         urlr.setAction("removeso");
                         out.println("<a href=\"#\" title=\"" + paramsRequest.getLocaleString("remove") + "\" onclick=\"if(confirm('" + paramsRequest.getLocaleString("confirm_remove") + " " + SWBUtils.TEXT.scape4Script(semO.getDisplayName(user.getLanguage())) + "?')){ window.location='" + urlr + "'; } else { return false;}\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/images/delete.gif\" border=\"0\" alt=\"" + paramsRequest.getLocaleString("remove") + "\"></a>");
                         SWBResourceURL urlform = paramsRequest.getRenderUrl();
@@ -567,7 +565,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
         SemanticObject semO = null;
         Iterator<String> itcol = null;
 
-        HashMap<String, SemanticObject> hmfiltro = new HashMap();
+        HashMap<String, SemanticObject> hmfiltro = new HashMap<>();
 
         SemanticClass sccol = getCatalogClass().transformToSemanticClass();
         Iterator<SemanticObject> itso = semmodel.listInstancesOfClass(sccol);
@@ -601,8 +599,8 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
 
         if (!busqueda.equals("") || !hmSearchParam.isEmpty()) {
 
-            HashMap<String, SemanticObject> hmResults = new HashMap();
-            HashMap<String, SemanticObject> hmRemove = new HashMap();
+            HashMap<String, SemanticObject> hmResults = new HashMap<>();
+            HashMap<String, SemanticObject> hmRemove = new HashMap<>();
             Iterator<SemanticObject> itsprop2 = null;
             if (!busqueda.equals("") || (!busqueda.equals("") && !hmSearchParam.isEmpty())) {
                 itsprop2 = hmfiltro.values().iterator();
@@ -671,7 +669,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             itso = hmfiltro.values().iterator();
 
         } else {
-            itso = semmodel.listInstancesOfClass(sccol); //gobj.getSemanticObject().getModel().listInstancesOfClass(sccol); //sccol.listInstances();
+            itso = semmodel.listInstancesOfClass(sccol);
         }
 
         return itso;
@@ -693,7 +691,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
         response.setHeader("Pragma", "no-cache");
 
         PrintWriter out = response.getWriter();
-        User user = paramRequest.getUser();
         String id = request.getParameter("suri");
         String cid = request.getParameter("clsuri");
         String act = request.getParameter("act");
@@ -713,11 +710,9 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
         SWBResourceURL urlPA = paramRequest.getActionUrl();
 
         SWBFormMgr fmgr = null;
-        String modeform = null;
-        HashMap<String, SemanticProperty> hmProps = new HashMap<String, SemanticProperty>();
-        HashMap<String, String> hmDetail = new HashMap<String, String>();
-        HashMap<String, SemanticProperty> hmDetailOrder = new HashMap<String, SemanticProperty>();
-        HashMap<SemanticProperty, String> hmDetailFEMode = new HashMap<SemanticProperty, String>();
+        HashMap<String, String> hmDetail = new HashMap<>();
+        HashMap<String, SemanticProperty> hmDetailOrder = new HashMap<>();
+        HashMap<SemanticProperty, String> hmDetailFEMode = new HashMap<>();
 
         //Agregando las propiedades seleccionadas para la edición
         Iterator<String> itdetProp = listDetailPropertieses();
@@ -739,7 +734,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             }
         }
 
-        ArrayList list = new ArrayList(hmDetailOrder.keySet());
+        ArrayList<String> list = new ArrayList<>(hmDetailOrder.keySet());
         Collections.sort(list);
 
         SWBResourceURL urlback = paramRequest.getRenderUrl();
@@ -753,7 +748,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
         }
         counter++;
         out.println(SWBFormMgr.DOJO_REQUIRED);
-        StringBuffer sbForm = new StringBuffer("");
+        StringBuilder sbForm = new StringBuilder("");
         if (act != null && act.equals("new")) {
 
             fmgr = new SWBFormMgr(sclass, getCatalogModel().getSemanticObject(), SWBFormMgr.MODE_CREATE);
@@ -845,7 +840,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             sbForm.append("\n<input type=\"hidden\" name=\"suri\" value=\"" + id + "\"/>");
             sbForm.append("\n<input type=\"hidden\" name=\"scls\" value=\"" + cid + "\"/>");
             sbForm.append("\n<input type=\"hidden\" name=\"smode\" value=\"edit\"/>");
-            //sbForm.append("\n<input type=\"hidden\" name=\"suri\" value=\"User\"/>");
             sbForm.append("\n<input type=\"hidden\" name=\"sval\" value=\"" + sval + "\"/>");
             sbForm.append("\n<input type=\"hidden\" name=\"act\" value=\"update\"/>");
             sbForm.append("\n<input type=\"hidden\" name=\"ract\" value=\"" + act + "\"/>");
@@ -981,15 +975,12 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
         ret.append("\n<option value=\"generico\" selected >GenericFormElement</option>");
         ret.append("\n</optgroup>");
 
-        HashMap<String, SemanticClass> hmscfe = new HashMap<String, SemanticClass>();
+        HashMap<String, SemanticClass> hmscfe = new HashMap<>();
         HashMap<String, SemanticObject> hmso = null;
-
-        //Property prop=SWBPlatform.getSemanticMgr().getVocabulary().getSemanticProperty(SemanticVocabulary.SWB_ANNOT_FORMELEMENTRANGE).getRDFProperty();
         SemanticProperty pro = SWBPlatform.getSemanticMgr().getVocabulary().getSemanticProperty(SemanticVocabulary.SWB_ANNOT_FORMELEMENTRANGE);
-        //System.out.println("prop:" + pro.getName());
 
 
-        Iterator<SemanticClass> itsub = sv.getSemanticClass(sv.SWB_SWBFORMELEMENT).listSubClasses();
+        Iterator<SemanticClass> itsub = sv.getSemanticClass(SemanticVocabulary.SWB_SWBFORMELEMENT).listSubClasses();
         while (itsub.hasNext()) {
             SemanticClass scobj = itsub.next();
 
@@ -1000,7 +991,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
 
             while (it.hasNext()) {
                 RDFNode node = it.next();
-                //System.out.println("node:" + node + " " + sprop.getRange());
                 if (node != null) {
                     if (sprop.getRange() != null && sprop.getRange().getURI().equals(node.asResource().getURI())) {
                         hmscfe.put(scobj.getDisplayName(usr.getLanguage()), scobj);
@@ -1016,7 +1006,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             }
         }
 
-        ArrayList list = new ArrayList(hmscfe.keySet());
+        ArrayList<String> list = new ArrayList<>(hmscfe.keySet());
         Collections.sort(list);
 
         Iterator<String> itsc = list.iterator();
@@ -1036,7 +1026,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 hmso.put(semObj.getDisplayName(usr.getLanguage()), semObj);
             }
 
-            list = new ArrayList(hmso.keySet());
+            list = new ArrayList<>(hmso.keySet());
             Collections.sort(list);
 
             Iterator<String> itsoo = list.iterator();
@@ -1064,7 +1054,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
 
     @Override
     public void doAdmin(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
-
         //System.out.println("doAdmin()");
         base = getResourceBase();
         response.setContentType("text/html; charset=ISO-8859-1");
@@ -1074,19 +1063,16 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
         PrintWriter out = response.getWriter();
         User user = paramsRequest.getUser();
         String id = request.getParameter("suri");
-        String page = request.getParameter("page");
 
         // Para filtrar el tipo de funcionamiento del despliegue.
         String collectiontype = base.getAttribute("collectype", "config");
-
         SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
-        GenericObject gobj = ont.getGenericObject(id);
 
         if (hmFormEle == null) {
             hmFormEle = new HashMap<String, SemanticObject>();
             SemanticOntology sont = SWBPlatform.getSemanticMgr().getSchema();
             SemanticVocabulary sv = SWBPlatform.getSemanticMgr().getVocabulary();
-            Iterator<SemanticObject> itfe = sont.listInstancesOfClass(sv.getSemanticClass(sv.SWB_FORMELEMENT));
+            Iterator<SemanticObject> itfe = sont.listInstancesOfClass(sv.getSemanticClass(SemanticVocabulary.SWB_FORMELEMENT));
             while (itfe.hasNext()) {
                 SemanticObject sofe = itfe.next();
                 hmFormEle.put(sofe.getURI(), sofe);
@@ -1116,7 +1102,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
 
         if (request.getParameter("statmsg") != null && request.getParameter("statmsg").trim().length() > 0) {
             log.debug("showStatus");
-            //System.out.println("showstatus...." + request.getParameter("statmsg"));
             out.println("   showStatus('" + request.getParameter("statmsg") + "');");
         }
 
@@ -1131,13 +1116,12 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             if (getCatalogClass() != null) {
                 SemanticClass sccol = getCatalogClass().transformToSemanticClass();
                 SWBModel colmodel = getCatalogModel();
-                //if(colmodel==null) colmodel = col.getWebSite().getSubModel();
 
-                HashMap<String, String> hmcol = new HashMap();
-                HashMap<String, String> hmbus = new HashMap();
-                HashMap<String, String> hmFE = new HashMap();
-                HashMap<String, String> hmdet = new HashMap();
-                HashMap<String, String> hmFEdet = new HashMap();
+                HashMap<String, String> hmcol = new HashMap<>();
+                HashMap<String, String> hmbus = new HashMap<>();
+                HashMap<String, String> hmFE = new HashMap<>();
+                HashMap<String, String> hmdet = new HashMap<>();
+                HashMap<String, String> hmFEdet = new HashMap<>();
 
                 Iterator<String> its = listListPropertieses();
                 while (its.hasNext()) {
@@ -1159,7 +1143,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                     StringTokenizer stoken = new StringTokenizer(spropname, "|");
 
                     if (spropname.indexOf("|") != -1 && stoken != null) {
-                        //System.out.println("tokens: "+spropname);
                         String spropuri = stoken.nextToken();
                         String propFE = stoken.nextToken();
                         String colOrder = stoken.nextToken();
@@ -1175,7 +1158,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                     StringTokenizer stoken = new StringTokenizer(spropname, "|");
 
                     if (spropname.indexOf("|") != -1 && stoken != null) {
-                        //System.out.println("tokens: "+spropname);
                         try {
                             String spropuri = stoken.nextToken();
                             String propFE = stoken.nextToken();
@@ -1213,13 +1195,11 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("<li>");
                 out.println("<label for=\"" + idform + "_collclass\">" + "Clase asociada" + "</label>");
                 out.println("<select id=\"" + idform + "_collclass\" name=\"collclass\">");
-                //out.println("<input type=\"text\" name=\"classname\" value=\"" + col.getCollectionClass().getDisplayName(user.getLanguage()) + "\" readonly >");
 
-                Iterator<SemanticObject> itsemcls = null; //col.getSemanticObject().getModel().listModelClasses();
+                Iterator<SemanticObject> itsemcls = null;
                 itsemcls = SWBPlatform.getSemanticMgr().getSchema().listInstancesOfClass(SWBPlatform.getSemanticMgr().getVocabulary().getSemanticClass(SWBPlatform.getSemanticMgr().getVocabulary().SWB_CLASS));
                 while (itsemcls.hasNext()) {
                     SemanticObject semobj = itsemcls.next();
-                    //System.out.println(semobj+" "+semobj.getURI()+" "+semobj.transformToSemanticClass());
                     SemanticClass semClass = semobj.transformToSemanticClass();
                     out.println("<option value=\"" + semClass.getURI() + "\" ");
                     if (sccol.getURI().equals(semClass.getURI())) {
@@ -1264,7 +1244,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("<fieldset>");
                 out.println("<button dojoType=\"dijit.form.Button\" _type=\"button\"  id=\"" + idform + "_btnClass\">" + paramsRequest.getLocaleString("btn_updt"));
                 out.println("<script type=\"dojo/method\" event=\"onClick\" >");
-                //out.println(" var miform = dojo.byId('"+ id + "/collectionconfig'); ");
                 out.println(" var actbut = dojo.byId('" + idform + "_actbutton'); ");
                 out.println(" actbut.value='updtclass'; ");
                 out.println(" submitForm('" + idform + "/collectionconfig'); ");
@@ -1281,9 +1260,9 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                     strproptype = "display";
                 }
 
-                HashMap<String, String> hmsc = new HashMap();
-                HashMap<String, SemanticProperty> hmprops = new HashMap();
-                HashMap<String, SemanticProperty> hmselected = new HashMap();
+                HashMap<String, String> hmsc = new HashMap<>();
+                HashMap<String, SemanticProperty> hmprops = new HashMap<>();
+                HashMap<String, SemanticProperty> hmselected = new HashMap<>();
 
                 SemanticClass cls = getCatalogClass().transformToSemanticClass();
                 String clsName = "";
@@ -1292,7 +1271,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                     Iterator<SemanticProperty> itp = cls.listProperties();
                     while (itp.hasNext()) {
                         SemanticProperty prop = itp.next();
-                        //System.out.println("PropURI: "+prop.getURI());
                         String name = cls.getName() + "|" + prop.getURI();
                         hmsc.put(name, prop.getPropertyCodeName());
                         hmprops.put(name, prop);
@@ -1310,8 +1288,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 SWBResourceURL urladd = paramsRequest.getActionUrl();
                 urladd.setAction("addprops");
 
-                //long idform = System.currentTimeMillis();
-
                 out.println("<form type=\"dijit.form.Form\" action=\"" + urladd + "\" id=\"" + idform + "/forma\" method=\"post\" onsubmit=\"if(enviatodos('" + idform + "/existentes')) { submitForm('" + idform + "/forma'); return false; } else { return false;}\">");
                 out.println("<input type=\"hidden\" name=\"suri\" value=\"" + id + "\">");
                 out.println("<fieldset>");
@@ -1328,7 +1304,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("<tr>");
                 out.println("<td>");
 
-                ArrayList list = new ArrayList(hmprops.keySet());
+                ArrayList<String> list = new ArrayList<>(hmprops.keySet());
                 Collections.sort(list);
 
                 // select con la lista de propiedades existentes
@@ -1339,7 +1315,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                     String str = itss.next();
                     String varName = "";
                     String propid = "";
-                    //System.out.println("props keyset: " + str);
                     StringTokenizer stoken = new StringTokenizer(str, "|");
                     if (stoken.hasMoreTokens()) {
                         varName = stoken.nextToken();
@@ -1432,7 +1407,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("<thead>");
                 out.println("<tr>");
                 out.println("<th width=\"70\">");
-                out.println("&nbsp;"); //paramsRequest.getLocaleString("th_action")
+                out.println("&nbsp;");
                 out.println("</th>");
                 out.println("<th>");
                 out.println(paramsRequest.getLocaleString("th_property"));
@@ -1448,13 +1423,11 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 String sorder = null;
                 int min = 0, max = 0, indice = 0;
 
-                HashMap<String, String> hmlistprop = new HashMap();
+                HashMap<String, String> hmlistprop = new HashMap<>();
 
-                int numlistprop = 0;
                 Iterator<String> itdis = listListPropertieses();
                 while (itdis.hasNext()) {
                     String slistprop = itdis.next();
-                    numlistprop++;
                     try {
                         StringTokenizer stoken = new StringTokenizer(slistprop, "|");
                         semprop = stoken.nextToken();
@@ -1482,30 +1455,24 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                         continue;
                     }
                 }
-                //System.out.println("rango( "+min+" , "+max+" )");
 
-                ArrayList lists = new ArrayList(hmlistprop.keySet());
+                ArrayList<String> lists = new ArrayList<>(hmlistprop.keySet());
                 Collections.sort(lists);
 
 
-                int countprop = 0;
-                itdis = lists.iterator(); //col.listListPropertieses();
+                itdis = lists.iterator();
                 while (itdis.hasNext()) {
                     String key = itdis.next();
                     String lprop = hmlistprop.get(key);
 
-                    countprop++;
-                    //System.out.println("valor display ..."+lprop);
                     try {
                         StringTokenizer stoken = new StringTokenizer(lprop, "|");
                         semprop = stoken.nextToken();
                         sempropFE = stoken.nextToken();
                         sorder = stoken.nextToken();
                         indice = Integer.parseInt(sorder);
-                        //System.out.println("Indice:"+indice);
                     } catch (Exception e) {
                         log.error("Error in display class property.", e);
-                        //continue;
                     }
                     out.println("<tr>");
                     out.println("<td  width=\"70\" align=\"left\">");
@@ -1582,11 +1549,9 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("                dijit.byId(\"leftSplit\").layout();");
                 out.println("            }");
                 out.println("            });");
-                //this.inherited(arguments);
                 out.println("    </script>");
                 out.println("</p>");
                 out.println("</fieldset>");
-                //out.println("</fieldset>");
                 out.println("</div>");
 
 
@@ -1597,7 +1562,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("<thead>");
                 out.println("<tr>");
                 out.println("<th width=\"70\">");
-                out.println("&nbsp;"); //paramsRequest.getLocaleString("th_action"));
+                out.println("&nbsp;");
                 out.println("</th>");
                 out.println("<th>");
                 out.println(paramsRequest.getLocaleString("th_property"));
@@ -1615,13 +1580,11 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 max = 0;
                 indice = 0;
 
-                HashMap<String, String> hmSearchprop = new HashMap();
+                HashMap<String, String> hmSearchprop = new HashMap<>();
 
-                int numsearchprop = 0;
                 itdis = listSearchPropertieses();
                 while (itdis.hasNext()) {
                     String slistprop = itdis.next();
-                    numsearchprop++;
                     try {
                         StringTokenizer stoken = new StringTokenizer(slistprop, "|");
                         semprop = stoken.nextToken();
@@ -1649,7 +1612,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 }
                 //System.out.println("rango( "+min+" , "+max+" )");
 
-                list = new ArrayList(hmSearchprop.keySet());
+                list = new ArrayList<>(hmSearchprop.keySet());
                 Collections.sort(list);
 
                 itdis = list.iterator();
@@ -1662,7 +1625,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                         sempropFE = stoken.nextToken();
                         sorder = stoken.nextToken();
                         indice = Integer.parseInt(sorder);
-                        //System.out.println("Indice:"+indice);
 
                     } catch (Exception e) {
                         log.error("Error in search class property.", e);
@@ -1743,11 +1705,9 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("                dijit.byId(\"leftSplit\").layout();");
                 out.println("            }");
                 out.println("            });");
-                //this.inherited(arguments);
                 out.println("    </script>");
                 out.println("</p>");
                 out.println("</fieldset>");
-                //out.println("</fieldset>");
                 out.println("</div>");
 
 
@@ -1762,7 +1722,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("<thead>");
                 out.println("<tr>");
                 out.println("<th width=\"70\">");
-                out.println("&nbsp;"); //paramsRequest.getLocaleString("th_action"));
+                out.println("&nbsp;");
                 out.println("</th>");
                 out.println("<th>");
                 out.println(paramsRequest.getLocaleString("th_property"));
@@ -1791,13 +1751,11 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 max = 0;
                 indice = 0;
 
-                HashMap<String, String> hmDetailprop = new HashMap();
+                HashMap<String, String> hmDetailprop = new HashMap<>();
 
-                int numdetailprop = 0;
                 itdis = listDetailPropertieses();
                 while (itdis.hasNext()) {
                     String slistprop = itdis.next();
-                    numsearchprop++;
                     try {
                         StringTokenizer stoken = new StringTokenizer(slistprop, "|");
                         semprop = stoken.nextToken();
@@ -1811,7 +1769,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                         if (stoken.hasMoreTokens()) {
                             show = stoken.nextToken();
                         }
-
 
                         if (min == 0 && max == 0) {
                             min = indice;
@@ -1831,9 +1788,8 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                         continue;
                     }
                 }
-                //System.out.println("rango( "+min+" , "+max+" )");
 
-                list = new ArrayList(hmDetailprop.keySet());
+                list = new ArrayList<>(hmDetailprop.keySet());
                 Collections.sort(list);
 
                 itdis = list.iterator();
@@ -1855,7 +1811,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                         if (stoken.hasMoreTokens()) {
                             show = stoken.nextToken();
                         }
-                        //System.out.println("Indice:"+indice);
 
                     } catch (Exception e) {
                         log.error("Error in detail class property.", e);
@@ -1980,7 +1935,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("</fieldset>");
                 out.println("</div>");
 
-                // out.println("</form >");
                 out.println("</div >");
             } else {
 
@@ -2001,13 +1955,12 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("<label for=\"" + id + "_collclass\">" + "Clase asociada" + "</label>");
                 out.println("<select id=\"" + id + "_collclass\" name=\"collclass\">");
 
-                Iterator<SemanticObject> itsemcls = null; //col.getSemanticObject().getModel().listModelClasses();
+                Iterator<SemanticObject> itsemcls = null;
                 itsemcls = SWBPlatform.getSemanticMgr().getSchema().listInstancesOfClass(SWBPlatform.getSemanticMgr().getVocabulary().getSemanticClass(SWBPlatform.getSemanticMgr().getVocabulary().SWB_CLASS));
                 while (itsemcls.hasNext()) {
                     SemanticObject semobj = itsemcls.next();
                     SemanticClass semClass = semobj.transformToSemanticClass();
                     out.println("<option value=\"" + semClass.getURI() + "\" ");
-                    //if(sccol!=null&&sccol.getURI().equals(semClass.getURI())) out.println(" selected ");
                     out.println(">");
                     out.println(semClass.getClassId());
                     out.println("</option>");
@@ -2019,7 +1972,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("</fieldset>");
 
                 WebSite wb = base.getWebSite();
-
 
                 out.println("<fieldset>");
                 out.println("<legend>" + "Tipo de modelo a utilizar" + "</legend>");
@@ -2049,7 +2001,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("<fieldset>");
                 out.println("<button dojoType=\"dijit.form.Button\" _type=\"button\"  id=\"" + id + "_btnClass\">" + paramsRequest.getLocaleString("btn_updt"));
                 out.println("<script type=\"dojo/method\" event=\"onClick\" >");
-                //out.println(" var miform = dojo.byId('"+ id + "/collectionconfig'); ");
                 out.println(" var actbut = dojo.byId('" + id + "_actbutton'); ");
                 out.println(" actbut.value='updtclass'; ");
                 out.println(" submitForm('" + id + "/collectionconfig'); ");
@@ -2060,7 +2011,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 out.println("</div>");
 
             }
-            //  }
 
         }
 
@@ -2070,7 +2020,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
         String id = request.getParameter("suri");
         String sval = request.getParameter("sval");
-        String ract = request.getParameter("ract");
         String action = response.getAction();
         if (action == null) {
             action = "";
@@ -2246,7 +2195,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 while (itsempro.hasNext()) {
                     SemanticProperty sPro = itsempro.next();
                     if (sPro.isRequired()) {
-                        //System.out.println("..Agregando propiedad requerida..." + sPro.getName());
                         hmProps.put(sPro.getURI(), sPro);
                     }
                 }
@@ -2291,8 +2239,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 throw new SWBResourceException("Error to process form...", e);
             }
 
-            //response.setMode(response.Mode_VIEW);
-
         } else if ("updateform".equals(action)) {
 
             log.error("ProcessAction(new) ");
@@ -2322,7 +2268,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                         fmgr.processElement(request, semProphm);
                     }
                 }
-//                SemanticObject nso = fmgr.processForm(request);
 
                 if (clsuri != null) {
                     response.setRenderParameter("clsuri", clsuri);
@@ -2334,35 +2279,24 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 log.error(e);
                 throw new SWBResourceException("Error to process form...", e);
             }
-            //response.setRenderParameter("statmsg", response.getLocaleString("statmsg1"));
             response.setMode(SWBActionResponse.Mode_VIEW);
         } // quita propiedad de la configuracion de la administracion
         else if ("remove".equals(action)) {
             log.debug("processAction(remove)");
-            //System.out.println("sval:"+sval);
-            //if (obj != null) 
-            {
 
-                String prop = request.getParameter("prop");
-                //System.out.println("Eliminando ... "+prop);
+            String prop = request.getParameter("prop");
 
-                if (prop != null && prop.equals("display")) {
-                    //System.out.println("quitando display");
-                    removeListProperties(sval);
-                    response.setRenderParameter("statmsg", "Propiedad de despliegue eliminada.");
-
-                } else if (prop != null && prop.equals("search")) {
-                    //System.out.println("quitando search");
-                    removeSearchProperties(sval);
-                    response.setRenderParameter("statmsg", "Propiedad de busqueda eliminanda.");
-
-                } else if (prop != null && prop.equals("detail")) {
-                    //System.out.println("quitando detail");
-                    removeDetailProperties(sval);
-                    response.setRenderParameter("statmsg", "Propiedad de detalle eliminada.");
-                }
-
+            if (prop != null && prop.equals("display")) {
+                removeListProperties(sval);
+                response.setRenderParameter("statmsg", "Propiedad de despliegue eliminada.");
+            } else if (prop != null && prop.equals("search")) {
+                removeSearchProperties(sval);
+                response.setRenderParameter("statmsg", "Propiedad de busqueda eliminanda.");
+            } else if (prop != null && prop.equals("detail")) {
+                removeDetailProperties(sval);
+                response.setRenderParameter("statmsg", "Propiedad de detalle eliminada.");
             }
+
 
         } else if ("removeso".equals(action)) {
             log.debug("processAction(removeso)");
@@ -2373,14 +2307,11 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             }
 
             log.debug("remove-closetab:" + sval);
-            //response.setRenderParameter("closetab", sval);
-            //response.setRenderParameter("statmsg", response.getLocaleString("statmsg2"));
             response.setMode(SWBActionResponse.Mode_VIEW);
         } else if (action.equals("updcfg")) {
 
             try {
                 String bhtype = request.getParameter("collectype");
-                //System.out.println("Config resource:"+bhtype);
                 if (bhtype != null) {
                     base.setAttribute("collectype", bhtype);
                     base.updateAttributesToDB();
@@ -2405,8 +2336,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             try {
                 StringTokenizer stoken = new StringTokenizer(proptype, "|");
 
-                //System.out.println("propiedad a modificar: " + proptype);
-
                 semprop = stoken.nextToken();
                 sempropFE = stoken.nextToken();
                 sorder = stoken.nextToken();
@@ -2420,19 +2349,15 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 log.error("Error in processAction.", e);
             }
 
-            //System.out.println("Remover propiedad: " + proptype);
-
             removeDetailProperties(proptype);
 
             if ("mode".equals(prop)) {
                 addDetailProperties(semprop + "|" + sempropFE + "|" + sorder + "|" + newMode + "|" + itemShow);
                 response.setRenderParameter("statmsg", "Modo de la propiedad actualizada a " + newMode);
-                //System.out.println("Nueva propiedad: " + semprop + "|" + sempropFE + "|" + sorder + "|" + newMode + "|" + itemShow);
             }
             if ("show".equals(prop)) {
                 addDetailProperties(semprop + "|" + sempropFE + "|" + sorder + "|" + modo + "|" + newShow);
                 response.setRenderParameter("statmsg", "Propiedad para creacion actualizada.");
-                //System.out.println("Nueva propiedad: " + semprop + "|" + sempropFE + "|" + sorder + "|" + modo + "|" + newShow);
             }
         } else if (action.equals("swap")) {
 
@@ -2484,7 +2409,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 }
             }
 
-            ArrayList list = new ArrayList(hm.keySet());
+            ArrayList<String> list = new ArrayList<>(hm.keySet());
             Collections.sort(list);
 
             String svaltempprev = null;
@@ -2618,12 +2543,11 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             String proptype = request.getParameter("proptype");
 
             String[] props = request.getParameterValues("existentes");
-            HashMap<String, String> hmparam = new HashMap();
+            HashMap<String, String> hmparam = new HashMap<>();
             //propiedades seleccionadas
             if (props != null && props.length > 0) {
                 int j = 0;
                 for (j = 0; j < props.length; j++) {
-                    //System.out.println("Prop:"+props[j]);
                     hmparam.put(props[j], props[j]);
                 }
             }
@@ -2726,7 +2650,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
                 }
 
                 // ordenando las propiedades
-                ArrayList list = new ArrayList(hmprops.keySet());
+                ArrayList<Integer> list = new ArrayList<>(hmprops.keySet());
                 Collections.sort(list);
 
                 //guardando las propiedades
@@ -2812,17 +2736,12 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             }
         }
 
-//        if (ract != null) {
-//            response.setRenderParameter("act", ract);
-//        }
-
         if (id != null) {
 
             response.setRenderParameter("suri", id);
         }
 
         log.debug("remove-closetab:" + sval);
-        //response.setMode(response.Mode_EDIT);
     }
 
     public HashMap<String, SemanticProperty> getExistentes(HashMap<String, SemanticProperty> hmprops, String chkproptype) {
@@ -2898,8 +2817,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
 
     public String objectPropertyControl(HttpServletRequest request, SemanticProperty semanticProperty, String idform, String paramsearch, User user, SemanticClass sc, SemanticModel semmodel) {
 
-        StringBuffer ret = new StringBuffer("");
-
+    		StringBuilder ret = new StringBuilder();
         SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
 
         HashMap<SemanticProperty, String> hmDetailFEMode = new HashMap<SemanticProperty, String>();
@@ -2932,7 +2850,6 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
             ret.append("\n<select name=\"search_" + bpropName + "\" id=\"" + idform + "_" + bpropName + "\" >");
             ret.append("\n<option value=\"\">Selecciona filtro</option>");
             Iterator<SemanticObject> sobj = semmodel.listInstancesOfClass(sc); //sc.listInstances();
-            //sobj = sc.listInstances();
 
             while (sobj.hasNext()) {
                 SemanticObject semanticObject = sobj.next();
@@ -2949,7 +2866,7 @@ public class SWBCatalogResource extends org.semanticwb.portal.resources.sem.cata
 
             StringTokenizer stoken = new StringTokenizer(uriFE, "|");
             String feURI = stoken.nextToken();
-            String feMode = "filter"; //stoken.nextToken();
+            String feMode = "filter"; 
 
 
             SWBFormMgr fmgr = new SWBFormMgr(getCatalogClass().transformToSemanticClass(), getCatalogModel().getSemanticObject(), "filter");

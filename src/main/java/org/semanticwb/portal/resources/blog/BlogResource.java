@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources.blog;
 
@@ -32,15 +32,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Enumeration;
+import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Templates;
-import org.jdom.*;
-import org.jdom.input.*;
-import org.jdom.output.*;
-import java.text.SimpleDateFormat;
-import java.util.Iterator;
+
+import org.jdom.CDATA;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.DOMOutputter;
+import org.jdom.output.XMLOutputter;
 import org.semanticwb.Logger;
 import org.semanticwb.SWBException;
 import org.semanticwb.SWBPlatform;
@@ -59,17 +64,16 @@ import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
 import org.semanticwb.portal.util.WBFileUpload;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class BlogResource.
  * 
- * @author victor.lorenzana
+ * @author Víctor Lorenzana {victor.lorenzana}
  */
 public class BlogResource extends GenericResource
 {
 
     /** The log. */
-    private Logger log=SWBUtils.getLogger(BlogResource.class);
+    private static final Logger log=SWBUtils.getLogger(BlogResource.class);
     
     /** The Constant defaultFormat. */
     public static final String defaultFormat = "dd 'de' MMMM 'de' yyyy";
@@ -767,7 +771,7 @@ public class BlogResource extends GenericResource
         out.println("<tr><td colspan='2' ><input class='boton' type='button' value='"+ paramRequest.getLocaleString("save") +"' onClick='javascript:validaForma(this.form)'></td></tr>");
         out.println("</form>");
         SWBResourceURL urlback = paramRequest.getRenderUrl();
-        urlback.setMode(urlback.Mode_ADMIN);
+        urlback.setMode(SWBResourceURL.Mode_ADMIN);
         out.println("</td></tr><tr><td colspan='2' ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></td></tr>");
         out.println("</table></fieldset></div>");
         out.close();
@@ -786,9 +790,10 @@ public class BlogResource extends GenericResource
     {
         PrintWriter out = response.getWriter();
         response.setContentType("text/xml");
-        InputStream styleStream = styleStream = Blog.class.getResourceAsStream("comments.xsl");
+        InputStream styleStream = null;
         try
         {
+        		styleStream = Blog.class.getResourceAsStream("comments.xsl");
             SAXBuilder builder = new SAXBuilder();
             Document docToReturn = builder.build(styleStream);
             XMLOutputter xMLOutputter = new XMLOutputter();
@@ -815,14 +820,14 @@ public class BlogResource extends GenericResource
     {
         PrintWriter out = response.getWriter();
         response.setContentType("text/xml");
-        InputStream styleStream = Blog.class.getResourceAsStream("blog.xsl");
+        InputStream styleStream = null;
         try
         {
+        		styleStream = Blog.class.getResourceAsStream("blog.xsl");
             SAXBuilder builder = new SAXBuilder();
             Document docToReturn = builder.build(styleStream);
             XMLOutputter xMLOutputter = new XMLOutputter();
             xMLOutputter.output(docToReturn, out);
-
         }
         catch ( Exception ex )
         {
@@ -926,15 +931,13 @@ public class BlogResource extends GenericResource
     public void doAsignRole(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
 
-        User user = paramRequest.getUser();
         UserRepository userrep = paramRequest.getWebPage().getWebSite().getUserRepository();
-
         PrintWriter out = response.getWriter();
         if ( this.getResourceBase().getAttribute("blogid") == null || this.getResourceBase().getAttribute("blogid").equals("") )
         {
             out.println("<div class=\"swbform\"><fieldset><p>"+ paramRequest.getLocaleString("noBlogs") +"</p>");
             SWBResourceURL urlback = paramRequest.getRenderUrl();
-            urlback.setMode(urlback.Mode_ADMIN);
+            urlback.setMode(SWBResourceURL.Mode_ADMIN);
             out.println("<p ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></p></fieldset></div>");
             return;
         }
@@ -979,7 +982,7 @@ public class BlogResource extends GenericResource
         out.println("</table>");
         out.println("</td></tr><tr><td colspan='2' ><input class='boton' type='submit' name='save' value='"+ paramRequest.getLocaleString("saveAsign") +"'></td></tr>");
         SWBResourceURL urlback = paramRequest.getRenderUrl();
-        urlback.setMode(urlback.Mode_ADMIN);
+        urlback.setMode(SWBResourceURL.Mode_ADMIN);
         out.println("</td></tr><tr><td colspan='2' ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></td></tr></table></fieldset></form></div>");
         out.close();
     }
@@ -1049,15 +1052,13 @@ public class BlogResource extends GenericResource
      */
     public void doAsignUser(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
-        User user = paramRequest.getUser();
         UserRepository userrep = paramRequest.getWebPage().getWebSite().getUserRepository();
-
         PrintWriter out = response.getWriter();
         if ( this.getResourceBase().getAttribute("blogid") == null || this.getResourceBase().getAttribute("blogid").equals("") )
         {
             out.println("<div class=\"swbform\"><fieldset><p>"+ paramRequest.getLocaleString("noBlogs") +"</p>");
             SWBResourceURL urlback = paramRequest.getRenderUrl();
-            urlback.setMode(urlback.Mode_ADMIN);
+            urlback.setMode(SWBResourceURL.Mode_ADMIN);
             out.println("<p ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></p></fieldset></div>");
             return;
         }
@@ -1101,7 +1102,7 @@ public class BlogResource extends GenericResource
         out.println("</table>");
         out.println("</td></tr><tr><td colspan='2' ><input class='boton' type='submit' name='save' value='"+ paramRequest.getLocaleString("saveAsign") +"'></td></tr>");
         SWBResourceURL urlback = paramRequest.getRenderUrl();
-        urlback.setMode(urlback.Mode_ADMIN);
+        urlback.setMode(SWBResourceURL.Mode_ADMIN);
         out.println("</td></tr><tr><td colspan='2' ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></td></tr></table></form></fieldset></div>");
         out.close();
     }
@@ -1122,7 +1123,7 @@ public class BlogResource extends GenericResource
         out.println("<table width='100%'  border='0' cellpadding='5' cellspacing='0'><tr><td >"+ paramRequest.getLocaleString("saveAsign") +":</td><td >");
         out.println("<input class='valores' checked type='radio' name='type' value='rol'>"+ paramRequest.getLocaleString("byRol") +"<br><input class='valores' type='radio' name='type' value='user'>"+ paramRequest.getLocaleString("byUser") +"</td></tr><tr><td colspan='2' ><input class='boton' type='submit' name='save' value='"+ paramRequest.getLocaleString("saveAsign") +"'></td></tr>");
         SWBResourceURL urlback = paramRequest.getRenderUrl();
-        urlback.setMode(urlback.Mode_ADMIN);
+        urlback.setMode(SWBResourceURL.Mode_ADMIN);
         out.println("</td></tr><tr><td colspan='2' ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></td></tr></table></form></fieldset></div>");
         out.close();
     }
@@ -1139,7 +1140,6 @@ public class BlogResource extends GenericResource
     public void doDeleteBlog(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
         PrintWriter out = response.getWriter();
-
         Connection con = SWBUtils.DB.getDefaultConnection();
         try
         {
@@ -1157,7 +1157,7 @@ public class BlogResource extends GenericResource
             {
                 out.println("<div class=\"swbform\"><fieldset><p>"+ paramRequest.getLocaleString("noBlogs") +"</p>");
                 SWBResourceURL urlback = paramRequest.getRenderUrl();
-                urlback.setMode(urlback.Mode_ADMIN);
+                urlback.setMode(SWBResourceURL.Mode_ADMIN);
                 out.println("<p ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></p></fieldset></div>");
                 return;
             }
@@ -1175,11 +1175,10 @@ public class BlogResource extends GenericResource
                 pt.close();
                 out.println("</select></td></tr><tr><td colspan='2' ><input type='submit' class='boton' name='save' value='"+ paramRequest.getLocaleString("deleteBlog") +"'></td></tr>");
                 SWBResourceURL urlback = paramRequest.getRenderUrl();
-                urlback.setMode(urlback.Mode_ADMIN);
+                urlback.setMode(SWBResourceURL.Mode_ADMIN);
                 out.println("</td></tr><tr><td colspan='2' ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></td></tr></table></form></fieldset></div>");
                 out.close();
             }
-
 
         }
         catch ( SQLException sqle )
@@ -1215,7 +1214,6 @@ public class BlogResource extends GenericResource
     public void doAsignblog(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
     {
         PrintWriter out = response.getWriter();
-
         Connection con = SWBUtils.DB.getDefaultConnection();
         try
         {
@@ -1233,7 +1231,7 @@ public class BlogResource extends GenericResource
             {
                 out.println("<div class=\"swbform\"><fieldset><p>"+ paramRequest.getLocaleString("noBlogs") +"</p>");
                 SWBResourceURL urlback = paramRequest.getRenderUrl();
-                urlback.setMode(urlback.Mode_ADMIN);
+                urlback.setMode(SWBResourceURL.Mode_ADMIN);
                 out.println("<p ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></p></fieldset></div>");
             }
             else
@@ -1250,7 +1248,7 @@ public class BlogResource extends GenericResource
                 pt.close();
                 out.println("</select></td></tr><tr><td colspan='2' ><input class='boton' type='submit' name='save' value='"+ paramRequest.getLocaleString("buttonAsign") +"'></td></tr>");
                 SWBResourceURL urlback = paramRequest.getRenderUrl();
-                urlback.setMode(urlback.Mode_ADMIN);
+                urlback.setMode(SWBResourceURL.Mode_ADMIN);
                 out.println("</td></tr><tr><td colspan='2' ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></td></tr></table></form></fieldset></div>");
             }
         }
@@ -1317,7 +1315,7 @@ public class BlogResource extends GenericResource
                 int blogid = Integer.parseInt(sBlogId);
                 SWBResourceURL url = paramRequest.getRenderUrl();
                 url.setMode("viewComents");
-                url.setCallMethod(url.Call_CONTENT);
+                url.setCallMethod(SWBResourceURL.Call_CONTENT);
                 url.setParameter("viewall", "true");
                 url.setParameter("postid", String.valueOf(postid));
                 try{
@@ -1583,10 +1581,7 @@ public class BlogResource extends GenericResource
             pt.executeUpdate();
             pt.close();
 
-
-
-
-            response.setMode(response.Mode_ADMIN);
+            response.setMode(SWBResourceURL.Mode_ADMIN);
         }
         catch ( SQLException sqle )
         {
@@ -1735,7 +1730,7 @@ public class BlogResource extends GenericResource
             {
                 asignBlog(request, response, blogid);
             }
-            response.setMode(response.Mode_ADMIN);
+            response.setMode(SWBResourceURL.Mode_ADMIN);
 
         }
         catch ( SQLException sqle )
@@ -1789,7 +1784,7 @@ public class BlogResource extends GenericResource
         try
         {
             this.getResourceBase().updateAttributesToDB();
-            response.setMode(response.Mode_ADMIN);
+            response.setMode(SWBResourceURL.Mode_ADMIN);
         }
         catch ( SWBException afe )
         {
@@ -2121,7 +2116,7 @@ public class BlogResource extends GenericResource
         }
         catch(Exception e){log.error(e);}
         
-        response.setMode(response.Mode_ADMIN);
+        response.setMode(SWBActionResponse.Mode_ADMIN);
     }
 
     /**
@@ -2145,7 +2140,7 @@ public class BlogResource extends GenericResource
         }
         catch(Exception e){log.error(e);}
         
-        response.setMode(response.Mode_ADMIN);
+        response.setMode(SWBActionResponse.Mode_ADMIN);
     }
 
     /* (non-Javadoc)
@@ -2162,14 +2157,14 @@ public class BlogResource extends GenericResource
             if ( templateblog != null && !templateblog.equals("") )
             {
                 addTemplateBlog(request, response, upload);
-                response.setMode(response.Mode_ADMIN);
+                response.setMode(SWBActionResponse.Mode_ADMIN);
                 return;
             }
             String templatecomments = upload.getFileName("templatecomments");
             if ( templatecomments != null && !templatecomments.equals("") )
             {
                 addTemplateComments(request, response, upload);
-                response.setMode(response.Mode_ADMIN);
+                response.setMode(SWBActionResponse.Mode_ADMIN);
                 return;
             }
         }
@@ -2181,7 +2176,6 @@ public class BlogResource extends GenericResource
             {
                 try
                 {
-                    SimpleDateFormat dateformat = new SimpleDateFormat(format_comments);
                     getResourceBase().setAttribute("format_comments", format_comments);
                     try{
                         getResourceBase().updateAttributesToDB();
@@ -2192,14 +2186,13 @@ public class BlogResource extends GenericResource
                     log.error(iae);
                     return;
                 }
-                response.setMode(response.Mode_ADMIN);
+                response.setMode(SWBActionResponse.Mode_ADMIN);
             }
             String format = request.getParameter("format");
             if ( format != null && !format.equals("") )
             {
                 try
                 {
-                    SimpleDateFormat dateformat = new SimpleDateFormat(format);
                     getResourceBase().setAttribute("format", format);
                     try{
                         getResourceBase().updateAttributesToDB();
@@ -2210,7 +2203,7 @@ public class BlogResource extends GenericResource
                     log.error(iae);
                     return;
                 }
-                response.setMode(response.Mode_ADMIN);
+                response.setMode(SWBActionResponse.Mode_ADMIN);
             }
             String deleteblog = request.getParameter("deleteblog");
             if ( deleteblog != null && !deleteblog.equals("") )
@@ -2224,7 +2217,7 @@ public class BlogResource extends GenericResource
                 try{
                     getResourceBase().updateAttributesToDB();
                 }catch(SWBException e){log.error(e);}
-                response.setMode(response.Mode_ADMIN);
+                response.setMode(SWBActionResponse.Mode_ADMIN);
                 
             }
 
@@ -2236,7 +2229,7 @@ public class BlogResource extends GenericResource
                 {
                     getResourceBase().updateAttributesToDB();
                 }catch(SWBException e){log.error(e);}
-                response.setMode(response.Mode_ADMIN);                
+                response.setMode(SWBActionResponse.Mode_ADMIN);                
             }
             String numofcomments = request.getParameter("numofcomments");
             if ( numofcomments != null && !numofcomments.equals("") )
@@ -2246,10 +2239,9 @@ public class BlogResource extends GenericResource
                 {
                     getResourceBase().updateAttributesToDB();
                 }catch(SWBException e){log.error(e);}
-                response.setMode(response.Mode_ADMIN);
+                response.setMode(SWBActionResponse.Mode_ADMIN);
                 return;
             }
-
 
             Enumeration names = request.getParameterNames();
             while (names.hasMoreElements())
@@ -2259,7 +2251,7 @@ public class BlogResource extends GenericResource
                 {
 
                     asignUser(request, response, Integer.parseInt(this.getResourceBase().getAttribute("blogid")));
-                    response.setMode(response.Mode_ADMIN);
+                    response.setMode(SWBActionResponse.Mode_ADMIN);
                     return;
                 }
             }
@@ -2271,7 +2263,7 @@ public class BlogResource extends GenericResource
                 {
 
                     asignRole(request, response, Integer.parseInt(this.getResourceBase().getAttribute("blogid")));
-                    response.setMode(response.Mode_ADMIN);
+                    response.setMode(SWBActionResponse.Mode_ADMIN);
                     return;
                 }
             }
@@ -2491,7 +2483,7 @@ public class BlogResource extends GenericResource
                     data = data.replaceAll("\\[urldeletepost\\]", url.toString());
                     SWBResourceURL editPost = paramRequest.getRenderUrl();
                     editPost.setMode("editpost");
-                    editPost.setCallMethod(url.Call_DIRECT);
+                    editPost.setCallMethod(SWBResourceURL.Call_DIRECT);
                     data = data.replaceAll("\\[urleditpost\\]", editPost.toString());
                     SWBResourceURL urlviewComments = paramRequest.getRenderUrl();
                     urlviewComments.setMode("viewComents");
@@ -2590,9 +2582,7 @@ public class BlogResource extends GenericResource
                     String repid = userid.substring(userid.indexOf("_")+1);
                     User recuser =UserRepository.ClassMgr.getUserRepository(repid).getUser(uid);
 
-                    //System.out.println("getComments: recuser: "+recuser);
-
-                    StringBuffer name = new StringBuffer("");
+                    StringBuilder name = new StringBuilder("");
                     if ( recuser == null )
                     {
                         name.append(paramRequest.getLocaleString("userAnonimous"));
@@ -2624,7 +2614,7 @@ public class BlogResource extends GenericResource
                     String repid = userid.substring(userid.indexOf("_")+1);
                     User recuser =UserRepository.ClassMgr.getUserRepository(repid).getUser(uid);
 
-                    StringBuffer name = new StringBuffer("");
+                    StringBuilder name = new StringBuilder("");
                     if ( recuser == null )
                     {
                         name.append(paramRequest.getLocaleString("userAnonimous"));
@@ -2696,7 +2686,7 @@ public class BlogResource extends GenericResource
                 int blogid = Integer.parseInt(sBlogId);
                 SWBResourceURL urlviewComents = paramRequest.getRenderUrl();
                 urlviewComents.setMode("viewComents");
-                urlviewComents.setCallMethod(urlviewComents.Call_CONTENT);
+                urlviewComents.setCallMethod(SWBResourceURL.Call_CONTENT);
                 urlviewComents.setParameter("viewall", "true");
                 urlviewComents.setParameter("postid", String.valueOf(postid));
                 Document doc = null;
@@ -2779,7 +2769,7 @@ public class BlogResource extends GenericResource
         out.println("<tr><td colspan='2' ><input class='valores' type='radio' name='asign' value='false'>"+ paramRequest.getLocaleString("notshowBlogContent") +"</td></tr>");
         out.println("<tr><td colspan='2' ><input class='boton' type='button' name='save' value='"+ paramRequest.getLocaleString("createBlog") +"' onClick='javascript:createBlog(this.form)'></td></tr>");
         SWBResourceURL urlback = paramRequest.getRenderUrl();
-        urlback.setMode(urlback.Mode_ADMIN);
+        urlback.setMode(SWBResourceURL.Mode_ADMIN);
         out.println("</td></tr><tr><td colspan='2' ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></td></tr></table></fieldset></form></div>");
     }
 
@@ -2802,7 +2792,7 @@ public class BlogResource extends GenericResource
                 "<input type='submit' name='btnSave' class='boton' value='"+ paramRequest.getLocaleString("save") +"' onClick=\"if(jsValida(this.form)) return true; else return false;\">" +
                 "</td></tr>");
         SWBResourceURL urlback = paramRequest.getRenderUrl();
-        urlback.setMode(urlback.Mode_ADMIN);
+        urlback.setMode(SWBResourceURL.Mode_ADMIN);
         out.println("</td></tr><tr><td colspan='2' ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></td></tr></table>");
         out.println("</fieldset></form></div>");
     }
@@ -2845,7 +2835,7 @@ public class BlogResource extends GenericResource
                 "<input type='submit' name='btnSave' class='boton' value='"+paramRequest.getLocaleString("save")+"' onClick=\"if(jsValida(this.form)) return true; else return false;\">" +
                 "</td></tr>");
         SWBResourceURL urlback = paramRequest.getRenderUrl();
-        urlback.setMode(urlback.Mode_ADMIN);
+        urlback.setMode(SWBResourceURL.Mode_ADMIN);
         out.println("</td></tr><tr><td colspan='2' ><a href='" + urlback + "'>"+ paramRequest.getLocaleString("back") +"</a></td></tr></table>");
         out.println("</fieldset></form></div>");
     }
@@ -2858,7 +2848,7 @@ public class BlogResource extends GenericResource
      */
     private String getScript(SWBParamRequest paramRequest)
     {
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         WBAdmResourceUtils admResUtils = new WBAdmResourceUtils();
         try
         {
@@ -2878,7 +2868,7 @@ public class BlogResource extends GenericResource
     }
 
     /**
-     * Asigna un blog � crea un blog.
+     * Asigna un blog - crea un blog.
      * 
      * @param request the request
      * @param response the response
@@ -2930,66 +2920,66 @@ public class BlogResource extends GenericResource
 
         SWBResourceURL url = paramRequest.getRenderUrl();
         url.setMode("asignblog");
-        url.setCallMethod(url.Call_CONTENT);
+        url.setCallMethod(SWBResourceURL.Call_CONTENT);
         out.println("<tr><td ><a href='" + url + "'>"+ paramRequest.getLocaleString("asignblog") +"</a></td></tr>");
         url.setMode("createBlog");
-        url.setCallMethod(url.Call_CONTENT);
+        url.setCallMethod(SWBResourceURL.Call_CONTENT);
         out.println("<tr><td ><a href='" + url + "'>"+paramRequest.getLocaleString("createblog")+"</a></td></tr>");
 
 
         url.setMode("changeSettings");
-        url.setCallMethod(url.Call_CONTENT);
+        url.setCallMethod(SWBResourceURL.Call_CONTENT);
         out.println("<tr><td ><a href='" + url + "'>"+  paramRequest.getLocaleString("config") +"</a></td></tr>");
 
         if ( sBlogId != null && !sBlogId.equals("") )
         {
             url.setMode("permissions");
-            url.setCallMethod(url.Call_CONTENT);
+            url.setCallMethod(SWBResourceURL.Call_CONTENT);
             out.println("<tr><td ><a href='" + url + "?blogid=1&postid=1'>"+paramRequest.getLocaleString("asignpermissions")+"</a></td></tr>");
         }
 
         out.println("<tr><td>&nbsp;</td></tr>");
 
         url.setMode("ViewBlogXML");
-        url.setCallMethod(url.Call_DIRECT);
+        url.setCallMethod(SWBResourceURL.Call_DIRECT);
         out.println("<tr><td ><a href='" + url + "' target='_blank'>"+paramRequest.getLocaleString("viewXMLBlog")+"</a></td></tr>");
 
         out.println("<tr><td>&nbsp;</td></tr>");
 
         url.setMode("viewTemplateBlog");
-        url.setCallMethod(url.Call_DIRECT);
+        url.setCallMethod(SWBResourceURL.Call_DIRECT);
         out.println("<tr><td ><a href='" + url + "' target='_blank'>"+paramRequest.getLocaleString("viewTemplateBlog")+"</a></td></tr>");
 
         url.setMode("changeTemplateBlog");
-        url.setCallMethod(url.Call_CONTENT);
+        url.setCallMethod(SWBResourceURL.Call_CONTENT);
         out.println("<tr><td ><a href='" + url + "'>"+paramRequest.getLocaleString("changeTemplateBlog")+"</a></td></tr>");
 
         out.println("<tr><td>&nbsp;</td></tr>");
 
         url.setMode("viewTemplateComments");
-        url.setCallMethod(url.Call_DIRECT);
+        url.setCallMethod(SWBResourceURL.Call_DIRECT);
         out.println("<tr><td ><a href='" + url + "' target='_blank'>"+  paramRequest.getLocaleString("viewTemplateComments")+"</a></td></tr>");
 
 
         url.setMode("changeTemplateComments");
-        url.setCallMethod(url.Call_CONTENT);
+        url.setCallMethod(SWBResourceURL.Call_CONTENT);
         out.println("<tr><td ><a href='" + url + "'>"+paramRequest.getLocaleString("changeTemplateComments")+"</a></td></tr>");
 
 
         out.println("<tr><td>&nbsp;</td></tr>");
 
         url.setMode("viewTemplateByDefaultBlog");
-        url.setCallMethod(url.Call_DIRECT);
+        url.setCallMethod(SWBResourceURL.Call_DIRECT);
         out.println("<tr><td ><a href='" + url + "' target='_blank'>"+ paramRequest.getLocaleString("viewBlogTemplateExample") +"</a></td></tr>");
 
         url.setMode("viewTemplateByDefaultComments");
-        url.setCallMethod(url.Call_DIRECT);
+        url.setCallMethod(SWBResourceURL.Call_DIRECT);
         out.println("<tr><td ><a href='" + url + "' target='_blank'>"+ paramRequest.getLocaleString("viewCommentsTemplateExample") +"</a></td></tr>");
 
         out.println("<tr><td>&nbsp;</td></tr>");
 
         url.setMode("deleteBlog");
-        url.setCallMethod(url.Call_CONTENT);
+        url.setCallMethod(SWBResourceURL.Call_CONTENT);
         out.println("<tr><td ><a href='" + url + "'>"+ paramRequest.getLocaleString("deleteBlog") +"</a></td></tr>");
 
         out.println("</table>");

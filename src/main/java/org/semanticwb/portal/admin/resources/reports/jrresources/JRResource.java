@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources.reports.jrresources;
 
@@ -34,11 +34,10 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import net.sf.jasperreports.engine.util.JRLoader;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class JRResource.
  * 
- * @author Carlos Ramos Inch�ustegui
+ * @author Carlos Ramos Incháustegui
  */
 public abstract class JRResource {    
     
@@ -81,9 +80,6 @@ public abstract class JRResource {
         this.locale = locale;
                 
         this.params.put(JRParameter.REPORT_LOCALE, this.locale);
-        /*ResourceBundle labels = ResourceBundle.getBundle("dailyRepUserTypes_es_MX", this.locale_es_MX);
-        this.params.put(JRParameter.REPORT_RESOURCE_BUNDLE, labels);*/
-
         setVirtualized(true);
     }
     
@@ -144,12 +140,8 @@ public abstract class JRResource {
      * @throws JRException the jR exception
      */
     protected void loadJasperResource() throws JRException {
-//        System.out.println("\ninicio... loadJasperResource 1");
-//        System.out.println("jasperResource="+jasperResource+"-----");
         InputStream is = getClass().getResourceAsStream(jasperResource);
-//        System.out.println("loadJasperResource 2");
         jasperReport = (JasperReport)JRLoader.loadObject(is);
-//        System.out.println("loadJasperResource 3... fin");
     }
     
     /**

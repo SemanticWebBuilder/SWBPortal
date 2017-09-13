@@ -617,7 +617,7 @@ public class WBFileUpload
                 throw new IllegalArgumentException("Content Disposition line misformatted: ".concat(String.valueOf(String.valueOf(s3))));
             String s10 = s6.substring(l + 21, i1);
             if(!s10.equals("form-data"))
-                throw new IllegalArgumentException(String.valueOf(String.valueOf((new StringBuffer("Content Disposition of ")).append(s10).append(" is not supported"))));
+                throw new IllegalArgumentException(String.valueOf(String.valueOf((new StringBuilder("Content Disposition of ")).append(s10).append(" is not supported"))));
             int j1 = s6.indexOf("name=\"", i1);
             int k1 = s6.indexOf("\"", j1 + 7);
             if(j1 == -1 || k1 == -1)

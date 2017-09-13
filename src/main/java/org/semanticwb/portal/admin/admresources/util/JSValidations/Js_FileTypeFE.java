@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources.util.JSValidations;
 
@@ -26,12 +26,11 @@ package org.semanticwb.portal.admin.admresources.util.JSValidations;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.portal.admin.admresources.lib.WBJsValidationsFEAbs;
 
-// TODO: Auto-generated Javadoc
 /**
  * Objeto que valida si la entrada a un campo html es de tipo file y si cumple con las extenciones definidas en el mismo objeto
  * <p>
  * Object that verifies if a html field has a file and if those files have certains extensions.
- * @author  Jorge Alberto Jim�nez
+ * @author  Jorge Alberto Jiménez
  */
 
 public class Js_FileTypeFE extends WBJsValidationsFEAbs {
@@ -142,14 +141,11 @@ public class Js_FileTypeFE extends WBJsValidationsFEAbs {
      */     
     public String getHtml(java.util.Locale locale)
     {
-        StringBuffer strb = new StringBuffer();
+    		StringBuilder strb = new StringBuilder();
         if(field != null)
         {
             String bundle=getClass().getName();
             strb.append("\n   pCaracter=");
-            //if(formfeName != null)
-            //    strb.append("document."+formfeName + ".");
-            //strb.append(field + ".value;");
             strb.append("document.getElementById(\""+field+"\").value;");
             strb.append("\n var pExt=\'"+filetypes+"\';");
             strb.append("\n   if(pCaracter.length > 0)");

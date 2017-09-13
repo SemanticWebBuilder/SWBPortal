@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,31 +18,46 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx.mx
  */
 package org.semanticwb.portal.admin.admresources.db;
 
-import org.w3c.dom.*;
-import java.util.*;
-import javax.servlet.http.*;
-import org.semanticwb.portal.admin.admresources.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBException;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
-import org.semanticwb.model.*;
+import org.semanticwb.model.Resource;
+import org.semanticwb.model.User;
+import org.semanticwb.portal.admin.admresources.FormFE;
+import org.semanticwb.portal.admin.admresources.HiddenFE;
 import org.semanticwb.portal.admin.admresources.util.WBAdmResourceUtils;
 import org.semanticwb.portal.util.WBFileUpload;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-// TODO: Auto-generated Javadoc
 /**
- * Objeto que administra conecci�n o connecciones de bd de la api de administraci�n de recursos
+ * Objeto que administra conexión o connexiones de bd de la api de administración de recursos
  * <p>
  * Object that administers bd conections in the resources administration api.
  * 
- * @author  Jorge Alberto Jim�nez
+ * @author  Jorge Alberto Jiménez
  */
 public class AdmDBConnMgr {
 
@@ -58,14 +73,8 @@ public class AdmDBConnMgr {
     /** The dom. */
     private Document dom = null;
     
-    /** The req. */
-    private HttpServletRequest req = null;
-    
-    /** The user. */
-    private User user = null;
-    
     /** The strbxmlp. */
-    private StringBuffer strbxmlp = null;
+    private StringBuilder strbxmlp = null;
     
     /** The imgapplet. */
     private String imgapplet = "";
@@ -92,10 +101,10 @@ public class AdmDBConnMgr {
     private String resIDTM = null;
     
     /** The connparams. */
-    private TreeMap connparams = null;
+    private TreeMap<String, String> connparams = null;
     
     /** The connparams insert. */
-    private TreeMap connparamsInsert = null;
+    private TreeMap<String, String> connparamsInsert = null;
     
     /** The exist record. */
     private boolean existRecord = false;
@@ -149,7 +158,6 @@ public class AdmDBConnMgr {
      * @param base the base
      */
     public AdmDBConnMgr(HttpServletRequest req, Resource base) {
-        this.req = req;
         this.base = base;
         createXmlAdmRes(req);
     }
@@ -167,7 +175,6 @@ public class AdmDBConnMgr {
      */
     public AdmDBConnMgr(HttpServletRequest req, String conname, String tablename, String fieldname, String resID, String resIDTM, Resource base) {
         this.defconn = false;
-        this.req = req;
         this.conname = conname;
         this.tablename = tablename;
         this.fieldname = fieldname;
@@ -198,7 +205,6 @@ public class AdmDBConnMgr {
      * @param req the new request
      */
     public void setRequest(HttpServletRequest req) {
-        this.req = req;
         createXmlAdmRes(req);
     }
 
@@ -226,7 +232,6 @@ public class AdmDBConnMgr {
      * @return the attribute
      */
     public String getAttribute(String attribute) {
-        //return base.getAttribute(attribute);
         if (dom != null) {
             NodeList ndl = dom.getElementsByTagName(attribute);
             if (ndl.getLength() > 0) {
@@ -263,14 +268,13 @@ public class AdmDBConnMgr {
     }
 
     /**
-     * Crea el xml de la administraci�n de un recurso,
+     * Crea el xml de la administración de un recurso,
      * esto para cuando se edite el recurso ya tenga valores por defecto.
      * 
      * @param req the req
      */
     private void createXmlAdmRes(HttpServletRequest req) {
-        this.req = req;
-        strbxmlp = new StringBuffer();
+        strbxmlp = new StringBuilder();
         try {
             Document dom = SWBUtils.XML.getNewDocument();
             if (dom != null) {
@@ -280,8 +284,8 @@ public class AdmDBConnMgr {
                 if (req.getHeader("content-type") != null && (req.getHeader("content-type").indexOf("multipart/form-data")) > -1) { // utilizar fileupload
                     HashMap hparams = new HashMap();
                     HashMap afiles = new HashMap();
-                    connparams = new TreeMap();
-                    connparamsInsert = new TreeMap();
+                    connparams = new TreeMap<>();
+                    connparamsInsert = new TreeMap<>();
                     WBFileUpload fUpload = new WBFileUpload();
                     fUpload.getFiles(req);
                     Iterator params = fUpload.getParamNames().iterator();
@@ -298,7 +302,7 @@ public class AdmDBConnMgr {
                                         defconn = true;
                                         this.conname = SWBPlatform.getEnv("wb/db/nameconn", "wb"); //conexion por defecto
                                         init();
-                                    } else {  //Es otra conexi�n
+                                    } else {  //Es otra conexión
                                         defconn = false;
                                         this.conname = value.trim();
                                     }
@@ -343,7 +347,6 @@ public class AdmDBConnMgr {
                     while (itparams.hasNext()) {
                         String pname = (String) itparams.next();
                         String value = (String) hparams.get(pname);
-                        //System.out.println("pname:"+pname+" value:"+value);
                         if (value.trim().equals("")) {
                             if (((String) hparams.get("wbfile_" + pname)) != null && hparams.get("wbNoFile_" + pname) == null) {
                                 child = dom.createElement(pname);
@@ -382,7 +385,7 @@ public class AdmDBConnMgr {
                         }
                     }
                 }
-                //strbxmlp.append(com.infotec.appfw.util.AFUtils.getInstance().DomtoXml(dom));
+
                 strbxmlp.append(SWBUtils.XML.domToXml(dom, "ISO-8859-1", true));
             }
         } catch (Exception e) {
@@ -411,7 +414,6 @@ public class AdmDBConnMgr {
      * @return the string
      */
     public String update2DB(User user) {
-        this.user = user;
         try {
             String xml=getXmlParams();
             if (xml != null && defconn == true)
@@ -423,7 +425,6 @@ public class AdmDBConnMgr {
                 {
                     log.error("Error updating xml of resource:"+base.getId());
                 }
-            //base.u(user.getId(), "resource width id:"+ base.getId()+",was updated succefully");
             } else { //No es base de datos defecto de recurso
                 if (xml != null && defconn == false) {
                     loadXmlRes();
@@ -439,13 +440,7 @@ public class AdmDBConnMgr {
         } catch (SWBException e) {
             log.error(e);
         }
-        /*
-        if(imgapplet!=null) {
-        System.out.println("imgapplet:"+imgapplet);
-        return strbxmlp.toString() +"\n"+ imgapplet;
-        }
-        else return strbxmlp.toString() +"\n";
-         */
+        
         return imgapplet;
     }
 
@@ -459,7 +454,7 @@ public class AdmDBConnMgr {
     }
 
     /**
-     * Coloca atributos de conecci�n a propiedades de la clase
+     * Coloca atributos de conexión a propiedades de la clase
      * insert connection attributes to class properties.
      */
     public void setAttrConn() {
@@ -471,7 +466,7 @@ public class AdmDBConnMgr {
                     String attrValue = nnodemap.item(i).getNodeValue().trim();
                     if (attrValue != null && !attrValue.equals("")) {
                         if (attrName.equalsIgnoreCase("defconn")) {
-                            if (Boolean.valueOf(attrValue).booleanValue() && base != null) { //es conecci�n por defecto
+                            if (Boolean.valueOf(attrValue).booleanValue() && base != null) { //es conección por defecto
                                 defconn = true;
                                 init();
                                 if (formfe != null) {
@@ -479,7 +474,7 @@ public class AdmDBConnMgr {
                                     hiddenfe.setValue("true");
                                     formfe.add(hiddenfe);
                                 }
-                            } else { // es otra conexi�n
+                            } else { // es otra conexión
                                 defconn = false;
                             }
                         } else {
@@ -579,7 +574,7 @@ public class AdmDBConnMgr {
                     init();
                 }
             } else {
-                if (base != null) { //si no se puso nada en el tag admdbconnmgr, crea conexi�n por defecto
+                if (base != null) { //si no se puso nada en el tag admdbconnmgr, crea conexión por defecto
                     defconn = true;
                     init();
                     if (formfe != null) {
@@ -778,8 +773,6 @@ public class AdmDBConnMgr {
                             } else if (stype.toLowerCase().equals("timestamp")) {
                                 if (svalue.equals("$LASTUPDATE")) {
                                     st.setTimestamp(contParam, lastupdate);
-                                //new Timestamp()
-                                //else st.setTimestamp(contParam,);
                                 }
                             }
                         }
@@ -990,7 +983,7 @@ public class AdmDBConnMgr {
     }
 
     /**
-     * Obtiene el nombre de la conecci�n.
+     * Obtiene el nombre de la conección.
      * 
      * @return the con name
      */

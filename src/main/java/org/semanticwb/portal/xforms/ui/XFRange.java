@@ -177,7 +177,7 @@ public class XFRange extends XformsBaseImp
      */
     @Override
     public String getXml() {
-        StringBuffer strbXml=new StringBuffer();
+        StringBuilder strbXml=new StringBuilder();
         try {
             strbXml.append("<range");
             

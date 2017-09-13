@@ -18,17 +18,17 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.util;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Locale;
-import java.util.ArrayList;
 import java.util.Vector;
-//import com.infotec.wb.core.WBLoader;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
@@ -220,7 +220,7 @@ public class XmlBundle
             result.addElement(baseName);
             return result;
         }
-        final StringBuffer temp = new StringBuffer(baseName);
+        final StringBuilder temp = new StringBuilder(baseName);
         temp.append('_');
         temp.append(language);
         if (languageLength > 0) 
@@ -280,17 +280,9 @@ public class XmlBundle
             try 
             {
                 String xml=SWBUtils.IO.readInputStream(stream);
-                //if(WBAdmResourceUtils.getInstance().xmlVerifierDefault(xml)) 
-                //{
-                    PropertyXmlBundle bundle=new PropertyXmlBundle(xml);
-                    bundle.setLocale(baseName, bundleName);
-                    return bundle;
-                //}
-                //else
-//                {
-//                    AFUtils.log("XML is not valid in resource: "+bundleName,true);
-//                    return null;
-//                }
+                PropertyXmlBundle bundle=new PropertyXmlBundle(xml);
+                bundle.setLocale(baseName, bundleName);
+                return bundle;
             } 
             catch (Exception e) {}
             finally 
@@ -310,8 +302,6 @@ public class XmlBundle
      */
     private static ClassLoader getLoader(String className) 
     {
-        //ClassLoader cl = WBLoader.getInstance().getClassLoader();
-        //if (cl == null)  cl = ClassLoader.getSystemClassLoader();
         ClassLoader cl = SWBPortal.getResourceMgr().getResourceLoader(className);
         if (cl == null)  {
             cl = SWBPortal.class.getClassLoader();

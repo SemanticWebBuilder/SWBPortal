@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,41 +18,48 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources.reports;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.text.ParseException;
-import java.util.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
-
-import org.semanticwb.Logger;
-import org.semanticwb.SWBUtils;
-import org.semanticwb.SWBPlatform;
-import org.semanticwb.model.Device;
-import org.semanticwb.model.Language;
-import org.semanticwb.model.WebPage;
-import org.semanticwb.model.Resource;
-import org.semanticwb.model.WebSite;
-import org.semanticwb.model.SWBContext;
-import org.semanticwb.portal.api.SWBResourceURL;
-import org.semanticwb.portal.api.GenericResource;
-import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.SWBResourceException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.semanticwb.Logger;
+import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
+import org.semanticwb.SWBUtils;
+import org.semanticwb.model.Device;
+import org.semanticwb.model.Language;
+import org.semanticwb.model.Resource;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.WebPage;
+import org.semanticwb.model.WebSite;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceModes;
+import org.semanticwb.portal.api.SWBResourceURL;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class WBAAccessLogHitsReport.
  */
@@ -65,7 +72,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
     public String strRscType;
     
     /** The hm_detail. */
-    private HashMap hm_detail = null;
+    private HashMap<String, ArrayList<String>> hm_detail = null;
 
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#init()
@@ -85,7 +92,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
      */
     @Override
     public void render(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException{
-        if(!paramsRequest.WinState_MINIMIZED.equals(paramsRequest.getWindowState())) {
+        if(!SWBResourceModes.WinState_MINIMIZED.equals(paramsRequest.getWindowState())) {
             processRequest(request, response, paramsRequest);
         }
     }
@@ -256,7 +263,6 @@ public class WBAAccessLogHitsReport extends GenericResource {
         JSONObject jobj = new JSONObject();
         JSONArray jarr = new JSONArray();
         try {
-            //jobj.put("identifier", "uri");
             jobj.put("label", "agregate");
             jobj.put("items", jarr);
         }catch (JSONException jse) {
@@ -268,7 +274,6 @@ public class WBAAccessLogHitsReport extends GenericResource {
             String[] cols = records.next();
             JSONObject obj = new JSONObject();
             try {
-                //obj.put("detail", "<a onClick=\"doDetail('width=860, height=580, scrollbars, resizable, alwaysRaised, menubar','"+cols[0]+"')\"><img src=\""+SWBPlatform.getContextPath()+"/swbadmin/icons/SEARCH.png\" border=\"0\" alt=\"detail\"></a>&nbsp;");
                 obj.put("folio", Long.toString(i++));
                 obj.put("date", cols[0]);
                 obj.put("agregate", cols[1]);
@@ -298,12 +303,11 @@ public class WBAAccessLogHitsReport extends GenericResource {
         }catch (JSONException jse) {
         }
 
-        /*getReportResults(request, paramsRequest);*/
         String s_key = (String)request.getSession(true).getAttribute("alfilter");
 
         if(null!=hm_detail) {
             if(null!=s_key) {
-                Vector vec_rep = (Vector) hm_detail.get(s_key);
+                ArrayList<String> vec_rep = hm_detail.get(s_key);
                 if( null!=vec_rep && !vec_rep.isEmpty() ) {
                     Iterator<String> ite_rep = vec_rep.iterator();
                     int i=1;
@@ -362,7 +366,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
         Resource base = paramsRequest.getResourceBase();
         StringBuilder ret = new StringBuilder();
-        HashMap hm_sites = new HashMap();
+        HashMap<String, String> hm_sites = new HashMap<>();
 
         try {
             // Evaluates if there are sites
@@ -376,7 +380,6 @@ public class WBAAccessLogHitsReport extends GenericResource {
             }
             // If there are sites continue
             if(hm_sites.size() > 0) {
-                String address = paramsRequest.getWebPage().getUrl();
                 String websiteId = request.getParameter("wb_site")==null ? (String)hm_sites.keySet().iterator().next():request.getParameter("wb_site");
                 String repositoryName = SWBContext.getWebSite(websiteId).getUserRepository().getDisplayTitle(paramsRequest.getUser().getLanguage());
 
@@ -398,7 +401,6 @@ public class WBAAccessLogHitsReport extends GenericResource {
                 ret.append("function refresh() {\n");
                 ret.append("    postHtml('"+url+"'+'/_mod/fillDevSel'+'?site='+dojo.byId('wb_site').options[dojo.byId('wb_site').selectedIndex].value,'dev_cntr');\n");
                 ret.append("    postHtml('"+url+"'+'/_mod/fillLangSel'+'?site='+dojo.byId('wb_site').options[dojo.byId('wb_site').selectedIndex].value,'lang_cntr');\n");
-                //ret.append("    postHtml('"+url+"'+'/_mod/fillUTSel'+'?site='+dojo.byId('wb_site').options[dojo.byId('wb_site').selectedIndex].value,'ut_cntr');\n");
                 ret.append("}\n");
 
                 ret.append("dojo.addOnLoad(function(){\n");
@@ -466,9 +468,6 @@ public class WBAAccessLogHitsReport extends GenericResource {
                 ret.append("   if(dojo.byId('wb_userid').value) {\n");
                 ret.append("      params += '&userid='+dojo.byId('wb_userid').value;\n");
                 ret.append("   }\n");
-//                ret.append("   if(dojo.byId('wb_usertype').value) {\n");
-//                ret.append("      params += '&usertype='+dojo.byId('wb_usertype').value;\n");
-//                ret.append("   }\n");
                 ret.append("   if(dojo.byId('wb_devid').value) {\n");
                 ret.append("      params += '&devid='+dojo.byId('wb_devid').value;\n");
                 ret.append("   }\n");
@@ -602,10 +601,8 @@ public class WBAAccessLogHitsReport extends GenericResource {
                 ret.append("<td><label for=\"wb_userid\">"+paramsRequest.getLocaleString("user")+":&nbsp;</label></td>\n");
                 ret.append("<td><input type=\"text\" name=\"wb_userid\" id=\"wb_userid\" size=\"20\" /></td>\n");
                 ret.append("<td>\n");
-                //ret.append("<label for=\"wb_usertype\">"+paramsRequest.getLocaleString("user_type")+":&nbsp;\n");
                 ret.append("</td>\n");
                 ret.append("<td>\n");
-                //ret.append("<div id=\"ut_cntr\"></div>\n");
                 ret.append("</td>\n");
                 ret.append("</tr>\n");
                 
@@ -715,7 +712,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
         PrintWriter out = response.getWriter();
 
         SWBResourceURL url=paramsRequest.getRenderUrl();
-        url.setCallMethod(paramsRequest.Call_DIRECT).setMode("fillGridDtd");
+        url.setCallMethod(SWBResourceModes.Call_DIRECT).setMode("fillGridDtd");
         request.getSession(true).setAttribute("alfilter", request.getParameter("key"));
 
         out.println("<html>");
@@ -795,7 +792,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void doGraph(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         Resource base = paramsRequest.getResourceBase();
         Iterator<String[]> ar_pag = null;
 
@@ -823,9 +820,6 @@ public class WBAAccessLogHitsReport extends GenericResource {
             ret.append("</head>\n");
 
             ret.append("<body class=\"soria\">\n");
-//            ret.append("<div class=\"swbform\">\n");
-//            ret.append("<form>");
-//            ret.append("<fieldset>\n");
             ret.append("<table border=\"0\" width=\"98%\" height=\"460\">\n");
             ret.append("<tr>\n");
             ret.append("<td colspan=\"3\"><img src=\""+SWBPlatform.getContextPath()+"/swbadmin/images/swb-logo-hor.jpg\" width=\"180\" height=\"36\" /></td>\n");
@@ -869,9 +863,6 @@ public class WBAAccessLogHitsReport extends GenericResource {
             ret.append("</td>\n");
             ret.append("</tr>\n");
             ret.append("</table>\n");
-//            ret.append("</fieldset>\n");
-//            ret.append("</form>");
-//            ret.append("</div>\n");
             ret.append("</body>\n");
             ret.append("</html>\n");
         }
@@ -948,7 +939,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
                 out.println("<td>"+paramsRequest.getLocaleString("th_Resource")+"</td>");
                 out.println("</tr>");
             
-                Vector vec_rep = (Vector) hm_detail.get(key);
+                ArrayList<String> vec_rep = hm_detail.get(key);
                 Iterator<String> ite_rep = vec_rep.iterator();
                 int i=0;
                 while(ite_rep.hasNext()) {
@@ -1042,7 +1033,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
                 detail.appendChild(dom.createTextNode(""));
                 report.appendChild(detail);
 
-                Vector vec_rep = (Vector) hm_detail.get(key);
+                ArrayList<String> vec_rep = hm_detail.get(key);
                 Iterator<String> ite_rep = vec_rep.iterator();
                 renglones = 0;
                 while(ite_rep.hasNext()) {
@@ -1120,7 +1111,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
      * @return
      */
     public Iterator<String> getFileNames(HttpServletRequest request) {
-        ArrayList files = new ArrayList();
+    		ArrayList<String> files = new ArrayList<>();
 
         String accessLogPath = SWBPlatform.getEnv("swb/accessLog");
         String period = SWBPlatform.getEnv("swb/accessLogPeriod");
@@ -1201,21 +1192,11 @@ public class WBAAccessLogHitsReport extends GenericResource {
     private Iterator<String[]> getReportResults(HttpServletRequest request, SWBParamRequest paramsRequest) {
         final int I_ZERO = 0;
         final int I_ONE = 1;
-        /*final int I_TWO = 2;
-        final int I_THREE = 3;
-        final int I_FOUR = 4;
-        final int I_FIVE = 5;
-        final int I_SIX = 6;
-        final int I_SEVEN = 7;
-        final int I_EIGHT = 8;
-        final int I_NINE = 9;
-        final int I_TEN = 10;*/
         final int I_TWENTYFOUR = 24;
-        /*final int I_LESSONE = -1;*/
 
-        hm_detail = new HashMap();
+        hm_detail = new HashMap<>();
 
-        ArrayList al_pag = new ArrayList();        
+        ArrayList<String[]> al_pag = new ArrayList<>();        
         String[] arr_data = null;
         GregorianCalendar datefile = null;
         GregorianCalendar datedisplay = null;
@@ -1223,7 +1204,6 @@ public class WBAAccessLogHitsReport extends GenericResource {
 
         String line = null;
         String s_aux = null;
-        /*String s_resource = null;*/
         String filename = null;
 
         String yearinfile = null;
@@ -1232,31 +1212,17 @@ public class WBAAccessLogHitsReport extends GenericResource {
         String hourinfile = null;
         String mininfile = null;
         String dateinfile = null;
-        /*String s_auxresourceid = null;*/
         String s_datedefault = null;
         String s_hourfin = null;
         String s_year = null;
 
-        /*boolean b_ipadduser = false;
-        boolean b_ipaddserver = false;
-        boolean b_topicid = false;
-        boolean b_userid = false;
-        boolean b_languagesel = false;
-        boolean b_devicesel = false;
-        boolean b_usersel = false;
-        boolean b_resourceid = false;*/
         boolean b_result = true;
-       /* boolean b_sessionid = false;*/
 
         long l_count = 0;
-        /*int i = 0;
-        int col = 0;
-        int i_len = 0;*/
         int i_new = 0;
         int i_hourini = 0;
         int i_hourfin = 0;
         int i_start = 0;
-
 
         // Receive parameters
         String siteId = request.getParameter("siteid");
@@ -1312,7 +1278,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
             Iterator<String> files = getFileNames(request);
             if(files.hasNext()) {
                 String s_key=null;
-                Vector vec_rep = null;
+                ArrayList<String> vec_rep = null;
                 while(files.hasNext()) {
                     filename = files.next();
                     File f = new File(filename);
@@ -1505,9 +1471,9 @@ public class WBAAccessLogHitsReport extends GenericResource {
                                     }
                                     s_key = line.substring(0,13) + ":00-"+s_hourfin;
                                 }
-                                vec_rep = (Vector) hm_detail.get(s_key);
+                                vec_rep = hm_detail.get(s_key);
                                 if(null == vec_rep) {
-                                    vec_rep=new Vector();
+                                    vec_rep=new ArrayList<>();
                                 }
                                 vec_rep.add(line);
                                 hm_detail.put(s_key,vec_rep);
@@ -1552,7 +1518,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
             if(agregateId.equalsIgnoreCase("1") || agregateId.equalsIgnoreCase("2")) {
                 i_start = 0;
                 s_year = null;
-                ArrayList al_aux = new ArrayList();
+                ArrayList<String[]> al_aux = new ArrayList<>();
                 for(int h=0; h < al_pag.size(); h++) {
                     String[] arr_dataaux = (String[])al_pag.get(h);
                     if(i_start == 0) {

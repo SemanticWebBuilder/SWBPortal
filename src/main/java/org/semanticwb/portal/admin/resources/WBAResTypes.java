@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,49 +18,50 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
-import com.sun.org.apache.xpath.internal.XPathAPI;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
+import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.ResourceType;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.WebSite;
 import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
-import java.util.Arrays;
-import java.util.HashMap;
-import org.semanticwb.SWBPortal;
-import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBResourceModes;
 import org.semanticwb.portal.api.SWBResourceURL;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-// TODO: Auto-generated Javadoc
+import com.sun.org.apache.xpath.internal.XPathAPI;
+
 /**
  * The Class WBAResTypes.
  * 
- * @author jorge.jimenez
+ * @author Jorge Jiménez {jorge.jimenez}
  */
 public class WBAResTypes extends GenericResource {
 
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(WBAResTypes.class);
+    private static final Logger log = SWBUtils.getLogger(WBAResTypes.class);
     
     /** The prop resource types. */
     private Properties propResourceTypes = null;
@@ -105,10 +106,6 @@ public class WBAResTypes extends GenericResource {
      */
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
-
-        //SemanticObject sem=SemanticObject.createSemanticObject("sref");
-        //SemanticModel model=sem.getModel();
-        //WebSite website = WebSite.getWebSite();
         String tm="sep";
         String resType="Strategy";
 
@@ -134,7 +131,7 @@ public class WBAResTypes extends GenericResource {
      * @return the cat sort array
      */
     private String[] getCatSortArray(WebSite wsite, int actualPage, String resType) {
-        Vector vRO = new Vector();
+        ArrayList<ResourceType> vRO = new ArrayList<>();
         Iterator<ResourceType> en1 = SWBContext.getGlobalWebSite().listResourceTypes();
         while (en1.hasNext()) {
             ResourceType ROT = en1.next();
@@ -145,7 +142,7 @@ public class WBAResTypes extends GenericResource {
             boolean iE = false;
             ResourceType ROT = en1.next();
             for (int i = 0; i < vRO.size(); i++) {
-                ResourceType RO = (ResourceType) vRO.get(i);
+                ResourceType RO = vRO.get(i);
                 if (RO.getResourceClassName().equals(ROT.getResourceClassName())) {
                     iE = true;
                     break;
@@ -156,17 +153,17 @@ public class WBAResTypes extends GenericResource {
             }
         }
         
-        HashMap hResTypes=getResourcesTypes(resType);
-        ArrayList aTypes=new ArrayList();
-        Iterator itResTypes = hResTypes.keySet().iterator();
+        HashMap<String, String> hResTypes=getResourcesTypes(resType);
+        ArrayList<String> aTypes=new ArrayList<>();
+        Iterator<String> itResTypes = hResTypes.keySet().iterator();
         int cont = 0;
         while (itResTypes.hasNext()) {
             String strPropName = (String)itResTypes.next();
             String value=(String)hResTypes.get(strPropName);
             boolean isExist = false;
-            Enumeration en = vRO.elements();
-            while (en.hasMoreElements()) {
-                ResourceType RO = (ResourceType) en.nextElement();
+            Iterator<ResourceType> en = vRO.iterator();
+            while (en.hasNext()) {
+                ResourceType RO = en.next();
                 if (value.equalsIgnoreCase(RO.getResourceClassName())) {
                     isExist = true;
                     break;
@@ -183,7 +180,7 @@ public class WBAResTypes extends GenericResource {
         }
         String[] strArray = new String[aTypes.size() + 1];
 
-        Iterator ittypes=aTypes.iterator();
+        Iterator<String> ittypes=aTypes.iterator();
         cont=0;
         while(ittypes.hasNext()){
             String value=(String)ittypes.next();
@@ -204,8 +201,8 @@ public class WBAResTypes extends GenericResource {
      * @param resType the res type
      * @return the resources types
      */
-    private HashMap getResourcesTypes(String resType){
-        HashMap hResTypes=new HashMap();
+    private HashMap<String, String> getResourcesTypes(String resType){
+        HashMap<String, String> hResTypes=new HashMap<>();
         
         Iterator itKeys=propResourceTypes.keySet().iterator();
         while(itKeys.hasNext()){
@@ -252,7 +249,7 @@ public class WBAResTypes extends GenericResource {
             out.println("<table> \n");
             out.println("<tr><td colspan=\"3\" align=\"center\"> \n");
 
-            url.setMode(url.Mode_VIEW);
+            url.setMode(SWBResourceModes.Mode_VIEW);
 
             if (actualPage > 1) {
                  int gotop = (actualPage - 1);
@@ -382,7 +379,7 @@ public class WBAResTypes extends GenericResource {
     private void doEditForm(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
         String strResId=request.getParameter("id");
         String tm=request.getParameter("tm");
-        StringBuffer sbRet = new StringBuffer();
+        StringBuilder sbRet = new StringBuilder();
         String strTitle = "";
         String strDisplayName = "";
         String strDescription = "";
@@ -499,7 +496,7 @@ public class WBAResTypes extends GenericResource {
         sbRet.append("<td colspan=\"2\" align=right><HR size=\"1\" noshade> \n");
 
         SWBResourceURL url=paramsRequest.getRenderUrl();
-        url.setMode(url.Mode_VIEW);
+        url.setMode(SWBResourceModes.Mode_VIEW);
         sbRet.append("\n <input type=button  class=\"boton\" name=Back onClick=location='" + url.toString() + "'; value=" + paramsRequest.getLocaleString("btnBack") + ">");
         sbRet.append("&nbsp;");
         sbRet.append("\n <input type=button  class=\"boton\" name=Edit onClick='javascript:if(validateForm()) this.form.submit();' value=" + paramsRequest.getLocaleString("btnAdd") + ">");
@@ -562,7 +559,7 @@ public class WBAResTypes extends GenericResource {
             cache = 0;
         }
 
-        StringBuffer strXML = new StringBuffer();
+        StringBuilder strXML = new StringBuilder();
         if (request.getParameter("ext_att_res") == null || (request.getParameter("ext_att_res") != null && request.getParameter("ext_att_res").equals(""))) {
             strXML.append("");
         } else {
@@ -579,7 +576,7 @@ public class WBAResTypes extends GenericResource {
             } catch (Exception e) {
                 response.setRenderParameter("confirm", "notadded");
             }
-        response.setMode(response.Mode_VIEW);
+        response.setMode(SWBResourceModes.Mode_VIEW);
         response.setRenderParameter("tm", website.getId());
         response.setRenderParameter("resType", request.getParameter("resType"));
     }
@@ -623,25 +620,6 @@ public class WBAResTypes extends GenericResource {
             if(mode!=4){
                 String clsname=ptype.getResourceClassName();
                 SWBPortal.getResourceMgr().createSWBResourceClass(clsname, true);
-
-                 //TODO:VER COMO QUEDARIA ESTO EN V4
-//               WBResource obj = (WBResource) ResourceMgr.getInstance().convertOldWBResource(cls.newInstance());
-//
-//                if (obj != null)
-//                {
-//                   /* recObj.setDescription(description);
-//                    recObj.setTopicMapId(tmnid);*/
-//                    recObj.create(userid, com.infotec.appfw.util.AFUtils.getLocaleString("locale_Gateway", "admlog_Gateway_getService_ResourceCreated") + ":" + recObj.getId() + " " + com.infotec.appfw.util.AFUtils.getLocaleString("locale_Gateway", "admlog_Gateway_getService_andClass") + recObj.getObjclass());
-//                    try
-//                    {
-//                        obj.install(recObj);
-//                    } catch (Exception e)
-//                    {
-//                        recObj.remove();
-//                        AFUtils.log(e, com.infotec.appfw.util.AFUtils.getLocaleString("locale_Gateway", "error_Gateway_getService_ChangeResourcePriorityError"), true);
-//                    }
-//                    return recObj;
-//                }
             }
             return ptype;
         }catch(Exception e){

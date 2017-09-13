@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,18 +18,16 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.StringTokenizer;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -43,9 +41,11 @@ import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
 import org.semanticwb.portal.api.SWBResourceURLImp;
 import org.semanticwb.portal.util.FileUpload;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-
-// TODO: Auto-generated Javadoc
 /**
  * Despliega los elementos indicados en la administracion de este recurso a fin 
  * de que los usuarios finales puedan enviar comentarios a una cuenta de 
@@ -108,7 +108,6 @@ public class CommentSwf extends Comment {
             
             if ("com_step3".equals(action)) {
                 //TODO:reparar
-                //dom = getDomEmail(request, response, reqParams); // Envia correo
             } else {
                 // Nueva ventana con formulario
                 User user = reqParams.getUser();
@@ -119,7 +118,7 @@ public class CommentSwf extends Comment {
                 url.setWindowState(SWBResourceURLImp.WinState_MAXIMIZED);
                 url.setParameter("com_act", "com_step3");
                 url.setTopic(topic);
-                url.setCallMethod(reqParams.Call_DIRECT);
+                url.setCallMethod(SWBResourceURL.Call_DIRECT);
                 
                 Element root = dom.createElement("form");
                 root.setAttribute("path", path);
@@ -200,7 +199,7 @@ public class CommentSwf extends Comment {
             HttpServletResponse response, SWBParamRequest paramsRequest) 
             throws SWBResourceException, IOException {
         
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         Resource base = getResourceBase();
         WBAdmResourceUtils admResUtils = new WBAdmResourceUtils();
         String msg = paramsRequest.getLocaleString("msgUndefinedOperation");
@@ -208,10 +207,6 @@ public class CommentSwf extends Comment {
                          && !"".equals(request.getParameter("act").trim())
                          ? request.getParameter("act").trim()
                          : paramsRequest.getAction());
-        String webWorkPath = "/work";
-        String name = getClass().getName().substring(
-                      getClass().getName().lastIndexOf(".") + 1);
-        String path = SWBPlatform.getContextPath() + "/swbadmin/xsl/" + name + "/";
         Logger log = SWBUtils.getLogger(Comment.class);
         
         if (action.equals("add") || action.equals("edit")) {
@@ -239,7 +234,6 @@ public class CommentSwf extends Comment {
                                         "template", request.getSession().getId());
                                 if (applet != null && !applet.trim().equals("")) {    
                                     base.setAttribute("template", file);
-                                    path = webWorkPath + "/";
                                 } else {
                                     msg = paramsRequest.getLocaleString("msgErrUploadFile")
                                             + " <i>" + value + "</i>.";
@@ -415,7 +409,7 @@ public class CommentSwf extends Comment {
     private String getForm(HttpServletRequest request,
             SWBParamRequest paramsRequest) {
         
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         String webWorkPath = "/work";
         String name = getClass().getName().substring(
                       getClass().getName().lastIndexOf(".") + 1);
@@ -432,18 +426,13 @@ public class CommentSwf extends Comment {
             ret.append("<fieldset>");
             ret.append("<legend>"+paramsRequest.getLocaleString("msgStep1")+"</legend>");
             ret.append("<table>");
-/*            ret.append("<tr> \n");
-            ret.append("<td colspan=2>");
-            ret.append(paramsRequest.getLocaleString("msgStep1"));
-            ret.append("</td> \n");
-            ret.append("</tr> \n");*/
+
             ret.append("<tr> \n");
             ret.append("<td align=\"right\" valign=\"top\">"
                     + paramsRequest.getLocaleString("msgTemplate")
                     + " (xsl, xslt):</td> \n");
             ret.append("<td>");
             ret.append("<input type=\"file\" name=\"template\" onChange=\"isFileType(this, 'xsl|xslt');\" />");
-            //if (!"".equals(base.getAttribute("template", "").trim()))
             if (path.indexOf(webWorkPath) !=-1) {
                 ret.append("<p>"
                         + paramsRequest.getLocaleString("msgCurrentTemplate")
@@ -645,11 +634,6 @@ public class CommentSwf extends Comment {
             ret.append("<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"7\">");
             ret.append("<tr><td width=\"35%\"></td><td width=\"65%\"></td>");
 
-/*            ret.append("<td colspan=2>");
-            ret.append("<br><br>");
-            ret.append(paramsRequest.getLocaleString("msgStep2") + "</font>");
-            ret.append("</td> \n");
-            ret.append("</tr> \n");*/
             ret.append(admResUtils.loadWindowConfiguration(base, paramsRequest));
 
             ret.append("</table> \n");
@@ -658,12 +642,7 @@ public class CommentSwf extends Comment {
             ret.append("<legend>"+paramsRequest.getLocaleString("msgStep3")+"</legend>");
             ret.append("<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"7\">");
             ret.append("<tr><td width=\"35%\"></td><td width=\"65%\"></td>");
-/*            ret.append("<tr> \n");
-            ret.append("<td colspan=2>");
-            ret.append("<br><br>");
-            ret.append(paramsRequest.getLocaleString("msgStep3"));
-            ret.append("</td> \n");
-            ret.append("</tr> \n");*/
+
             ret.append("<tr> \n");
             ret.append("<td align=\"right\">* "
                     + paramsRequest.getLocaleString("msgArea") + "</td> \n");
@@ -767,25 +746,14 @@ public class CommentSwf extends Comment {
     private String getScript(HttpServletRequest request,
             SWBParamRequest paramsRequest) {
         
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         WBAdmResourceUtils admResUtils = new WBAdmResourceUtils();
         Logger log = SWBUtils.getLogger(Comment.class);
         
         try {
             ret.append("\n<script>");
             ret.append("\nfunction jsValida(pForm) {");
-            //ret.append("\n");
-            /*
-            if ("".equals(getResourceBase().getAttribute("template","").trim()))
-            {
-                ret.append("\n   if(pForm.template.value==null || pForm.template.value=='' || pForm.template.value==' ')");
-                ret.append("\n   {");
-                ret.append("\n       alert('" + paramsRequest.getLocaleString("msgTemplateRequired") + "');");
-                ret.append("\n       pForm.template.focus();");
-                ret.append("\n       return false;");
-                ret.append("\n   }");
-            }
-            */
+            
             if ("".equals(getResourceBase().getAttribute("swf","").trim())) {
                 ret.append("\n   if (pForm.swf.value==null || pForm.swf.value=='' || pForm.swf.value==' ') {");
                 ret.append("\n       alert('"
@@ -803,21 +771,18 @@ public class CommentSwf extends Comment {
             ret.append("\n   if (!isNumber(pForm.top)) return false;");
             ret.append("\n   if (!isNumber(pForm.left)) return false;");
             ret.append("\n   if (pForm.area.value==null || pForm.area.value=='' || pForm.area.value==' ') {");
-            //ret.append("\n   ");
             ret.append("\n       alert('"
                     + paramsRequest.getLocaleString("msgAreaRequired") + "');");
             ret.append("\n       pForm.area.focus();");
             ret.append("\n       return false;");
             ret.append("\n   }");
             ret.append("\n   if (pForm.responsable.value==null || pForm.responsable.value=='' || pForm.responsable.value==' ') {");
-            //ret.append("\n   ");
             ret.append("\n       alert('"
                     + paramsRequest.getLocaleString("msgManagerRequired") + "');");
             ret.append("\n       pForm.responsable.focus();");
             ret.append("\n       return false;");
             ret.append("\n   }");
             ret.append("\n   if (pForm.email.value==null || pForm.email.value=='' || pForm.email.value==' ') {");
-            //ret.append("\n   ");
             ret.append("\n       alert('"
                     + paramsRequest.getLocaleString("msgEmailRequired") + "');");
             ret.append("\n       pForm.email.focus();");
@@ -828,7 +793,6 @@ public class CommentSwf extends Comment {
             ret.append("\n   replaceChars(pForm.footermsg);");
             ret.append("\n   pForm.swfvar.value='';");
             ret.append("\n   for (var i=0; i<pForm.selSwfvar.length; i++) {");
-            //ret.append("\n   ");
             ret.append("\n       if (i>0) pForm.swfvar.value+=\"|\";");
             ret.append("\n       pForm.swfvar.value+=pForm.selSwfvar.options[i].value;");
             ret.append("\n   }");

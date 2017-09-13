@@ -46,7 +46,7 @@ import org.semanticwb.portal.api.SWBResourceURL;
 
 /**
  * Agrupa un conjunto de comentarios asociados al suri recibido como parametro de un
- * HttpServletRequest y muestra el listado de los mismos correspondientes al suri recibido.
+ * HttpServletRequest y muestra el listado de los mismos.
  * @author jose.jimenez
  */
 public class SWBCommentToElement extends org.semanticwb.portal.resources.sem.base.SWBCommentToElementBase {
@@ -55,13 +55,13 @@ public class SWBCommentToElement extends org.semanticwb.portal.resources.sem.bas
     public static final String FCTR = "fctr";
     
     /**
-     * Instantiates a new sWB comment to element.
+     * Instantiates a new SWB comment to element.
      */
     public SWBCommentToElement() {
     }
 
     /**
-     * Instantiates a new sWB comment to element.
+     * Instantiates a new SWB comment to element.
      * 
      * @param base the base
      */
@@ -379,16 +379,16 @@ public class SWBCommentToElement extends org.semanticwb.portal.resources.sem.bas
         out.println("    s = s.concat('  <label for=\"ab_comment_'+pc+'\">"+paramRequest.getLocaleString("comment")+":</label>');");
         out.println("    s = s.concat('  <textarea id=\"ab_comment_'+pc+'\" name=\"comment\" cols=\"32\" rows=\"3\"></textarea>');");
         out.println("    s = s.concat('</div>');");
-if(!user.isSigned()) {
-out.println("    s = s.concat('<div class=\"swb-comments-image\">');");
-out.println("    s = s.concat('  <img src=\""+SWBPlatform.getContextPath()+"/swbadmin/jsp/securecode.jsp\" id=\"imgseccode_'+pc+'\" width=\"155\" height=\"65\" />');");
-out.println("    s = s.concat('  <a href=\"#\" onclick=\"changeSecureCodeImage(\\'imgseccode_'+pc+'\\')\">"+paramRequest.getLocaleString("anotherCode")+"</a>');");
-out.println("    s = s.concat('</div>');");
-out.println("    s = s.concat('<div class=\"swb-comments-captcha\">');");
-out.println("    s = s.concat('  <label for=\"ab_seccode_'+pc+'\">El texto de la imagen es:</label>');");
-out.println("    s = s.concat('  <input type=\"text\" id=\"ab_seccode_'+pc+'\" name=\"seccode\" />');");
-out.println("    s = s.concat('</div>');");
-}
+        if (!user.isSigned()) {
+            out.println("    s = s.concat('<div class=\"swb-comments-image\">');");
+            out.println("    s = s.concat('  <img src=\""+SWBPlatform.getContextPath()+"/swbadmin/jsp/securecode.jsp\" id=\"imgseccode_'+pc+'\" width=\"155\" height=\"65\" />');");
+            out.println("    s = s.concat('  <a href=\"#\" onclick=\"changeSecureCodeImage(\\'imgseccode_'+pc+'\\')\">"+paramRequest.getLocaleString("anotherCode")+"</a>');");
+            out.println("    s = s.concat('</div>');");
+            out.println("    s = s.concat('<div class=\"swb-comments-captcha\">');");
+            out.println("    s = s.concat('  <label for=\"ab_seccode_'+pc+'\">El texto de la imagen es:</label>');");
+            out.println("    s = s.concat('  <input type=\"text\" id=\"ab_seccode_'+pc+'\" name=\"seccode\" />');");
+            out.println("    s = s.concat('</div>');");
+        }
         out.println("    s = s.concat('<div class=\"swb-comments-send\">');");
         out.println("    s = s.concat('  <input type=\"button\" value=\""+paramRequest.getLocaleString("publish")+"\" onclick=\"if(validateFrm('+childObjId+')){this.form.submit()}\" />');");
         out.println("    s = s.concat('</div>');");
@@ -429,16 +429,16 @@ out.println("    s = s.concat('</div>');");
         out.println("  <label for=\"comment\">"+paramRequest.getLocaleString("comment")+":</label>");
         out.println("  <textarea id=\"comment\" name=\"comment\" cols=\"32\" rows=\"3\" >"+(request.getParameter("comment")==null?"":request.getParameter("comment"))+"</textarea>");
         out.println("</div>");
-if(!user.isSigned()) {
-out.println("<div class=\"swb-comments-image\">");
-out.println("  <img src=\""+SWBPlatform.getContextPath()+"/swbadmin/jsp/securecode.jsp\" id=\"imgseccode\" width=\"155\" height=\"65\" /><br/>");
-out.println("  <a href=\"javascript:changeSecureCodeImage('imgseccode');\">"+paramRequest.getLocaleString("anotherCode")+"</a>");
-out.println("</div>");
-out.println("<div class=\"swb-comments-captcha\">");
-out.println("  <label for=\"seccode\">El texto de la imagen es:</label>");
-out.println("  <input type=\"text\" id=\"seccode\" name=\"seccode\" />");
-out.println("</div>");
-}
+        if (!user.isSigned()) {
+            out.println("<div class=\"swb-comments-image\">");
+            out.println("  <img src=\""+SWBPlatform.getContextPath()+"/swbadmin/jsp/securecode.jsp\" id=\"imgseccode\" width=\"155\" height=\"65\" /><br/>");
+            out.println("  <a href=\"javascript:changeSecureCodeImage('imgseccode');\">"+paramRequest.getLocaleString("anotherCode")+"</a>");
+            out.println("</div>");
+            out.println("<div class=\"swb-comments-captcha\">");
+            out.println("  <label for=\"seccode\">El texto de la imagen es:</label>");
+            out.println("  <input type=\"text\" id=\"seccode\" name=\"seccode\" />");
+            out.println("</div>");
+        }
         out.println("<div class=\"swb-comments-send\">");
         out.println("  <input type=\"button\" value=\""+paramRequest.getLocaleString("publish")+"\" onclick=\"if(validateFrm('cmnt')){this.form.submit()}\" />");
         out.println("</div>");
@@ -490,14 +490,14 @@ out.println("</div>");
     }
 
     /**
-     * Render list comments.
-     * 
-     * @param paramRequest the param request
-     * @param suri the suri
-     * @return the string
+     * Renders a collection of comments as an un-numbered HTML list for when indexing.
+     * It also shows the list of answers available for each comment.
+     * @param paramRequest an object that holds references to properties and objects from the SWB context
+     * @param icomments the collection of comments to show on the interface
+     * @return the string representing the HTML code for the un-numbered list
      */
-    public String renderListComments(SWBParamRequest paramRequest, Iterator<CommentToElement> icomments) throws SWBResourceException
-    {
+    public String renderListComments(SWBParamRequest paramRequest,
+            Iterator<CommentToElement> icomments) throws SWBResourceException {
         StringBuilder html = new StringBuilder();
         final User user = paramRequest.getUser();
         final String lang = user.getLanguage()==null?"es":user.getLanguage();
@@ -557,8 +557,17 @@ out.println("</div>");
         return html.toString();
     }
     
-    public void doDetail(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException
-    {
+    /**
+     * Generates the HTML code for one comment in particular
+     * @param request the client's request containing the uri for a particular comment in a parameter with name cmmt
+     * @param response the response for the client
+     * @param paramRequest an object that holds references to properties and objects from the SWB context
+     * @throws SWBResourceException in case of a malfunction in any SWB's platform related object
+     * @throws IOException in case of a problem reading or writing information
+     */
+    public void doDetail(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest)
+            throws SWBResourceException, IOException {
+        
         response.setContentType("text/html; charset=UTF-8");
         response.setHeader("Cache-Control","no-cache");
         response.setHeader("Pragma","no-cache");
@@ -578,31 +587,31 @@ out.println("</div>");
             answer = (CommentToElement)SemanticObject.createSemanticObject(cmmt).createGenericInstance();
             CommentToElement comment = answer.getAnswerBackTo();
             
-            html.append("<div>");
-            html.append("  <div>");
+            html.append("<div>\n");
+            html.append("  <div>\n");
             html.append("    <p class=\"swb-commts-name\">"+(comment.getCreator()==null?comment.getName():comment.getCreator().getFullName()));
             try {
                 html.append("&nbsp;<span class=\"swb-commts-ago\">"+paramRequest.getLocaleString("ago")+"&nbsp;"+SWBUtils.TEXT.getTimeAgo(comment.getCreated(), lang)+"</span>");
             }catch(Exception e) {
             }
-            html.append("    </p>");
-            html.append("    <p class=\"swb-commts-cmmt\">"+comment.getCommentToElement()+"</p>");
-            html.append("  </div>");
-            html.append("  <div>");
+            html.append("    </p>\n");
+            html.append("    <p class=\"swb-commts-cmmt\">"+comment.getCommentToElement()+"</p>\n");
+            html.append("  </div>\n");
+            html.append("  <div>\n");
             html.append("    <p class=\"swb-commts-name\">"+(answer.getCreator()==null?answer.getName():answer.getCreator().getFullName()));
             try {
                 html.append("&nbsp;<span class=\"swb-commts-ago\">"+paramRequest.getLocaleString("ago")+"&nbsp;"+SWBUtils.TEXT.getTimeAgo(answer.getCreated(), lang)+"</span>");
             }catch(Exception e) {
             }
-            html.append("    </p>");
-            html.append("    <p class=\"swb-commts-cmmt\">"+answer.getCommentToElement()+"</p>"); 
-            html.append("<p><a href=\"#\" onclick=\"answerBack('cmmt_"+answer.getId()+"','child_"+answer.getId()+"', 'last','"+answer.getId()+"');return false;\">"+paramRequest.getLocaleString("answerBack") +"</a></p>");
-            html.append("<div class=\"swb-commts-ans\" id=\"cmmt_"+answer.getId()+"\">");
+            html.append("    </p>\n");
+            html.append("    <p class=\"swb-commts-cmmt\">"+answer.getCommentToElement()+"</p>\n"); 
+            html.append("    <p><a href=\"#\" onclick=\"answerBack('cmmt_"+answer.getId()+"','child_"+answer.getId()+"', 'last','"+answer.getId()+"');return false;\">"+paramRequest.getLocaleString("answerBack") +"</a></p>\n");
+            html.append("    <div class=\"swb-commts-ans\" id=\"cmmt_"+answer.getId()+"\">\n");
             html.append(paramRequest.getLocaleString("inAnswerTo")+"&nbsp;");
             html.append(comment.getCreator()==null?comment.getName():comment.getCreator().getFullName());
-            html.append("</div>");
-            html.append("  </div>");
-            html.append("</div>");
+            html.append("    </div>\n");
+            html.append("  </div>\n");
+            html.append("</div>\n");
             
             out.println(html.toString());
         }catch(Exception e) {
@@ -631,12 +640,20 @@ out.println("</div>");
         out.close();
     }
     
-    public String renderListComments(HttpServletRequest request, SWBParamRequest paramRequest, SWBClass element) throws SWBResourceException
-    {
+    /**
+     * Renders an unnumbered HTML list, for the element indicated by {@code element}
+     * @param request the client's request
+     * @param paramRequest an object that holds references to properties and objects from the SWB context
+     * @param element the element from which all its comments are to be displayed in a HTML list
+     * @return a String object representing the HTML list to be displayed
+     * @throws SWBResourceException in case of a malfunction in any SWB's platform related object
+     */
+    public String renderListComments(HttpServletRequest request, SWBParamRequest paramRequest,
+            SWBClass element) throws SWBResourceException {
         StringBuilder html = new StringBuilder();
         final User user = paramRequest.getUser();
         final String lang = user.getLanguage()==null?"es":user.getLanguage();
-        String name;
+        //String name;
         
         List<CommentToElement> commentsList = listCommentToElementByElement(element, paramRequest.getWebPage().getWebSite());
         if(!commentsList.isEmpty())
@@ -713,6 +730,11 @@ out.println("</div>");
         return html.toString();
     }
     
+    /**
+     * Obtains the instance of the object refered by the uri received
+     * @param suri a URI that refers to a semantic object's instance
+     * @return the instance that the received uri referes to
+     */
     private SWBClass getSWBClassObject(final String suri)
     {
         SWBClass element = null;
@@ -736,6 +758,12 @@ out.println("</div>");
         return element;
     }
     
+    /**
+     * Obtains the list of valid comments associated to the element specified by {@code value}
+     * @param value an instance of a semantic object which has a collection of comments
+     * @param model the semantic model to which the semantic object {@code value} is associated
+     * @return a list of valid comments, or comments without answer that are associated to the semantic object {@code vaue}
+     */
     public List<CommentToElement> listCommentToElementByElement(SWBClass value, org.semanticwb.model.SWBModel model)
     {
         CommentToElement comment;

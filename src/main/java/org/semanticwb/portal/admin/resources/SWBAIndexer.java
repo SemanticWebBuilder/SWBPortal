@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,13 +18,19 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
-import javax.servlet.http.*;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
@@ -33,10 +39,14 @@ import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.SWBModel;
 import org.semanticwb.model.User;
 import org.semanticwb.model.WebSite;
-import org.semanticwb.portal.api.*;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceModes;
+import org.semanticwb.portal.api.SWBResourceURL;
 import org.semanticwb.portal.indexer.SWBIndexer;
 
-// TODO: Auto-generated Javadoc
 /**
  * Recurso de WB para la administracion de los Indexadores.
  * 
@@ -64,57 +74,22 @@ public class SWBAIndexer extends GenericResource {
         PrintWriter out = response.getWriter();
         User user = paramRequest.getUser();
         // Mostrar la lista de indexadores existentes
-        HashMap hmtmind = new HashMap();
+        HashMap<String, String> hmtmind = new HashMap<>();
 
         base = getResourceBase();
         String act = request.getParameter("act");
         String indexName = request.getParameter("indexName");
         if(null==indexName)indexName = SWBPortal.getIndexMgr().getDefaultIndexer().getName();
-        String status = request.getParameter("bar_status");
         if (null == act) {
             act = "";
         }
 
-//        if("".equals(act))
-//        {
-//            SWBResourceURL url = paramRequest.getRenderUrl();
-//            url.setParameter("act","tmList");
-//            out.println("<form class=box action=\""+url+"\" method=\"post\">");
-//            out.println("<table border=0 cellpadding=5 cellspacing=0 width=100%>");
-//            out.println("<tr>");
-//            out.println("<td class=tabla colspan=2>"+"Lista de indexadores"+"</td>");
-//            out.println("</tr>");
-//            out.println("<tr>");
-//            out.println("<td class=datos align=\"right\"></td>");
-//            out.println("<td><select name=\"indexName\">");
-//            out.println("<option value=\"0\">Selecciona un indexador</option>");
-//            HashMap hmind = SWBPortal.getIndexMgr().getIndexers();
-//            Iterator iteind = hmind.keySet().iterator();
-//            while(iteind.hasNext())
-//            {
-//                String key = (String) iteind.next();
-//                SWBIndexer obj = (SWBIndexer) hmind.get(key);
-//                out.println("<option value=\""+key+"\">"+obj.getName()+"</option>");
-//            }
-//            out.println("</select>");
-//            out.println("</td>");
-//            out.println("</tr>");
-//            out.println("<tr>");
-//            out.println("<td colspan=2 align=right><HR noshade size=\"1\">");
-//            out.println("<input type=submit class=boton value=\"Enviar\">");
-//            out.println("</td></tr>");
-//            out.println("</table></form>");
-//        }
-        //else if("tmList".equals(act))
         SWBIndexer ind = SWBPortal.getIndexMgr().getDefaultIndexer();
         if ("".equals(act)&&ind.getIndexSize()==0) {
             
             if (null != indexName) {
-                //indexName = SWBPortal.getIndexMgr().getDefaultIndexer().getName();
                 hmtmind = loadHMINDTM(indexName);
                 
-
-                //out.println("<script type=\"javascript\">include_dom('" + SWBPlatform.getContextPath() + "/swbadmin/js/indexer.js');</script>");
                 out.println("<div id=\"" + base.getId() + "/statusIndex\" class=\"swbform\">");
                 out.println("<form dojoType=\"dijit.form.Form\" id=\"" + getResourceBase().getId() + "/frmInd\" name=\"" + getResourceBase().getId() + "/frmInd\" action=\"\" method=\"post\">");
                 out.println("<fieldset>");
@@ -125,10 +100,9 @@ public class SWBAIndexer extends GenericResource {
                 out.println("<tr>");
                 out.println("<td>");
                 out.println("<table border=\"0\" cellpadding=\"5\" cellspacing=\"0\" width=\"100%\">");
-                Iterator ittm = SWBContext.listWebSites();
+                Iterator<WebSite> ittm = SWBContext.listWebSites();
                 while (ittm.hasNext()) {
                     WebSite tmp = (WebSite) ittm.next();
-                    //if(indexName.equals(tmp.getDbdata().getIndexer()) && SWBAdmFilterMgr.getInstance().haveAccess2WebSite(user,tmp.getId())>0)
                     if(SWBPortal.getAdminFilterMgr().haveAccessToSemanticObject(user,tmp.getSemanticObject()))
                     {
 
@@ -139,7 +113,6 @@ public class SWBAIndexer extends GenericResource {
                             str_check = "checked";
                         }
                         out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"checkbox\" name=\"tmids\" value=\"" + tmid + "\" " + str_check + ">");
-                        //out.println("</td><td align=left>");
                         out.println(tmp.getDisplayTitle(user.getLanguage()));
                         out.println("</td>");
                         out.println("</tr>");
@@ -153,7 +126,6 @@ public class SWBAIndexer extends GenericResource {
                                 str_check = "checked";
                             }
                             out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;<input type=\"checkbox\" name=\"tmids\" value=\"" + tmid + "\" " + str_check + ">");
-                            //out.println("</td><td align=left>");
                             out.println(sWBModel.getSemanticObject().getDisplayName(user.getLanguage()));
                             out.println("</td>");
                             out.println("</tr>");
@@ -165,19 +137,16 @@ public class SWBAIndexer extends GenericResource {
                 out.println("</td></tr>");
                 out.println("<tr><td>");
                 out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reemplazar Indice" + ":");
-                //out.println("</td><td align=\"left\">");
                 out.println("<input type=\"checkbox\" name=\"reemplazar\" value=\"replaceIndex\">");
                 out.println("</td>");
                 out.println("</tr>");
                 out.println("<tr><td >");
                 out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Indice bloqueado" + ":");
-                //out.println("</td><td align=\"left\" >");
                 out.println(ind.isLocked() ? "Si" : "No");
                 out.println("</td>");
                 out.println("</tr>");
                 out.println("<tr><td>");
                 out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Archivos por indexar" + ":");
-                //out.println("</td><td align=\"left\" >");
                 out.println(ind.getIndexSize());
                 out.println("</td>");
                 out.println("</tr>");
@@ -199,15 +168,11 @@ public class SWBAIndexer extends GenericResource {
                 out.println("</fieldset>");
                 out.println("<fieldset>");
                 out.println("<button dojoType=\"dijit.form.Button\" onclick=\"enviar('" + getResourceBase().getId() + "/frmInd','" + urlInd + "'); return false;\">Indexar</button>");
-                //out.println("<input name=\"btn_index\" onclick=\"enviar(frmInd,'" + urlInd + "');\" type=button class=boton value=\"" + "Indexar" + "\">");
                 out.println("<button dojoType=\"dijit.form.Button\" onclick=\"enviar('" + getResourceBase().getId() + "/frmInd','" + urldel + "'); return false;\">Eliminar</button>");
-                //out.println("<input name=\"btn_del\" onclick=\"enviar(frmInd,'" + urldel + "');\" type=button class=boton value=\"" + "Eliminar" + "\">");
                 if (ind.isLocked()) {
                     out.println("<button dojoType=\"dijit.form.Button\" onclick=\"enviar('" + getResourceBase().getId() + "/frmInd','" + urldes + "'); return false;\">Desbloquear</button>");
-                //out.println("<input name=\"btn_des\" onclick=\"enviar(frmInd,'" + urldes + "');\" type=button class=boton value=\"" + "Desbloquear" + "\">");
                 }
                 out.println("<button dojoType=\"dijit.form.Button\" onclick=\"enviar('" + getResourceBase().getId() + "/frmInd','" + urlOpt + "'); return false;\">Optimizar</button>");
-                //out.println("<input name=\"btn_opt\" onclick=\"enviar(frmInd,'" + urlOpt + "');\" type=button class=boton value=\"" + "Optimizar" + "\">");
                 out.println("</fieldset>");
                 out.println("</form>");
                 out.println("</div>");
@@ -215,7 +180,7 @@ public class SWBAIndexer extends GenericResource {
         }
         else if(ind.getIndexSize()>0)
         {
-            StringBuffer status_msg = new StringBuffer();
+            StringBuilder status_msg = new StringBuilder();
             SWBResourceURL url1 = paramRequest.getRenderUrl();
             status_msg.append("\n<div id=\"" + base.getId() + "/statusIndex\" class=\"swbform\">");
             status_msg.append("\n<fieldset>");
@@ -227,13 +192,12 @@ public class SWBAIndexer extends GenericResource {
             SWBResourceURL url = paramRequest.getRenderUrl();
             url.setMode("doStatus");
             url.setCallMethod(SWBResourceURL.Call_DIRECT);
-            url.setWindowState(url.WinState_MAXIMIZED);
+            url.setWindowState(SWBResourceModes.WinState_MAXIMIZED);
             out.println("<script type=\"text/javascript\">");
             out.println("  indexcheck('"+url+"','" + base.getId() + "/indice');");
             out.println("   sleep(1000);");
             out.println("   submitUrl('"+url1+"',document.getElementById('"+base.getId() + "/statusIndex'));");
             out.println("</script>");
-            //out.println("<meta http-equiv=\"refresh\" content=\"3;url="+url1+"\" />");
         }
 
         
@@ -251,15 +215,12 @@ public class SWBAIndexer extends GenericResource {
      */
     public void doStatus(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         PrintWriter out = response.getWriter();
-        HashMap hmtmind = new HashMap();
         SWBIndexer ind = SWBPortal.getIndexMgr().getDefaultIndexer();
         base = getResourceBase();
         String indexName = ind.getName();
         if (null != indexName) {
-            hmtmind = loadHMINDTM(indexName);
-            StringBuffer status_msg = new StringBuffer();
+            StringBuilder status_msg = new StringBuilder();
             status_msg.append(ind.getIndexSize());
-            //System.out.println("size indx:"+ind.getIndexSize()); //MAPS74- 24/Oct/2011
             out.println(status_msg.toString());
         }
 
@@ -272,9 +233,9 @@ public class SWBAIndexer extends GenericResource {
       * @return the hash map
       * @return
       */
-     public HashMap loadHMINDTM(String indexName) {
+     public HashMap<String, String> loadHMINDTM(String indexName) {
         base = getResourceBase();
-        HashMap hm_ret = new HashMap();
+        HashMap<String, String> hm_ret = new HashMap<>();
         String ind_tms = base.getAttribute("index" + indexName, "");
 
         log.debug("loadHMINDTM: " + ind_tms);
@@ -304,7 +265,7 @@ public class SWBAIndexer extends GenericResource {
         String newInd = request.getParameter("reemplazar");
         String indexName = request.getParameter("indexID");
         indexName = SWBPortal.getIndexMgr().getDefaultIndexer().getName();
-        HashMap hmtmind = null;
+        HashMap<String, String> hmtmind = null;
         if (null != indexName) {
             hmtmind = loadHMINDTM(indexName);
         }
@@ -313,7 +274,7 @@ public class SWBAIndexer extends GenericResource {
             if (null != newInd && "replaceIndex".equals(newInd)) {
                 SWBIndexer tmindexer = SWBPortal.getIndexMgr().getDefaultIndexer();
                 tmindexer.reset();
-                hmtmind = new HashMap();
+                hmtmind = new HashMap<>();
             }
 
             String[] tmarr = request.getParameterValues("tmids");
@@ -323,8 +284,6 @@ public class SWBAIndexer extends GenericResource {
                 for (int i = 0; i < tmarr.length; i++) {
                     String tmid = tmarr[i];
                     if (null != hmtmind && hmtmind.get(tmid) == null) {
-                        //WebSite tm_o = SWBContext.getWebSite(tmid);
-                        //tmindexer.indexWebSite(tm_o);
                         tmindexer.indexModel(tmid);
                     }
                     if (null != hmtmind && hmtmind.get(tmid) != null) {
@@ -338,11 +297,10 @@ public class SWBAIndexer extends GenericResource {
                 }
                 if (null != hmtmind && !hmtmind.isEmpty()) // QUITANDO TM DEL INDICE
                 {
-                    Iterator ite = hmtmind.keySet().iterator();
+                    Iterator<String> ite = hmtmind.keySet().iterator();
                     while (ite.hasNext()) {
-                        String tm_del = (String) ite.next();
-                        //tmindexer.removeWebSite(tm_del); //
-                        tmindexer.removeModel(tm_del); //
+                        String tm_del = ite.next();
+                        tmindexer.removeModel(tm_del);
                     }
                 }
                 log.debug("cadena: " + tmids + ", name: " + indexName);
@@ -358,7 +316,7 @@ public class SWBAIndexer extends GenericResource {
         if ("eliminar".equals(act)) {
             if (null != indexName && "".equals(indexName)) {
                 SWBIndexer tmindexer = SWBPortal.getIndexMgr().getDefaultIndexer();
-                tmindexer.remove();  // eliminar �ndice
+                tmindexer.remove();  // eliminar indice
             }
             base.removeAttribute("index" + indexName);
             response.setRenderParameter("act", "");
@@ -410,6 +368,4 @@ public class SWBAIndexer extends GenericResource {
             super.processRequest(request, response, paramRequest);
         }
     }
-
-
 }

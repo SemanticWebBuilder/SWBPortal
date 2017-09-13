@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,19 +18,19 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
 import java.io.IOException;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
-import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-//import org.apache.poi.hpsf.Variant;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -45,11 +45,8 @@ import org.semanticwb.util.StringSearch;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
-
-// TODO: Auto-generated Javadoc
 /** Esta clase se encarga de desplegar y administrar el buscador del sitio bajo ciertos
- * criterios de configuraci�n. Viene de la versi�n 2 de WebBuilder.
+ * criterios de configuración. Viene de la versión 2 de WebBuilder.
  *
  * This class displays and manages prospector resource under some comfiguration
  * criteria. This resource comes from WebBuilder 2.
@@ -62,7 +59,7 @@ public class Search extends GenericAdmResource
 {
     
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(Search.class);
+    private static final Logger log = SWBUtils.getLogger(Search.class);
     
     
     /** The tpl. */
@@ -78,7 +75,7 @@ public class Search extends GenericAdmResource
     }
 
     /**
-     * Asigna la informaci�n de la base de datos al recurso.
+     * Asigna la información de la base de datos al recurso.
      * 
      * @param base the new resource base
      */
@@ -124,13 +121,13 @@ public class Search extends GenericAdmResource
                 scope = tm.getLanguage().getId();
             }
 
-            HashMap args = new HashMap();
+            HashMap<String, String> args = new HashMap<>();
             args.put("separator", " | ");
             args.put("links", "false");
             args.put("language", paramRequest.getUser().getLanguage());
 
             Element search = doc.createElement("SEARCH");
-            doc.appendChild(search);            
+            doc.appendChild(search);
             search.setAttribute("path", path);
             
             String q = request.getParameter("q");
@@ -139,15 +136,14 @@ public class Search extends GenericAdmResource
             {
                 search.setAttribute("words", q);
                 search.setAttribute("wordsEnc", java.net.URLEncoder.encode(q));
-                //search.setAttribute("path",AFUtils.getInstance().getWebPath()+AFUtils.getInstance().getEnv("wb/distributor")+"/"+tm.getId()+"/");
                 search.setAttribute("work", SWBPortal.getWebWorkPath());
                 search.setAttribute("url", paramRequest.getWebPage().getUrl(scope,false));
 
                 StringTokenizer st = new StringTokenizer(q, " ");
-                Vector w = new Vector();
+                ArrayList<String> w = new ArrayList<>();
                 while (st.hasMoreTokens())
                 {
-                    w.addElement(st.nextToken());
+                    w.add(st.nextToken());
                 }
 
                 int seg = 10;
@@ -170,61 +166,17 @@ public class Search extends GenericAdmResource
                         continue;
                     }
                     
-                    StringBuffer names = new StringBuffer("");
+                    StringBuilder names = new StringBuilder("");
                     if (t1.getId() != null)
                     {
-                         /* TODO: VER 4
-                        Iterator na = t1.getBaseNames().iterator();
-                        while (na.hasNext())
-                        {
-                            BaseName bn = (BaseName) na.next();
-                            names.append(bn.getBaseNameString() + " / ");
-
-                            Iterator va = bn.getVariants().iterator();
-                            while (va.hasNext())
-                            {
-                                Variant v = (Variant) va.next();
-                                VariantName vn = v.getVariantName();
-                                names.append(vn.getResource() + " ");
-                            }
-                        }
-                        **/
+                         // TODO: VER 4
                         
                         String desc = null;
-                        StringBuffer descb = new StringBuffer("");
-/*
-                        Iterator ito=t1.getOccurrences().iterator();
-                        while(ito.hasNext())
+                        StringBuilder descb = new StringBuilder("");
+                        Iterator<String> itw = w.iterator();
+                        while (itw.hasNext())
                         {
-                            Occurrence occ=(Occurrence)ito.next();
-                            if(occ.getDbdata().getActive()==1)
-                            {
-                                if(occ.getInstanceOf()!=null && occ.getInstanceOf().getTopicRef()!=null)
-                                {
-                                    String tpid=occ.getInstanceOf().getTopicRef().getId();
-                                    if(tpid.startsWith("IDM_WB"))
-                                    {
-                                        descb.append(occ.getResourceData()+" / ");
-                                        if(tpid.equals(scope.getId()))
-                                        {
-                                            desc=occ.getResourceData();
-                                        }
-                                    }else if(tpid.equals("REC_WBContent"))
-                                    {
-                                        try
-                                        {
-                                            RecResource rec=DBResource.getInstance().getResource(Long.parseLong(occ.getResourceData()));
-                                            descb.append(rec.getDescription());
-                                        }catch(Exception e){}
-                                    }
-                                }else AFUtils.log("Error: La occurrencia:"+occ.getId()+" no tiene padre...",true);
-                            }
-                        }
- */
-                        Enumeration itw = w.elements();
-                        while (itw.hasMoreElements())
-                        {
-                            String str = (String) itw.nextElement();
+                            String str = (String) itw.next();
                             StringSearch iter = new StringSearch();
                             if (!iter.compare(names.toString() + descb.toString(), str)) {
                                 find = false;
@@ -241,7 +193,6 @@ public class Search extends GenericAdmResource
                                 search.appendChild(theme);
                                 addElem(doc, theme, "id", t1.getId());
                                 addElem(doc, theme, "name", t1.getDisplayName(scope));
-                                //addElem(doc,theme,"names",names.toString());
                                 addElem(doc, theme, "names", t1.getPath(args));
                                 desc=t1.getDescription(scope);  
                                 if (desc != null && !"".equals(desc)) {
@@ -334,7 +285,6 @@ public class Search extends GenericAdmResource
         try
         {
             Document dom =getDom(request, response, paramRequest);
-            //System.out.println(AFUtils.getInstance().DomtoXml(dom));
             if(dom != null)  {
                 response.getWriter().print(SWBUtils.XML.transformDom(tpl, dom));
             }

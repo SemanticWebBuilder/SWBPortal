@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.api;
 
@@ -31,8 +31,6 @@ package org.semanticwb.portal.api;
  */
 public interface SWBActionResponse extends SWBParameters
 {
-    
-
 
   /**
    * Instructs the resource container to send a redirect response

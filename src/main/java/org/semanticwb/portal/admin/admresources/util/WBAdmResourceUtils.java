@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,17 +18,25 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources.util;
 
-//import gnu.regexp.RE;
-//import gnu.regexp.REException;
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.StringTokenizer;
+
 import javax.servlet.http.HttpServletRequest;
-import org.semanticwb.model.Resource;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.semanticwb.Logger;
@@ -36,15 +44,15 @@ import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Language;
+import org.semanticwb.model.Resource;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.User;
 import org.semanticwb.model.WebSite;
-import org.w3c.dom.*;
-import org.semanticwb.portal.admin.admresources.*;
+import org.semanticwb.portal.admin.admresources.AdmResourceMgr;
 import org.semanticwb.portal.util.FileUpload;
 import org.semanticwb.portal.util.WBFileUpload;
+import org.w3c.dom.Document;
 
-// TODO: Auto-generated Javadoc
 /** objeto: Utilerias de uso comun para los objetos de la api de administraci�n de recursos.
  * <p>
  * methods utils for common use in the administration api objetcs
@@ -227,52 +235,6 @@ public class WBAdmResourceUtils {
      */
     public boolean xmlVerifierImpl(String sysid, Object objschema, Object objxml) {
         boolean bOk = false;
-//        if (objschema == null || objxml == null) {
-//            if (objschema == null) {
-//                log.error("Error WBAdmResourceUtils.XMLVerifier(): Schema is null.");
-//            } else {
-//                log.error("Error WBAdmResourceUtils.XMLVerifier(): The input document is null.");
-//            }
-//            return bOk;
-//        }
-//
-//        org.iso_relax.verifier.VerifierFactory factory = new com.sun.msv.verifier.jarv.TheFactoryImpl();
-//        org.iso_relax.verifier.Schema schema = null;
-//        try {
-//            if (objschema instanceof java.io.File) {
-//                schema = factory.compileSchema((java.io.File) objschema);
-//            } else if (objschema instanceof org.xml.sax.InputSource) {
-//                schema = factory.compileSchema((org.xml.sax.InputSource) objschema);
-//            } else if (objschema instanceof java.io.InputStream) {
-//                if (sysid != null && !sysid.trim().equals("")) {
-//                    schema = factory.compileSchema((java.io.InputStream) objschema, sysid);
-//                } else {
-//                    schema = factory.compileSchema((java.io.InputStream) objschema);
-//                }
-//            } else if (objschema instanceof java.lang.String) {
-//                schema = factory.compileSchema((java.lang.String) objschema);
-//            }
-//            try {
-//                org.iso_relax.verifier.Verifier verifier = schema.newVerifier();
-//                verifier.setErrorHandler(silentErrorHandler);
-//
-//                if (objxml instanceof java.io.File) {
-//                    bOk = verifier.verify((java.io.File) objxml);
-//                } else if (objxml instanceof org.xml.sax.InputSource) {
-//                    bOk = verifier.verify((org.xml.sax.InputSource) objxml);
-//                } else if (objxml instanceof org.w3c.dom.Node) {
-//                    bOk = verifier.verify((org.w3c.dom.Node) objxml);
-//                } else if (objxml instanceof java.lang.String) {
-//                    bOk = verifier.verify((java.lang.String) objxml);
-//                }
-//            } catch (org.iso_relax.verifier.VerifierConfigurationException e) {
-//                log.error("Error WBAdmResourceUtils.XMLVerifier(): Unable to create a new verifier.", e);
-//            } catch (org.xml.sax.SAXException e) {
-//                log.error("Error WBAdmResourceUtils.XMLVerifier(): The input document is not wellformed.", e);
-//            }
-//        } catch (Exception e) {
-//            log.error("Error WBAdmResourceUtils.XMLVerifier(): Unable to parse the schema file.", e);
-//        }
         return bOk;
     }
 
@@ -375,7 +337,7 @@ public class WBAdmResourceUtils {
         if (path == null || base == null || plt == null) {
             return null;
         }
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         Document dom = transformAdmResource(user, path, redirect, base, form);
         if (dom == null) {
             return null;
@@ -424,7 +386,6 @@ public class WBAdmResourceUtils {
         AdmResourceMgr mgr = new AdmResourceMgr(user);
         mgr.setRequest(request);
         mgr.setXml(xml, base, redirect);
-//        System.out.println("\n\nxml=    "+xml);
         if (form != null && !form.trim().equals("")) {
             xml = mgr.show(form);
         } else {
@@ -432,11 +393,6 @@ public class WBAdmResourceUtils {
         }
         xml = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><admresource>" + xml + "</admresource>";
         
-//        System.out.println("WBAdmResourceUtils.transformAdmResourceByXml...");
-//        System.out.println("----------");
-//        System.out.println(xml);
-//        System.out.println("----------");
-         
         return SWBUtils.XML.xmlToDom(xml);
     }
 
@@ -491,7 +447,7 @@ public class WBAdmResourceUtils {
         if (xml == null || base == null || plt == null) {
             return null;
         }
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         Document dom = transformAdmResourceByXml(user, xml, redirect, base, form, request);
         if (dom == null) {
             return null;
@@ -546,7 +502,7 @@ public class WBAdmResourceUtils {
      * @return the app languages
      */
     public ArrayList getAppLanguages() {
-        ArrayList languages = new ArrayList();
+        ArrayList<String> languages = new ArrayList<>();
         Iterator<WebSite> it = SWBContext.listWebSites();
         while (it.hasNext()) {
             WebSite site = it.next();
@@ -594,16 +550,6 @@ public class WBAdmResourceUtils {
      * @return true, if is character
      */
     public boolean isCharacter(String eval) {
-//        if (eval != null && !eval.trim().equals("")) {
-//            try {
-//                RE reg = new RE("(.)");
-//                if (reg.isMatch(eval)) {
-//                    return true;
-//                }
-//            } catch (REException e) {
-//                log.error("WBAdmResourceUtils.isCharacter()", e);
-//            }
-//        }
         return false;
     }
 
@@ -615,14 +561,7 @@ public class WBAdmResourceUtils {
      */
     public boolean isDigit(String eval) {
         if (eval != null && !eval.trim().equals("")) {
-//            try {
-//                RE reg = new RE("\\d");
-//                if (reg.isMatch(eval)) {
-//                    return true;
-//                }
-//            } catch (REException e) {
-//                log.error("WBAdmResourceUtils.isDigit()", e);
-//            }
+
         }
         return false;
     }
@@ -635,14 +574,7 @@ public class WBAdmResourceUtils {
      */
     public boolean isNumber(String eval) {
         if (eval != null && !eval.trim().equals("")) {
-//            try {
-//                RE reg = new RE("([0-9])+");
-//                if (reg.isMatch(eval)) {
-//                    return true;
-//                }
-//            } catch (REException e) {
-//                log.error("WBAdmResourceUtils.isNumber()", e);
-//            }
+
         }
         return false;
     }
@@ -655,14 +587,7 @@ public class WBAdmResourceUtils {
      */
     public boolean isID(String eval) {
         if (eval != null && !eval.trim().equals("")) {
-//            try {
-//                RE reg = new RE("^([a-zA-Z])([a-zA-Z0-9_\\.\\-])*");
-//                if (reg.isMatch(eval)) {
-//                    return true;
-//                }
-//            } catch (REException e) {
-//                log.error("WBAdmResourceUtils.isID()", e);
-//            }
+
         }
         return false;
     }
@@ -675,14 +600,7 @@ public class WBAdmResourceUtils {
      */
     public boolean isCDATA(String eval) {
         if (eval != null && !eval.trim().equals("")) {
-//            try {
-//                RE reg = new RE("^([a-zA-Z])([a-zA-Z0-9_\\.\\-\\s])*");
-//                if (reg.isMatch(eval)) {
-//                    return true;
-//                }
-//            } catch (REException e) {
-//                log.error("WBAdmResourceUtils.isCDATA()", e);
-//            }
+
         }
         return false;
     }
@@ -695,14 +613,7 @@ public class WBAdmResourceUtils {
      */
     public boolean isEmail(String eval) {
         if (eval != null && !eval.trim().equals("")) {
-//            try {
-//                RE reg = new RE("^([a-zA-Z0-9_\\.\\-])+\\@(([a-zA-Z0-9\\-])+\\.)+([a-zA-Z0-9]{2,4})+$");
-//                if (reg.isMatch(eval)) {
-//                    return true;
-//                }
-//            } catch (REException e) {
-//                log.error("WBAdmResourceUtils.isEmail()", e);
-//            }
+
         }
         return false;
     }
@@ -770,7 +681,7 @@ public class WBAdmResourceUtils {
      * @return  Regresa un nuevo String que contiene la representación html de la imagen.
      */
     public String displayImage(Resource base, String pImage, String pNode) {
-        StringBuffer sbfRet = new StringBuffer("");
+    		StringBuilder sbfRet = new StringBuilder("");
         try {
             String img = base.getAttribute(pNode, "").trim();
             if (!img.equals("")) {
@@ -829,7 +740,7 @@ public class WBAdmResourceUtils {
      * @return  Regresa un nuevo String que contiene la representaciÃ³n html de la imagen.
      */
     public String displayImage(Resource base, String filename, int width, int height) {
-        StringBuffer strb = new StringBuffer();
+    		StringBuilder strb = new StringBuilder();
         try {
             if (filename.endsWith(".swf")) { //para desplegar imagenes de flash
                 strb.append("<object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0\"");
@@ -908,7 +819,7 @@ public class WBAdmResourceUtils {
      * @return    Regresa un nuevo String que contiene el applet para subir las imágenes relativas al archivo parseado.
      */
     public String uploadFileParsed(Resource base, WBFileUpload fUp, String pInForm, String idsession,boolean replace_special_chars) {
-        StringBuffer strb = null;
+    		StringBuilder strb = null;
         String strWorkPath = workPath;
         String strFile = null, strClientPath = "";
         int intPos;
@@ -942,19 +853,9 @@ public class WBAdmResourceUtils {
                             file.mkdir();
                         }
                         if (file.exists() && file.isDirectory() && strAttaches != null && !strAttaches.equals("")) {
-                            strb = new StringBuffer();
+                            strb = new StringBuilder();
                             strb.append("\n");
-                            //strb.append("<OBJECT WIDTH=100% HEIGHT=100% classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\" codebase=\"http://java.sun.com/products/plugin/autodl/jinstall-1_4_0-win.cab#Version=1,4,0,0\" border=0><NOEMBED><XMP>\n");
                             strb.append("<APPLET  WIDTH=100% HEIGHT=100% CODE=\"applets.dragdrop.DragDrop.class\" codebase=\"" + SWBPlatform.getContextPath() + "/\" archive=\"swbadmin/lib/SWBAplDragDrop.jar, swbadmin/lib/SWBAplCommons.jar\" border=0>");
-                            //strb.append("<APPLET  WIDTH=100% HEIGHT=100% CODE=\"DragDrop.class\" archive=\""+ webPath + "admin/DragDrop.jar\" border=0></XMP>");
-                            //strb.append("<PARAM NAME=CODE VALUE=\"DragDrop.class\">\n");
-                            //strb.append("<PARAM NAME=ARCHIVE VALUE=\""+ webPath + "admin/DragDrop.jar\">\n");
-                            //strb.append("<PARAM NAME=\"cache_archive\" VALUE=\""+ webPath + "admin/DragDrop.jar\">\n");
-                            //strb.append("<PARAM NAME=\"_cache_version\" VALUE=\"1.0.0.1\">\n");
-                            //strb.append("<PARAM NAME=\"_cache_archive_ex\" VALUE=\"applet.jar;preload, util.jar;preload,tools.jar;preload\">\n");
-                            //strb.append("<PARAM NAME=\"type\" VALUE=\"application/x-java-applet;version=1.4\">\n");
-                            //strb.append("<PARAM NAME=\"scriptable\" VALUE=\"false\">\n");
-                            //strb.append("<PARAM NAME =\"JSESS\" VALUE=\""+idsession+"\">\n");
                             strb.append("<PARAM NAME=\"webpath\" VALUE=\"" + SWBPlatform.getContextPath() + "/\">\n");
                             strb.append("<PARAM NAME=\"foreground\" VALUE=\"000000\">\n");
                             strb.append("<PARAM NAME=\"background\" VALUE=\"979FC3\">\n");
@@ -964,20 +865,6 @@ public class WBAdmResourceUtils {
                             strb.append("<PARAM NAME=\"clientpath\" value=\"" + strClientPath + "\">\n");
                             strb.append("<PARAM NAME=\"files\" value=\"" + strAttaches + "\">\n");
                             strb.append("<PARAM NAME=\"locale\" value=\"" + SWBUtils.TEXT.getLocale() + "\">\n");
-                            //strb.append("<COMMENT>\n");
-                            //strb.append("<EMBED\n");
-                            //strb.append("     type=\"application/x-java-applet;version=1.4\"\n");
-                            //strb.append("     CODE = \"DragDrop.class\"\n");
-                            //strb.append("     ARCHIVE = \"DragDrop.jar\"\n");
-                            //strb.append("     WIDTH = 100%\n");
-                            //strb.append("     HEIGHT = 100%\n");
-                            //strb.append("     foreground=\"979FC3\"\n");
-                            //strb.append("     background=\"979FC3\"\n");
-                            //strb.append("     scriptable=false\n");
-                            //strb.append("     pluginspage=\"http://java.sun.com/products/plugin/index.html#download\">\n");
-                            //strb.append("<NOEMBED></NOEMBED>\n");
-                            //strb.append("</EMBED>\n");
-                            //strb.append("</COMMENT>\n");
                             strb.append("</APPLET>\n");
                         }
                     } else {
@@ -1007,7 +894,7 @@ public class WBAdmResourceUtils {
      */
     public String uploadFileParsed(Resource base, FileUpload fUp, String pInForm, String idsession,String path2save)
     {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         String strWorkPath = workPath;
         String strFile = null, strClientPath = "";
         int intPos;
@@ -1020,7 +907,6 @@ public class WBAdmResourceUtils {
                 intPos=strFile.lastIndexOf("/");
                 if(intPos != -1) 
                 {
-//                    strClientPath=strFile.substring(0, intPos);
                     strFile=strFile.substring(intPos+1).trim();
                 }
                 if(!strClientPath.endsWith("/")) strClientPath=strClientPath+"/";
@@ -1039,9 +925,7 @@ public class WBAdmResourceUtils {
                         if (file.exists() && file.isDirectory())
                         {
                             sbfRet.append("\n");
-                            //sbfRet.append("<OBJECT WIDTH=100% HEIGHT=100% classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\" codebase=\"http://java.sun.com/products/plugin/autodl/jinstall-1_4_0-win.cab#Version=1,4,0,0\" border=0><NOEMBED><XMP>\n");
                             sbfRet.append("<APPLET  WIDTH=100% HEIGHT=100% CODE=\"applets.dragdrop.DragDrop.class\" codebase=\""+SWBPlatform.getContextPath()+"\" archive=\"swbadmin/lib/SWBAplDragDrop.jar, swbadmin/lib/SWBAplCommons.jar\" border=0>");
-                            //sbfRet.append("<PARAM NAME =\"JSESS\" VALUE=\"" + idsession + "\">\n");
                             sbfRet.append("<PARAM NAME=\"webpath\" VALUE=\""+SWBPlatform.getContextPath()+"\">\n");
                             sbfRet.append("<PARAM NAME=\"foreground\" VALUE=\"000000\">\n");
                             sbfRet.append("<PARAM NAME=\"background\" VALUE=\"979FC3\">\n");
@@ -1050,20 +934,6 @@ public class WBAdmResourceUtils {
                             sbfRet.append("<PARAM NAME=\"path\" value=\"" + strWorkPath + "images/" + "\">\n");
                             sbfRet.append("<PARAM NAME=\"clientpath\" value=\"" + strClientPath + "\">\n");
                             sbfRet.append("<PARAM NAME=\"files\" value=\"" + strAttaches + "\">\n");
-                            //sbfRet.append("<COMMENT>\n");
-                            //sbfRet.append("<EMBED\n");
-                            //sbfRet.append("     type=\"application/x-java-applet;version=1.4\"\n");
-                            //sbfRet.append("     CODE = \"DragDrop.class\"\n");
-                            //sbfRet.append("     ARCHIVE = \"DragDrop.jar\"\n");
-                            //sbfRet.append("     WIDTH = 100%\n");
-                            //sbfRet.append("     HEIGHT = 100%\n");
-                            //sbfRet.append("     foreground=\"979FC3\"\n");
-                            //sbfRet.append("     background=\"979FC3\"\n");
-                            //sbfRet.append("     scriptable=false\n");
-                            //sbfRet.append("     pluginspage=\"http://java.sun.com/products/plugin/index.html#download\">\n");
-                            //sbfRet.append("<NOEMBED></NOEMBED>\n");
-                            //sbfRet.append("</EMBED>\n");
-                            //sbfRet.append("</COMMENT>\n");
                             sbfRet.append("</APPLET>\n");
                         }
                     }
@@ -1189,7 +1059,7 @@ public class WBAdmResourceUtils {
      * @return    Regresa un nuevo String que contiene el nombre del archivo que se guardó.
      */
     public String removeResource(Resource base) {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         String strError = SWBUtils.TEXT.getLocaleString("locale_swb_util", "usrmsg_WBResource_removeResource_htmlAlerta");
         try {
             strError += SWBUtils.TEXT.getLocaleString("locale_swb_util", "error_WBResource_removeResource_nodelete") + base.getTitle() + SWBUtils.TEXT.getLocaleString("locale_swb_util", "error_WBResourceremoveResource_tipo") + " " + base.getResourceType().getId() + " " + SWBUtils.TEXT.getLocaleString("locale_swb_util", "error_WBResource_removeResource_ident") + base.getId() + SWBUtils.TEXT.getLocaleString("locale_swb_util", "usrmsg_WBResource_removeResource_html2");
@@ -1239,7 +1109,6 @@ public class WBAdmResourceUtils {
     public String getFileName(String pFile) {
         String ret = "";
         if (pFile != null && !"".equals(pFile.trim())) {
-            //ret=(new File(pFile)).getName(); 
             pFile = pFile.replace('\\', '/');
             int intPos = pFile.lastIndexOf("/");
             if (intPos != -1) {
@@ -1264,7 +1133,6 @@ public class WBAdmResourceUtils {
         try {
             String strExt = "";
             if (pFile != null && !"".equals(pFile.trim())) {
-                //pFile=(new File(pFile)).getName();
                 pFile = getFileName(pFile);
                 int intPos = pFile.lastIndexOf(".");
                 if (intPos != -1) {
@@ -1291,7 +1159,7 @@ public class WBAdmResourceUtils {
      * @return the string
      */
     public String loadColorApplet(java.util.HashMap param) {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\n<applet name=\"");
         if (param.get("id") != null) {
             sbfRet.append((String) param.get("id"));
@@ -1323,9 +1191,6 @@ public class WBAdmResourceUtils {
         sbfRet.append("\n<param name=\"_cache_archive_ex\" value=\"applet.jar;preload, util.jar;preload,tools.jar;preload\">");
         sbfRet.append("\n<param name=\"type\" value=\"application/x-java-applet;version=1.4\">");
         sbfRet.append("\n<param name=\"scriptable\" value=\"true\">");
-        //sbfRet.append("\n<param name=\"JSESS\" value=\"");
-        //if(param.get("session")!=null) sbfRet.append((String)param.get("session"));
-        //sbfRet.append("\">");
         sbfRet.append("\n<param name=\"webpath\" value=\"" + webPath + "\">");
         sbfRet.append("\n<param name=\"foreground\" value=\"");
         if (param.get("foreground") != null) {
@@ -1369,7 +1234,6 @@ public class WBAdmResourceUtils {
     public String loadWindowConfiguration(Resource base, org.semanticwb.portal.api.SWBParamRequest paramsRequest) {
         StringBuilder ret = new StringBuilder("");
         try {
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"menubar\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgMenubar"));
@@ -1379,7 +1243,6 @@ public class WBAdmResourceUtils {
                 ret = ret.append(" checked=\"checked\"");
             ret = ret.append(" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"toolbar\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgToolbar"));
@@ -1390,7 +1253,6 @@ public class WBAdmResourceUtils {
             }
             ret = ret.append(" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"status\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgStatusbar"));
@@ -1401,7 +1263,6 @@ public class WBAdmResourceUtils {
             }
             ret = ret.append(" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"location\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgLocation"));
@@ -1412,7 +1273,6 @@ public class WBAdmResourceUtils {
             }
             ret = ret.append(" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"directories\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgDirectories"));
@@ -1423,7 +1283,6 @@ public class WBAdmResourceUtils {
             }
             ret = ret.append(" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"scrollbars\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgScrollbars"));
@@ -1434,7 +1293,6 @@ public class WBAdmResourceUtils {
             }
             ret = ret.append(" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"resizable\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgResizable"));
@@ -1445,7 +1303,6 @@ public class WBAdmResourceUtils {
             }
             ret = ret.append(" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"width\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgWidth"));
@@ -1456,7 +1313,6 @@ public class WBAdmResourceUtils {
             ret = ret.append(base.getAttribute("width",""));
             ret = ret.append("\" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"height\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgHeight"));
@@ -1467,7 +1323,6 @@ public class WBAdmResourceUtils {
             ret = ret.append(base.getAttribute("height",""));
             ret = ret.append("\" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"top\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgTop"));
@@ -1478,7 +1333,6 @@ public class WBAdmResourceUtils {
             ret = ret.append(base.getAttribute("top",""));
             ret = ret.append("\" />");
             ret = ret.append("</li>");
-            //--------------------
             ret = ret.append("<li class=\"swbform-li\">");
             ret = ret.append("<label for=\"left\" class=\"swbform-label\">");
             ret = ret.append(paramsRequest.getLocaleString("msgLeft"));
@@ -1807,7 +1661,7 @@ public class WBAdmResourceUtils {
         if(radix!=8 && radix!=10 && radix!=16) {
             radix = 10;
         }
-        StringBuffer sbfRet = new StringBuffer();
+        StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\n function isInt(textBoxIn) {");
         sbfRet.append("\n    var pCaracter = textBoxIn.value;");
 
@@ -1825,7 +1679,7 @@ public class WBAdmResourceUtils {
         if(radix!=8 && radix!=10 && radix!=16) {
             radix = 10;
         }
-        StringBuffer sbfRet = new StringBuffer();
+        StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\n function isInt(textBoxIn) {");
         sbfRet.append("\n    var pCaracter = textBoxIn.value;");
 
@@ -1917,7 +1771,7 @@ public class WBAdmResourceUtils {
      */
     public String loadIsHexadecimal()
     {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\nfunction isHexadecimal(pIn)");
         sbfRet.append("\n{");
         sbfRet.append("\n   var swFormat=\"0123456789ABCDEF\";");
@@ -1946,7 +1800,7 @@ public class WBAdmResourceUtils {
 
     public String loadIsHexadecimal(Locale locale)
     {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\nfunction isHexadecimal(pIn)");
         sbfRet.append("\n{");
         sbfRet.append("\n   var swFormat=\"0123456789ABCDEF\";");
@@ -1980,7 +1834,7 @@ public class WBAdmResourceUtils {
      */
     public String loadReplaceChars()
     {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\nfunction replaceChars(pIn)");
         sbfRet.append("\n{");
         sbfRet.append("\n   out = \"\\r\"; // replace this");
@@ -2038,7 +1892,7 @@ public class WBAdmResourceUtils {
      */
     public String loadTrim()
     {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\nfunction trim(field) ");
         sbfRet.append("\n{");
         sbfRet.append("\n   var retVal = '';");
@@ -2064,7 +1918,7 @@ public class WBAdmResourceUtils {
      */
     public String loadIsEmail()
     {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\nfunction isEmail(pInTxt)");
         sbfRet.append("\n{");
         sbfRet.append("\n   var swOK=2;");
@@ -2092,7 +1946,7 @@ public class WBAdmResourceUtils {
      */
     public String loadOpenHelp()
     {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\nfunction openHelp(pIdRsc, pField, pTemplate)");
         sbfRet.append("\n{");
         sbfRet.append("\n   window.open('" + SWBPortal.getContextPath() + "admin/help/resources/HelpResource.jsp?rsc=' + pIdRsc + '&fld=' + pField + '&tpl=' + pTemplate,'WBHelp','menubar=no,toolbar=no,status=no,location=no,directories=no,scrollbars=yes,resizable=yes,width=500,height=380,top=20,left=20');");
@@ -2107,7 +1961,7 @@ public class WBAdmResourceUtils {
      */
     public String loadHtmlStyles()
     {
-        StringBuffer sbfRet = new StringBuffer();
+    		StringBuilder sbfRet = new StringBuilder();
         sbfRet.append("\n<STYLE type=\"text/css\">");
         sbfRet.append("\nA {");
         sbfRet.append("\nfont-family: Arial, Helvetica, sans-serif; font-size: 12px; ");

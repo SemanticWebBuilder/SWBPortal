@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,36 +18,42 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+//import java.util.HashMap;
+import java.util.Iterator;
+
 //import java.sql.*;
-import javax.servlet.http.*;
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Resource;
+import org.semanticwb.platform.SemanticModel;
 import org.semanticwb.portal.api.GenericAdmResource;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
-import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-//import java.util.HashMap;
-import java.util.Iterator;
-import org.semanticwb.platform.SemanticModel;
 import org.semanticwb.portal.api.SWBResourceURL;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-// TODO: Auto-generated Javadoc
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+
 /**
  * The Class SparqlQueryResource.
  * 
- * @author juan.fernandez
+ * @author Juan Fernández {juan.fernandez}
  */
 public class SparqlQueryResource extends GenericAdmResource {
 
@@ -60,7 +66,7 @@ public class SparqlQueryResource extends GenericAdmResource {
     String path = SWBPlatform.getContextPath() + "/swbadmin/xsl/SparqlQueryResource/";
     
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(SparqlQueryResource.class);
+    private static final Logger log = SWBUtils.getLogger(SparqlQueryResource.class);
 
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#processRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
@@ -141,7 +147,6 @@ public class SparqlQueryResource extends GenericAdmResource {
             showPages = base.getAttribute("showPages");
         }
         Document doc = null;
-        //ByteArrayOutputStream bout = new ByteArrayOutputStream();
         String _query = parse(base.getAttribute("query"), request, paramsRequest);
         String dbcon = "";
         int maximo = 5;
@@ -156,7 +161,6 @@ public class SparqlQueryResource extends GenericAdmResource {
         if (request.getParameter("actualPage") != null) {
             actualPage = Integer.parseInt(request.getParameter("actualPage"));
         }
-        //base.getAttribute("dbcon");
         if (_query != null) {
             try {
                 doc = SWBUtils.XML.getNewDocument();
@@ -172,7 +176,6 @@ public class SparqlQueryResource extends GenericAdmResource {
                 addElem(doc, equery, "description", base.getDescription());
 
                 try {
-                    //Model model = SWBPlatform.getSemanticMgr().getOntology().getRDFOntModel();
                     SemanticModel model = null;
                     if(base.getAttribute("dbPedia","0").endsWith("1"))
                     {
@@ -192,11 +195,9 @@ public class SparqlQueryResource extends GenericAdmResource {
                         Element eheader = doc.createElement("header");
                         equery.appendChild(eheader);
 
-                        int x = 1;
                         Iterator<String> itcols = rs.getResultVars().iterator();
                         while (itcols.hasNext()) {
                             Element ecol = addElem(doc, eheader, "col_name", itcols.next());
-                            x++;
                         }
 
                         Element eresult = doc.createElement("result");
@@ -272,10 +273,8 @@ public class SparqlQueryResource extends GenericAdmResource {
                                 numTotPages++;
                             }
                             maximo = maximo - 1;
-                            StringBuffer numeros = new StringBuffer("");
                             if (showPages != null) {
                                 if (showPages.equals("1")) {
-                                    int numPages = 1;
                                     //estableciendo rangos para mostrar las paginas correspondientes
                                     int rInicio = 1;
                                     int rFinal = maximo;
@@ -295,57 +294,47 @@ public class SparqlQueryResource extends GenericAdmResource {
 
                                     for (int i = 1; i <= numTotPages; i++) {
 
-                                        SWBResourceURL urlNums = paramsRequest.getRenderUrl().setMode(paramsRequest.Mode_VIEW);
+                                        SWBResourceURL urlNums = paramsRequest.getRenderUrl().setMode(SWBParamRequest.Mode_VIEW);
                                         urlNums.setParameter("actualPage", Integer.toString(i));
                                         if (i >= rInicio && i <= rFinal) {
 
                                             Element epage = doc.createElement("page");
                                             epages.appendChild(epage);
 
-                                            numPages++;
                                             if (i != actualPage) {
                                                 epage.setAttribute("link", "<a href=\"" + urlNums.toString() + "\" >" + i + "</a>");
-                                            //numeros.append("<a href=\"#\" onclick=\"submitUrl('" + urlNums.toString() + "',this); return false;\" >" + i + "</a>");
                                             } else {
                                                 epage.setAttribute("link", "" + i + "");
-                                            //numeros.append("" + i + "");
                                             }
                                         }
                                         if (i < numTotPages) {
-                                            //numeros.append("&nbsp;");
                                         }
                                     }
-                                //numeros.append("&nbsp;");
                                 }
                             }
-                            SWBResourceURL urlBack = paramsRequest.getRenderUrl().setMode(paramsRequest.Mode_VIEW);
+                            SWBResourceURL urlBack = paramsRequest.getRenderUrl().setMode(SWBParamRequest.Mode_VIEW);
                             int tmpBack = actualPage;
                             if (actualPage > 1) {
                                 tmpBack--;
                             }
                             urlBack.setParameter("actualPage", Integer.toString(tmpBack));
 
-                            SWBResourceURL urlNext = paramsRequest.getRenderUrl().setMode(paramsRequest.Mode_VIEW);
+                            SWBResourceURL urlNext = paramsRequest.getRenderUrl().setMode(SWBParamRequest.Mode_VIEW);
                             urlNext.setParameter("actualPage", Integer.toString(actualPage + 1));
                             String nextHistory = paramsRequest.getLocaleString("defaultValueNext");
                             String backHistory = paramsRequest.getLocaleString("defaultValuePrevious");
                             if (numReg <= maxRows) {
                             } else {
-                                //out.println("<fieldset>");
-                                //out.println("<div align=\"center\">");
                                 if (actualPage == 1) {
                                     Element epagenext = doc.createElement("pagenext");
                                     epages.appendChild(epagenext);
                                     epagenext.setAttribute("link", urlNext.toString());
                                     epagenext.setAttribute("texto", nextHistory);
-                                //out.println(numeros + "<a href=\"#\" onclick=\"submitUrl('" + urlNext + "',this); return false;\" >" + nextHistory + "</a>");
                                 } else if (actualPage == numTotPages) {
                                     Element epageback = doc.createElement("pageback");
                                     epages.appendChild(epageback);
                                     epageback.setAttribute("link", urlBack.toString());
                                     epageback.setAttribute("texto", backHistory);
-//
-                                //out.println("<a href=\"#\" onclick=\"submitUrl('" + urlBack + "',this); return false;\" >" + backHistory + "</a>&nbsp;" + numeros);
                                 } else {
                                     Element epageback = doc.createElement("pageback");
                                     epages.appendChild(epageback);
@@ -355,10 +344,7 @@ public class SparqlQueryResource extends GenericAdmResource {
                                     epages.appendChild(epagenext);
                                     epagenext.setAttribute("link", urlNext.toString());
                                     epagenext.setAttribute("texto", nextHistory);
-                                //out.println("<a href=\"#\" onclick=\"submitUrl('" + urlBack + "',this); return false;\" >" + backHistory + "</a>&nbsp;" + numeros + "<a href=\"#\" onclick=\"submitUrl('" + urlNext + "',this); return false;\" >" + nextHistory + "</a>");
                                 }
-                            //out.println("</div>");
-                            //out.println("</fieldset>");
                             }
                         }
 

@@ -27,10 +27,11 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
-import java.util.Iterator;
 import java.security.Principal;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginContext;
@@ -39,6 +40,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -51,8 +53,6 @@ import org.semanticwb.platform.SemanticProperty;
 import org.semanticwb.portal.SWBSessionObject;
 import org.semanticwb.security.limiter.FailedAttempt;
 
-
-// TODO: Auto-generated Javadoc
 /**
  * The Internal Servlet Login.
  * 
@@ -63,8 +63,6 @@ public class Login implements InternalServlet
 
     /** The log. */
     private static Logger log = SWBUtils.getLogger(Login.class);
-    // private static String VALSESS = "swb4-auto";
-    // private static String CALLBACK = "swb4-callback";
     /** The _realm. */
     private static String _realm = "Semantic Web Builder";
 
@@ -88,8 +86,6 @@ public class Login implements InternalServlet
 
     /** The blocked list. */
     private static SWBSoftkHashMap<String, FailedAttempt> blockedList = new SWBSoftkHashMap<String, FailedAttempt>();
-
-    //private static java.security.KeyPair rsakey = SWBUtils.CryptoWrapper.getRSAKey();
 
     private static String codigoRSA1 = "\n"
             + "<script language=\"JavaScript\" type=\"text/javascript\" src=\"/swbadmin/js/crypto/jsbn.js\"></script>\n"
@@ -139,7 +135,7 @@ public class Login implements InternalServlet
     {
         //User session log
         {
-            StringBuffer logbuf = new StringBuffer();
+            StringBuilder logbuf = new StringBuilder();
             logbuf.append("lgn|");
             logbuf.append(request.getRemoteAddr());
             logbuf.append("|");
@@ -161,7 +157,7 @@ public class Login implements InternalServlet
 
     public static void sendMailLog(HttpServletRequest request, User usr)
     {
-        StringBuffer logbuf =  new StringBuffer();
+        StringBuilder logbuf =  new StringBuilder();
         if ("es".equals(usr.getLanguage())){
             logbuf.append(usr.getFullName());
             logbuf.append("\nLe informamos que se ha firmado el ");
@@ -212,10 +208,10 @@ public class Login implements InternalServlet
         String uri = request.getRequestURI();
         String path = SWBPlatform.getContextPath();
         boolean inLoginFase=false;
-        User user = null; //System.out.println("Externo: "+ur.getId()+":"+ur.isExternal());
+        User user = null;
         if (ur.isExternal()) {
             String[]list =paramList.split(",");
-            for (String param:list){ //System.out.println("paramlist:"+param);
+            for (String param:list){ 
                 if (request.getParameter(param)!=null) inLoginFase=true;
             }
         }
@@ -236,7 +232,6 @@ public class Login implements InternalServlet
                 String url = request.getParameter("wb_goto");
                 if ((url == null))
                 {
-                   // url = path + "/" + SWBPlatform.getEnv("swb/distributor") + "/" + dparams.getWebPage().getWebSiteId() + "/" + dparams.getWebPage().getId() + "/_lang/" + dparams.getUser().getLanguage();
                      url = dparams.getWebPage().getUrl(dparams.getUser().getLanguage());
                 }
                 log.debug("LOGOUT (Path, uri, url): " + path + "   |   " + uri + "    |  " + url);
@@ -372,191 +367,13 @@ public class Login implements InternalServlet
         if ((url == null || url.equals("/")))
         {
             log.debug("PATHs: Path:" + path + " - " + dparams.getWebPage().getWebSiteId() + " - " + dparams.getWebPage().getId());
-            url =   /*SWBPlatform.getContextPath() + */ dparams.getWebPage().getUrl(dparams.getUser().getLanguage());
-                    //SWBPlatform.getContextPath() + "/" + SWBPlatform.getEnv("swb/distributor") + "/" + dparams.getWebPage().getWebSiteId() + "/" + dparams.getWebPage().getId() + "/_lang/" + dparams.getUser().getLanguage();
+            url =   dparams.getWebPage().getUrl(dparams.getUser().getLanguage());
         } 
         if (null!=request.getQueryString() && request.getQueryString().indexOf("wb_logout")==-1) url = url+"?"+request.getQueryString();
         sendRedirect(response, url);
     }
 
-    /**
-     * public void doProcessxx(HttpServletRequest request, HttpServletResponse response, DistributorParams dparams) throws IOException
-     * {
-     * if (null == dparams.getWebPage())
-     * {
-     * return;
-     * }
-     * UserRepository ur = dparams.getWebPage().getWebSite().getUserRepository();
-     * String authMethod = ur.getAuthMethod();
-     * //String authMethod = ur.getProperty(UserRepository.SWBUR_AuthMethod);
-     * String context = ur.getLoginContext();
-     * //String context = ur.getProperty(UserRepository.SWBUR_LoginContext);
-     * String CBHClassName = ur.getCallBackHandlerClassName();
-     * //String CBHClassName = ur.getProperty(UserRepository.SWBUR_CallBackHandlerClassName);
-     * Subject subject = SWBPortal.getUserMgr().getSubject(request);
-     * HttpSession session = request.getSession(true);
-     * String enAuto = (String) session.getAttribute(VALSESS);
-     * String uri = request.getRequestURI();
-     * String path = SWBPlatform.getContextPath();
-     * User user = null;
-     * Iterator it = subject.getPrincipals().iterator();
-     * if (it.hasNext())
-     * {
-     * user = (User) it.next();
-     * }
-     * if (request.getParameter("wb_logout") != null)
-     * {
-     * LoginContext lc;
-     * try
-     * {
-     * lc = new LoginContext(context, subject);
-     * lc.logout();
-     * request.getSession(true).invalidate();
-     * String url = request.getParameter("wb_goto");
-     * if ((url == null || url.equals("/")))
-     * {
-     * url = path + "/" + SWBPlatform.getEnv("swb/distributor") + "/" + dparams.getWebPage().getWebSiteId() + "/" + dparams.getWebPage().getId() + "/_lang/" + dparams.getUser().getLanguage();
-     * log.debug("LOGOUT3(Path, uri, url): " + path + "   |   " + uri + "    |  " + url);
-     * sendRedirect(response, url);
-     * return;
-     * }
-     * } catch (Exception elo)
-     * {
-     * log.error("LoggingOut " + subject, elo);
-     * }
-     * }
-     *
-     * if (uri != null)
-     * {
-     * path = uri.replaceFirst(_name, SWBPlatform.getEnv("swb/distributor"));
-     * }
-     * if (handleError || user == null || !user.isSigned())
-     * {
-     * CallbackHandler callbackHandler = (CallbackHandler) session.getAttribute(CALLBACK);
-     * if (null == callbackHandler)
-     * {
-     * if (null != request.getParameter("wb_username"))
-     * {
-     * enAuto = "Working";
-     * }
-     * try
-     * {
-     * log.debug("New callbackHandler...");
-     * Constructor[] constructor = Class.forName(CBHClassName).getConstructors();
-     * int method = 0;
-     * for (int i = 0; i < constructor.length; i++)
-     * {
-     * if (constructor[i].getParameterTypes().length == 4)
-     * {
-     * method = i;
-     * }
-     * }
-     * callbackHandler = (CallbackHandler) constructor[method].newInstance(request, response, authMethod, dparams);
-     * //callbackHandler = new SWB4CallbackHandlerLoginPasswordImp(request, response, authMethod, dparams); //TODO proveer otros métodos
-     * session.setAttribute(CALLBACK, callbackHandler);
-     * } catch (Exception ex)
-     * {
-     * log.error("Can't Instanciate a CallBackHandler for UserRepository " + ur.getId()+"\n"+CBHClassName, ex);
-     * response.sendError(500, "Authentication System failure!!!");
-     * return;
-     * }
-     * } else
-     * {
-     * if (null == request.getParameter("wb_username"))
-     * {
-     * log.debug("Request a new username...");
-     * doResponse(request, response, dparams, null, authMethod);
-     * session.setAttribute(VALSESS, "Working");
-     * return;
-     * }
-     * ((SWB4CallbackHandler) callbackHandler).setRequest(request);
-     * ((SWB4CallbackHandler) callbackHandler).setResponse(response);
-     * }
-     * if (null == enAuto)
-     * {
-     * log.debug("Starts new Authentication process...");
-     * doResponse(request, response, dparams, null, authMethod);
-     * session.setAttribute(VALSESS, "Working");
-     * return;
-     * }
-     * LoginContext lc;
-     * try
-     * {
-     * log.trace("1er callback "+callbackHandler);
-     * request.getSession(true).invalidate();
-     * subject = SWBPortal.getUserMgr().getSubject(request);
-     * log.trace("es null??? "+((SWB4CallbackHandler) callbackHandler).getRequest()+" y es SWB4 " + (callbackHandler instanceof SWB4CallbackHandler));
-     * if (callbackHandler instanceof SWB4CallbackHandler && null == ((SWB4CallbackHandler) callbackHandler).getRequest())
-     * {
-     * log.trace("intentando...");
-     * ((SWB4CallbackHandler) callbackHandler).setRequest(request);
-     * ((SWB4CallbackHandler) callbackHandler).setResponse(response);
-     *
-     * }
-     * try
-     * {
-     * log.trace("testing for null: "+
-     * ((SWB4CallbackHandler) callbackHandler).getRequest());
-     * } catch (NullPointerException npe)
-     * {
-     * try
-     * {
-     * log.trace("re Build callbackHandler...");
-     * Constructor[] constructor = Class.forName(CBHClassName).getConstructors();
-     * int method = 0;
-     * for (int i = 0; i < constructor.length; i++)
-     * {
-     * if (constructor[i].getParameterTypes().length == 4)
-     * {
-     * method = i;
-     * }
-     * }
-     * callbackHandler = (CallbackHandler) constructor[method].newInstance(request, response, authMethod, dparams);
-     * //callbackHandler = new SWB4CallbackHandlerLoginPasswordImp(request, response, authMethod, dparams); //TODO proveer otros métodos
-     * session.setAttribute(CALLBACK, callbackHandler);
-     * } catch (Exception ex)
-     * {
-     * log.error("Can't Instanciate a CallBackHandler for UserRepository " + ur.getId(), ex);
-     * response.sendError(500, "Authentication System failure!!!");
-     * return;
-     * }
-     * }
-     * log.trace("2o callback "+callbackHandler);
-     * lc = new LoginContext(context, subject, callbackHandler);
-     * lc.login();
-     * // Obtener el principal asociado (el principal se modifica en el login)
-     * it = subject.getPrincipals().iterator();
-     * if (it.hasNext())
-     * {
-     * user = (User) it.next();
-     * log.trace("user checked?:"+user.hashCode()+":"+user.isSigned());
-     * }
-     * sendLoginLog(request, user);
-     * // session.removeAttribute(VALSESS);
-     * // session.removeAttribute(CALLBACK);
-     * //   System.out.println(subject.toString());
-     * //   System.out.println(lc.getSubject().toString());
-     * //   System.out.println(((User)lc.getSubject().getPrincipals().iterator().next()).isSigned());
-     * } catch (LoginException ex)
-     * {
-     * log.debug("Can't log User", ex);
-     * doResponse(request, response, dparams, "User non existent", authMethod);
-     * return;
-     * }
-     * }
-     *
-     * String url = request.getParameter("wb_goto");
-     * if ((url == null || url.equals("/")))
-     * {
-     * log.debug("PATHs: Path:" + path + " - " + dparams.getWebPage().getWebSiteId() + " - " + dparams.getWebPage().getId());
-     * url =
-     * SWBPlatform.getContextPath() + "/" + SWBPlatform.getEnv("swb/distributor") + "/" + dparams.getWebPage().getWebSiteId() + "/" + dparams.getWebPage().getId() + "/_lang/" + dparams.getUser().getLanguage();
-     * }
-     *
-     * sendRedirect(response, url);
-     * //response.getWriter().print("Hello Login, Authenticated User: "+subject.getPrincipals().iterator().next().getName());
-     * }
-     *
+     /*
      * @param request the request
      * @param response the response
      * @param distributorParams the distributor params
@@ -592,7 +409,7 @@ public class Login implements InternalServlet
      */
     private void basicChallenge(String realm, HttpServletResponse response)
     {
-        StringBuffer header = new StringBuffer();
+        StringBuilder header = new StringBuilder();
         header.append("Basic realm=\"");
         header.append(realm);
         header.append("\"");
@@ -712,7 +529,6 @@ public class Login implements InternalServlet
             PrintWriter out = response.getWriter();
             out.println("<html><head><meta http-equiv=\"Refresh\" CONTENT=\"0; URL=" + url + "\" /><script>window.location='" + url + "';</script></head></html>");
             out.flush();
-            //out.close();
         } catch (IOException e)
         {
             log.error("Redirecting user", e);
@@ -800,7 +616,6 @@ public class Login implements InternalServlet
         LoginContext lc;
         User user=null;
         log.trace("Sending calback:" + callbackHandler + " " + context);
-        // request.getSession(true).invalidate();
         lc = new LoginContext(context, subject, callbackHandler);
         lc.login();
 
@@ -832,7 +647,7 @@ public class Login implements InternalServlet
             blockedList.put(matchKey, fa);
             failedAttempt = fa;
         }
-        failedAttempt.failedAttempt(); //System.out.println("******************************:"+failedAttempt.getLogin()+":"+failedAttempt.getCont()+":"+failedAttempt.isBlocked()+":"+failedAttempt.getTsBlockedTime());
+        failedAttempt.failedAttempt();
     }
 
     /**
@@ -944,9 +759,7 @@ public class Login implements InternalServlet
             if (urep.isUserRepRememberUser() && user.isSigned()) {
                 String uid = user.getShortURI();
                 SemanticProperty sp = SWBPlatform.getSemanticMgr().getModel(SWBPlatform.getSemanticMgr().SWBAdmin).getSemanticProperty(SWBPlatform.getSemanticMgr().SWBAdminURI + "/PrivateKey");
-                //System.out.println("sp:"+sp);
                 String pass = SWBPlatform.getSemanticMgr().getModel(SWBPlatform.getSemanticMgr().SWBAdmin).getModelObject().getProperty(sp);
-                //System.out.println("pass:"+pass);
                 if (null!=pass){
                     byte[] buid = SWBUtils.CryptoWrapper.PBEAES128Cipher(pass, uid.getBytes());
                     Cookie cookie = new Cookie("swb."+id, SWBUtils.TEXT.encodeBase64(new String(buid)));
@@ -955,8 +768,6 @@ public class Login implements InternalServlet
                     String name = "Set-Cookie";
                     cookie.setVersion(1);
                     response.setHeader(name, getCookieData(cookie));
-                    
-                    
                 }
             }
         } catch (GeneralSecurityException ex) {
@@ -965,7 +776,7 @@ public class Login implements InternalServlet
     }
     
     private String getCookieData(Cookie cookie){
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(cookie.getName());
         buf.append("=");
         buf.append ('"');
@@ -975,9 +786,7 @@ public class Login implements InternalServlet
         buf.append ("; Max-Age=");
         buf.append (cookie.getMaxAge());
         buf.append ("; Path=");
-        //buf.append ('"');
         buf.append (cookie.getPath());
-        //buf.append ('"');
         buf.append ("; HttpOnly");
         return buf.toString();
     }

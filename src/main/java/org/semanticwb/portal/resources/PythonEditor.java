@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,18 +18,19 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
-
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -41,8 +42,6 @@ import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
 
-
-// TODO: Auto-generated Javadoc
 /**
  * Muestra las facilidades para editar el codigo en Python que se ejecutar&aacute;
  * cuando se muestre en el navegador la secci&oacute;n con que se relaciona este
@@ -51,8 +50,6 @@ import org.semanticwb.portal.api.SWBResourceURL;
  * web page associated to this resource is shown. This resource is not a compiler.</p>
  */
 public class PythonEditor extends GenericAdmResource {
-
-
     /**
      * objeto encargado de crear mensajes en los archivos log de SemanticWebBuilder (SWB).
      * <p>object that creates messages in SWB's log file.</p>
@@ -88,7 +85,7 @@ public class PythonEditor extends GenericAdmResource {
             SWBParamRequest paramReq)
             throws IOException, SWBResourceException {
 
-        StringBuffer ret = new StringBuffer(1000);
+    		StringBuilder ret = new StringBuilder(1000);
         String language = paramReq.getUser().getLanguage();
         Resource base = paramReq.getResourceBase();
         String code = "";

@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,19 +18,18 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources.util.JSValidations;
 
 import org.semanticwb.SWBUtils;
 import org.semanticwb.portal.admin.admresources.lib.WBJsValidationsFEAbs;
 
-// TODO: Auto-generated Javadoc
 /**
  * Objeto que valida si la entrada a un campo html cumple con un cierto patron de expresiones regulares mediante JavaScript.
  * <p>
  * Object that verifies if a html field conteins a especified regular expresion using JavaScript.
- * @author  Jorge Alberto Jim�nez
+ * @author  Jorge Alberto Jiménez
  */
 
 public class Js_PatronFE extends WBJsValidationsFEAbs {
@@ -96,8 +95,8 @@ public class Js_PatronFE extends WBJsValidationsFEAbs {
     /**
      * Sets the patron.
      */
-    public void setPatron(){
-        this.patron=patron;
+    public void setPatron(String val){
+        this.patron=val;
     }
     
     /**
@@ -136,14 +135,11 @@ public class Js_PatronFE extends WBJsValidationsFEAbs {
      */     
     public String getHtml(java.util.Locale locale)
     {
-        StringBuffer strb = new StringBuffer();
+    		StringBuilder strb = new StringBuilder();
         if(field != null)
         {
             String bundle=getClass().getName();
             strb.append("\n   pCaracter=");
-//            if(formfeName != null)
-//                strb.append("document."+formfeName + ".");
-//            strb.append(field + ".value;");
             strb.append("document.getElementById(\""+field+"\").value;");
             strb.append("var patron=/"+patron+"/;");
             strb.append("\n   if (pCaracter.length>0) ");
@@ -155,9 +151,6 @@ public class Js_PatronFE extends WBJsValidationsFEAbs {
                 strb.append(" "+patron);
             }
             strb.append(" ');");
-//            if(formfeName != null)
-//                strb.append("\n     " + "document."+formfeName + ".");
-//            strb.append(field + ".focus();");
             strb.append("document.getElementById(\""+field+"\").focus();");
             strb.append("\n     return false;");
             strb.append("\n      } ");

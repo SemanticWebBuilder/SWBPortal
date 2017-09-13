@@ -22,8 +22,6 @@
  */
 package org.semanticwb.portal.util;
 
-import com.arthurdo.parser.HtmlStreamTokenizer;
-import com.arthurdo.parser.HtmlTag;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -31,8 +29,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
+
 import javax.servlet.http.HttpServletRequest;
-import org.omg.PortableServer.REQUEST_PROCESSING_POLICY_ID;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
@@ -40,6 +39,9 @@ import org.semanticwb.model.Resource;
 import org.semanticwb.model.WebPage;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+
+import com.arthurdo.parser.HtmlStreamTokenizer;
+import com.arthurdo.parser.HtmlTag;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -98,10 +100,10 @@ public class ContentUtils {
     HashMap hStyleObjs = null;
     
     /** The h t mh style objs. */
-    static HashMap hTMhStyleObjs = new HashMap();
+    static HashMap hTMhStyleObjs = new HashMap<>();
     
     /** The h tm change styles. */
-    static HashMap hTMChangeStyles = new HashMap();
+    static HashMap hTMChangeStyles = new HashMap<>();
     
     /** The schange styles. */
     String schangeStyles = null;
@@ -161,7 +163,6 @@ public class ContentUtils {
             strb1.append("<table width=\"100%\" id=\"pagStyle\">");
             strb1.append("<tr>");
             strb1.append("<td align=\"center\">");
-            //String path = webpage.getUrl() + "?";
             String path = request.getRequestURI() + "?";
 
             if (npage > 1) {
@@ -233,7 +234,6 @@ public class ContentUtils {
             strb1.append("<table width=\"100%\" id=\"pagStyle\">");
             strb1.append("<tr>");
             strb1.append("<td align=\"center\">");
-            //String path = webpage.getUrl() + "?";
             String path = request.getRequestURI() + "?";
 
             if (npage > 1) {
@@ -367,8 +367,8 @@ public class ContentUtils {
      */
     private String getContentByPage(String datos, int page) {
         HtmlTag tag = new HtmlTag();
-        StringBuffer ret = new StringBuffer();
-        StringBuffer rettmp = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
+        StringBuilder rettmp = new StringBuilder();
         boolean flag = false;
         boolean flag1 = false;
         boolean flag2 = false;
@@ -384,7 +384,7 @@ public class ContentUtils {
                     if (tag.getTagString().toLowerCase().equals("div")) { // Si es un tag div
                         flag1 = true;
                         if (!tag.isEndTag()) { //Si no es fin de tag
-                            rettmp = new StringBuffer();
+                            rettmp = new StringBuilder();
                             rettmp.append("<");
                             rettmp.append(tag.getTagString());
                             rettmp.append(" ");
@@ -493,7 +493,6 @@ public class ContentUtils {
                         fptr = new FileInputStream(path);
                         file = new FileInputStream(path);
                     } catch (Exception e) {
-                        //log.error(e);
                     }
                     if (fptr == null) { //busca en raiz de work/config
                         try {
@@ -501,7 +500,6 @@ public class ContentUtils {
                             fptr = new FileInputStream(path);
                             file = new FileInputStream(path);
                         } catch (Exception e) {
-                            //log.error(e);
                         }
                     }
                     if (fptr != null) {
@@ -571,7 +569,7 @@ public class ContentUtils {
      */
     private void createStyleObjs() {
         if (hStyleObjs == null) {
-            hStyleObjs = new HashMap();
+            hStyleObjs = new HashMap<>();
         }
         if (norm_font != null || norm_size != null || norm_color != null) { //crear objeto ContentStyles (normal)
             ContentStyles contentStyle = new ContentStyles();
@@ -759,7 +757,7 @@ public class ContentUtils {
       */
     private String getContentOpenOfficeByPage(String datos, int page2ret) {
         HtmlTag tag = new HtmlTag();
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         int page=1;
         try {
             HtmlStreamTokenizer tok = new HtmlStreamTokenizer(new java.io.ByteArrayInputStream(datos.getBytes()));
@@ -775,18 +773,11 @@ public class ContentUtils {
                         if(tag.getParam("STYLE")!=null && tag.getParam("STYLE").equals("page-break-before: always")) { // Si es un tag div
                             page++;
                             if(page>page2ret){
-                                /*
-                                String str="<P><BR><BR>"+(char)13+(char)10+"</P>"+(char)13+(char)10;
-                                if(ret.toString().endsWith(str)){
-                                    String rettmp=ret.toString().substring(0, ret.length()-19);
-                                    ret=new StringBuffer();
-                                    ret.append(rettmp);
-                                }*/
                                 ret.append("</BODY>");
                                 ret.append("</HTML>");
                                 break;
                             }else{
-                                ret = new StringBuffer();
+                                ret = new StringBuilder();
                             }
                         }else{
                             ret.append(tok.getRawString());
@@ -871,45 +862,9 @@ public class ContentUtils {
         return size;
     }
 
-    /**
-     * Gets the html content by page.
-     * 
-     * @param datos the datos
-     * @param page the page
-     * @return the html content by page
-     */
-    /*
     private String getHtmlContentByPage(String datos, int page){
         int off = 0;
         int cont = 0;
-        String matchPatron="<div style=\"page-break-after: always\">";
-        if(datos.indexOf(matchPatron)==-1) matchPatron="<div style=\"page-break-after: always;\">";
-
-        int f = -1;
-        String data="";
-        do {
-            f = datos.indexOf(matchPatron, off);
-            if (f >-1) {
-                cont++;
-                data=datos.substring(off, f);
-                if(page==cont) break;
-                off = f + matchPatron.length();
-            }else if(off>0){
-                data=datos.substring(off-matchPatron.length());
-            }
-            else { //Solo hay una pagina
-                data=datos;
-            }
-        } while (f > -1);
-        return data;
-    }
-    */
-
-    private String getHtmlContentByPage(String datos, int page){
-        int off = 0;
-        int cont = 0;
-        //String matchPatron="<div style=\"page-break-after: always\">";
-        //if(datos.indexOf(matchPatron)==-1) matchPatron="<div style=\"page-break-after: always;\">";
         String matchPatron="<div style=\"page-break-after: always";
 
         int f = -1;

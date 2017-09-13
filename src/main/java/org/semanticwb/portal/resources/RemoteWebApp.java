@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,15 +18,19 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
-import javax.servlet.http.*;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-
-import java.util.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
@@ -38,17 +42,20 @@ import org.semanticwb.model.Template;
 import org.semanticwb.model.User;
 import org.semanticwb.model.WebPage;
 import org.semanticwb.portal.TemplateImp;
-import org.semanticwb.portal.lib.SWBResponse;
-import org.semanticwb.portal.api.*;
+import org.semanticwb.portal.api.GenericAdmResource;
+import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBParamRequestImp;
+import org.semanticwb.portal.api.SWBResource;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceURL;
 import org.semanticwb.portal.lib.SWBBridgeResponse;
 import org.semanticwb.portal.lib.SWBRequest;
+import org.semanticwb.portal.lib.SWBResponse;
 import org.semanticwb.portal.util.SWBBridge;
 import org.semanticwb.servlet.SWBHttpServletRequestWrapper;
 import org.semanticwb.servlet.internal.DistributorParams;
 
-
-
-// TODO: Auto-generated Javadoc
 /**
  * Esta clase se encarga de desplegar y administrar un servicio SOP
  * 
@@ -62,7 +69,7 @@ public class RemoteWebApp extends GenericAdmResource
 {
     
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(RemoteWebApp.class);
+    private static final Logger log = SWBUtils.getLogger(RemoteWebApp.class);
     
     /** The encryptor. */
     private org.semanticwb.util.Encryptor encryptor = null;
@@ -126,7 +133,6 @@ public class RemoteWebApp extends GenericAdmResource
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest, boolean userIns) throws SWBResourceException, IOException
     {
         long iniTime=System.currentTimeMillis();        
-        //PrintWriter ret=response.getWriter();
         WebPage topic=paramRequest.getWebPage();
         User user=paramRequest.getUser();
         Resource base=paramRequest.getResourceBase();
@@ -144,7 +150,6 @@ public class RemoteWebApp extends GenericAdmResource
             String initext=base.getAttribute("initext",null);
             String endtext=base.getAttribute("endtext",null);
             String headers=base.getAttribute("headers");
-            //String removePath=base.getAttribute("removePath","http://200.33.31.6;http://172.20.174.55");
             String cookies=base.getAttribute("cookies");
             String instance=base.getAttribute("instance",""+base.getId());
             
@@ -164,36 +169,25 @@ public class RemoteWebApp extends GenericAdmResource
             String buri=uri;
             if(uri!=null)
             {
-            //System.out.println("uri:"+uri);
                 int i=uri.indexOf("_url");
                 if(i>-1)
                 {
                     surl=uri.substring(i+4);
                     buri=uri.substring(0,i+4);
-                    //buri=paramsRequest.getRenderUrl().setCallMethod(paramsRequest.Call_DIRECT).toString()+"/_url";
                 }
             }
             
-            //System.out.println("surl:"+surl);
-            
             if(surl==null)
             {
-                //response.sendError(500);
-                String url=paramRequest.getRenderUrl().setCallMethod(paramRequest.Call_DIRECT).toString()+"/_url"+iniPath;
+                String url=paramRequest.getRenderUrl().setCallMethod(SWBResourceURL.Call_DIRECT).toString()+"/_url"+iniPath;
                 if(paramRequest.getResourceBase().getAttribute("firstredirect")==null)
                 {
-                    //response.getWriter().print("<META HTTP-EQUIV=\"Refresh\" CONTENT=\"0; URL="+url+"\"><script>location.href='"+url+"';</script>");
-                    //return;
-                    //System.out.println(""+System.currentTimeMillis()+": "+"Send Redirect url:"+url);
-                    //response.reset();
-                    //response.resetBuffer();
                     response.sendRedirect(url);
-                    //throw new TemplateInterruptedException();
                     return;
                 }else
                 {
                     surl=iniPath;
-                    buri=paramRequest.getRenderUrl().setCallMethod(paramRequest.Call_DIRECT).toString()+"/_url";
+                    buri=paramRequest.getRenderUrl().setCallMethod(SWBResourceURL.Call_DIRECT).toString()+"/_url";
                 }
             }
             //Validacion de espacion en uri
@@ -201,7 +195,7 @@ public class RemoteWebApp extends GenericAdmResource
             String remoteURL = server + surl;
 
             boolean resCall = false;
-            if (paramRequest.getCallMethod()==paramRequest.Call_DIRECT)
+            if (paramRequest.getCallMethod()==SWBResourceURL.Call_DIRECT)
             {
                 resCall = true;
             } else
@@ -209,28 +203,12 @@ public class RemoteWebApp extends GenericAdmResource
                 resCall = false;
             }
             
-            //System.out.println("resCall:"+resCall);
-
-            //System.out.println("remoteURL:"+remoteURL);
-            //System.out.println("base.getId():"+base.getId());
-            
             if(userinsert!=null && request.getSession(true).getAttribute("WBCookieMgrUI")==null)
             {
-//                WBCookieMgr cookiemgr = (WBCookieMgr) request.getSession().getAttribute("WBCookieMgr");
-//                if (cookiemgr != null)
-//                {
-//                    cookiemgr.removeInstanceCookies(instance);
-//                }
-                   
                 request.getSession(true).setAttribute("WBCookieMgrUI", "true");
-                //System.out.println(""+System.currentTimeMillis()+": "+"User forbidden...");
                 ByteArrayOutputStream aout = new ByteArrayOutputStream(5000);
                 SWBBridge abridge = new SWBBridge();
-                //if (user.isLoged())
-                {
-                    addUserAttributes(abridge,paramRequest.getUser());
-                }
-                //System.out.println(""+System.currentTimeMillis()+": "+"userinsert:"+userinsert);
+                addUserAttributes(abridge,paramRequest.getUser());
                 SWBBridgeResponse ares = abridge.bridge(userinsert, null, new SWBRequest(request), aout, instance);
                 String acode = "" + ares.getResponseCode();                
                 if (acode.startsWith("2"))
@@ -239,7 +217,7 @@ public class RemoteWebApp extends GenericAdmResource
                 }else
                 {
                     //bloque de error duplicado
-                    String err = "";//"Error:" + acode + " " + ares.getResponseMessage();
+                    String err = "";
                     log.warn("Resource "+getResourceBase().getId()+" Error:" + acode + " " + ares.getResponseMessage());
 
                     String errm=ares.getErrorMessage();
@@ -255,7 +233,6 @@ public class RemoteWebApp extends GenericAdmResource
                     {
                         response.getWriter().print(err);
                     }        
-                    //*********
                 }
                 return;
             }
@@ -263,23 +240,16 @@ public class RemoteWebApp extends GenericAdmResource
             ByteArrayOutputStream out = new ByteArrayOutputStream(5000);
             SWBBridge bridge = new SWBBridge();
             bridge.setAcceptEncoding(false);
-            //if (user.isLoged())
-            {
-                addHeaders(bridge,headers);
-                addCookies(bridge,cookies);
-            }
-            //System.out.println(""+System.currentTimeMillis()+": "+"remoteURL:"+remoteURL);
+            addHeaders(bridge,headers);
+            addCookies(bridge,cookies);
             SWBBridgeResponse res = bridge.bridge(remoteURL, loginurl, request, out, instance);
             String code = "" + res.getResponseCode();
 
-            //System.out.println(""+System.currentTimeMillis()+": "+"getResponseCode:"+code);
-            
             if (code.startsWith("3"))
             {
                 String redi = res.getHeaderField("Location");
                 if (redi != null)
                 {
-                    //redi = removePaths(removePath,redi);
                     redi = replaceStr(replace,redi);
                     redi = replacePaths(basePath, redi, buri);
                     response.sendRedirect(redi);
@@ -291,8 +261,6 @@ public class RemoteWebApp extends GenericAdmResource
             } else if (code.startsWith("2"))
             {
                 String contentType = res.getContentType();
-                //System.out.println(""+System.currentTimeMillis()+": "+"Content-Type:"+contentType);
-                //if (isDirect(direct, remoteURL) || contentType.toLowerCase().equals("text/xml") || contentType.toLowerCase().indexOf("text") == -1)
                 boolean isHtml=false;
                 if(contentType!=null)
                     isHtml=contentType.toLowerCase().indexOf("text/html")!=-1 || contentType.toLowerCase().indexOf("text/plain")!=-1;
@@ -302,10 +270,6 @@ public class RemoteWebApp extends GenericAdmResource
                                              ||contentType.toLowerCase().indexOf("text/javascript")>=0))
                     {
                         response.setContentType(contentType);
-//                        for(int x=0;x<res.getHeaderSize();x++)
-//                        {
-//                            response.setHeader(res.getHeaderFieldKey(x+1), res.getHeaderField(x+1));
-//                        }                        
                         String content = "";
                         if(encode!=null)
                         {
@@ -314,10 +278,8 @@ public class RemoteWebApp extends GenericAdmResource
                         {
                             content=out.toString();
                         }
-                        //System.out.println("*********x1\n"+content);
                         content = replaceStr(replace,content);
                         content = replacePaths(basePath, content, buri);
-                        //System.out.println("*********x1\n"+content);
                         response.getOutputStream().write(content.getBytes());
                         
                     }else
@@ -331,8 +293,6 @@ public class RemoteWebApp extends GenericAdmResource
                 } else
                 {
                     response.setContentType(contentType);
-                    //System.out.println(""+System.currentTimeMillis()+": before-parse");
-                    //String content = out.toString().replaceAll(servletRemote, servletName);
                     String content = "";
                     if(encode!=null)
                     {
@@ -341,7 +301,6 @@ public class RemoteWebApp extends GenericAdmResource
                     {
                         content=out.toString();
                     }
-                    //content = removePaths(removePath,content);
                     content = cropStr(initext,endtext,content);
                     content = replaceStr(replace,content);
                     content = replacePaths(basePath, content, buri);
@@ -355,7 +314,6 @@ public class RemoteWebApp extends GenericAdmResource
                         while(pit.hasNext())
                         {
                             String param=(String)pit.next();
-                            //System.out.println("param:"+param);
                             if(param.equals("_tpl") && pit.hasNext())
                             {
                                 try
@@ -363,19 +321,16 @@ public class RemoteWebApp extends GenericAdmResource
                                     Template t=topic.getWebSite().getTemplate((String)pit.next());
                                     Template aux=SWBPortal.getTemplateMgr().getTemplateImp(t);
                                     if(aux!=null)tpl=aux;
-                                    //System.out.println("tpl:"+t+" "+tpl);
                                 }catch(Exception e){log.error(e);}
                             }
                         }
                         boolean onlyContent = distparams.isOnlyContent();
                         
                         //other contents
-                        //System.out.println(""+System.currentTimeMillis()+": "+"othercont:"+paramsRequest.getResourceBase().getAttribute("othercont", null));
                         if(paramRequest.getResourceBase().getAttribute("othercont", null)!=null)
                         {
-                            //System.out.println("othercont:on");
-                            StringBuffer rr=new StringBuffer();
-                            Iterator it= SWBPortal.getResourceMgr().getContents(user, topic, new HashMap(), tpl);
+                            StringBuilder rr=new StringBuilder();
+                            Iterator<SWBResource> it= SWBPortal.getResourceMgr().getContents(user, topic, new HashMap(), tpl);
                             while (it.hasNext())
                             {
                                 SWBResource wbres = (SWBResource) it.next();
@@ -390,18 +345,14 @@ public class RemoteWebApp extends GenericAdmResource
                                     if(distparams!=null)
                                     {
                                         vtopic=distparams.getVirtWebPage();
-                                        //onlyContent = distparams.isOnlyContent();
                                         HashMap resp=distparams.getResourceURI(rid);
                                         if(resp!=null && distparams.getResourceTMID(rid).equals(wbres.getResourceBase().getWebSiteId()))
                                         {
-                                            mdo=(String)resp.get(distparams.URLP_MODE);
-                                            wst=(String)resp.get(distparams.URLP_WINSTATE);
-                                            act=(String)resp.get(distparams.URLP_ACTION);
+                                            mdo=(String)resp.get(DistributorParams.URLP_MODE);
+                                            wst=(String)resp.get(DistributorParams.URLP_WINSTATE);
+                                            act=(String)resp.get(DistributorParams.URLP_ACTION);
                                         }
                                     }
-
-                                    //System.out.println("rid:"+rid);
-                                    //System.out.println("distparams.getAccResourceID():"+distparams.getAccResourceID());
 
                                     SWBResponse res2=new SWBResponse(response);
                                     javax.servlet.http.HttpServletRequest req=request;
@@ -414,7 +365,7 @@ public class RemoteWebApp extends GenericAdmResource
                                     }
                                     SWBParamRequestImp resParams = new SWBParamRequestImp(req,wbres.getResourceBase(),topic,user);
                                     resParams.setArguments(args);
-                                    resParams.setCallMethod(resParams.Call_CONTENT);
+                                    resParams.setCallMethod(SWBParamRequestImp.Call_CONTENT);
                                     if(act!=null)resParams.setAction(act);
                                     if(mdo!=null)resParams.setMode(mdo);
                                     if(wst!=null)resParams.setWindowState(wst);                                        
@@ -431,11 +382,9 @@ public class RemoteWebApp extends GenericAdmResource
                                     {
                                         rr.append("<BR>");
                                     }
-                                    //System.out.println("add content 2");
                                     rr.append(res2.toString());
                                 }else if(wbres == this)
                                 {
-                                    //System.out.println("add content 1");
                                     String intraBR=(String)args.get("intrabr");
                                     if(intraBR==null || intraBR.equalsIgnoreCase("true") && rr.length()>0)
                                     {
@@ -463,27 +412,16 @@ public class RemoteWebApp extends GenericAdmResource
                 }
             } else if(userIns && code.startsWith("403") && userinsert!=null)
             {
-//                WBCookieMgr cookiemgr = (WBCookieMgr) request.getSession().getAttribute("WBCookieMgr");
-//                if (cookiemgr != null)
-//                {
-//                    cookiemgr.removeInstanceCookies(instance);
-//                }
-                //System.out.println("User forbidden...");
                 ByteArrayOutputStream aout = new ByteArrayOutputStream(5000);
                 SWBBridge abridge = new SWBBridge();
-                //if (user.isLoged())
-                {
-                    addUserAttributes(abridge,paramRequest.getUser());
-                }
-                //System.out.println("userinsert:"+userinsert);
+                addUserAttributes(abridge,paramRequest.getUser());
                 SWBBridgeResponse ares = abridge.bridge(userinsert, null, new SWBRequest(request), aout, instance);
                 String acode = "" + ares.getResponseCode();                
                 if (acode.startsWith("2"))
                 {
                     if("POST".equals(request.getMethod()))
                     {
-                        //response.sendRedirect(request.getRequestURI().toString());
-                        String url=paramRequest.getRenderUrl().setCallMethod(paramRequest.Call_DIRECT).toString()+"/_url"+iniPath;
+                        String url=paramRequest.getRenderUrl().setCallMethod(SWBResourceURL.Call_DIRECT).toString()+"/_url"+iniPath;
                         response.sendRedirect(url);
                     }else
                     {
@@ -493,7 +431,7 @@ public class RemoteWebApp extends GenericAdmResource
                 }else
                 {
                     //bloque de error duplicado
-                    String err = "";//"Error:" + acode + " " + ares.getResponseMessage();
+                    String err = "";
                     log.warn("Resource "+getResourceBase().getId()+" Error:" + acode + " " + ares.getResponseMessage());
 
                     String errm=ares.getErrorMessage();
@@ -508,13 +446,12 @@ public class RemoteWebApp extends GenericAdmResource
                     {
                         response.getWriter().print(err);
                     }        
-                    //*********
                 }
                 
             }else
             {
                 //bloque de error duplicado
-                String err = "";//"Error:" + code + " " + res.getResponseMessage();
+                String err = "";
                 log.warn("Resource "+getResourceBase().getId()+" Error:" + code + " " + res.getResponseMessage());
 
                 String errm=res.getErrorMessage();
@@ -529,7 +466,6 @@ public class RemoteWebApp extends GenericAdmResource
                 {
                     response.getWriter().print(err);
                 }
-                //*********
             }
         } catch (Exception e)
         {
@@ -547,49 +483,47 @@ public class RemoteWebApp extends GenericAdmResource
      */
     public String replaceTags(String str, HttpServletRequest request, SWBParamRequest paramRequest)
     {
-        //System.out.print("\nstr:"+str+"-->");
         if(str==null || str.trim().length()==0)return null;
         str=str.trim();
         //TODO: codificar cualquier atributo o texto
-        Iterator it=SWBUtils.TEXT.findInterStr(str, "{encode(\"", "\")}");
+        Iterator<String> it=SWBUtils.TEXT.findInterStr(str, "{encode(\"", "\")}");
         while(it.hasNext())
         {
-            String s=(String)it.next();
+            String s= it.next();
             str=SWBUtils.TEXT.replaceAll(str, "{encode(\""+s+"\")}", encryptor.encode(replaceTags(s,request,paramRequest)));
         }
 
         it=SWBUtils.TEXT.findInterStr(str, "{encodeB64(\"", "\")}");
         while(it.hasNext())
         {
-            String s=(String)it.next();
+            String s=it.next();
             str=SWBUtils.TEXT.replaceAll(str, "{encodeB64(\""+s+"\")}", SFBase64.encodeString(replaceTags(s,request,paramRequest)));
         }
         
         it=SWBUtils.TEXT.findInterStr(str, "{request.getParameter(\"", "\")}");
         while(it.hasNext())
         {
-            String s=(String)it.next();
+            String s=it.next();
             str=SWBUtils.TEXT.replaceAll(str, "{request.getParameter(\""+s+"\")}", request.getParameter(replaceTags(s,request,paramRequest)));
         }
         
         it=SWBUtils.TEXT.findInterStr(str, "{session.getAttribute(\"", "\")}");
         while(it.hasNext())
         {
-            String s=(String)it.next();
+            String s=it.next();
             str=SWBUtils.TEXT.replaceAll(str, "{session.getAttribute(\""+s+"\")}", (String)request.getSession().getAttribute(replaceTags(s,request,paramRequest)));
         }
         
         it=SWBUtils.TEXT.findInterStr(str, "{getEnv(\"", "\")}");
         while(it.hasNext())
         {
-            String s=(String)it.next();
+            String s=it.next();
             str=SWBUtils.TEXT.replaceAll(str, "{getEnv(\""+s+"\")}", SWBPlatform.getEnv(replaceTags(s,request,paramRequest)));
         }
         
         str=SWBUtils.TEXT.replaceAll(str, "{user.login}", paramRequest.getUser().getLogin());
         str=SWBUtils.TEXT.replaceAll(str, "{user.email}", paramRequest.getUser().getEmail());
         str=SWBUtils.TEXT.replaceAll(str, "{user.language}", paramRequest.getUser().getLanguage());
-        //System.out.println(str);
         return str;
     }
     
@@ -628,7 +562,6 @@ public class RemoteWebApp extends GenericAdmResource
                 if(ini>=0)
                 {
                     content=a2+content.substring(ini+a1.length());
-                    //break;
                 }
             }    
         }
@@ -655,7 +588,6 @@ public class RemoteWebApp extends GenericAdmResource
                 if(end>=0)
                 {
                     content=content.substring(0,end)+a2;
-                    //break;
                 }
             }    
         }        
@@ -719,15 +651,6 @@ public class RemoteWebApp extends GenericAdmResource
      */
     public String replacePaths(String basePath, String content, String buri)
     {
-//        if(basePath==null || buri==null)return content;
-//        StringTokenizer st = new StringTokenizer(basePath, ";,");
-//        while (st.hasMoreTokens())
-//        {
-//            String wp = st.nextToken();
-//            content = content.replaceAll(wp, buri + wp);
-//        }    
-//        return content;
-        
         if(basePath==null || buri==null)return content;
         
         int i=-1;
@@ -842,43 +765,8 @@ public class RemoteWebApp extends GenericAdmResource
      * @param user the user
      */
     public void addUserAttributes(SWBBridge bridge, User user)
-    {/* TODO:VER 4
-        HashMap map=new HashMap();
-        Enumeration en=user.getPropertyNames();
-        while(en.hasMoreElements())
-        {
-            String name=(String)en.nextElement();
-            String value=user.getAttribute(name);
-            if(name!=null && value!=null)
-            {
-                map.put(name,value);
-            }
-        }
-        String roles="";
-        Iterator it=user.getRoles();
-        while(it.hasNext())
-        {
-            int roleid=((Integer)it.next()).intValue();
-            RecRole role=DBRole.getInstance().getRole(roleid, user.getRepository());
-            roles+="|"+role.getName();
-        }
-        if(roles.length()>0)
-        {
-            roles=roles.substring(1);
-            map.put("ROLES",roles);
-        }
-        
-        try
-        {
-//            ByteArrayOutputStream f = new ByteArrayOutputStream();
-//            ObjectOutput s = new ObjectOutputStream(f);
-//            s.writeObject(map);
-//            s.flush();
-//            s.close();       
-//            bridge.setPostData(f.toByteArray());
-            bridge.addGetParameter("obj", AFUtils.encodeObject(map));
-        }catch(Exception e){AFUtils.log(e);}
-      * */
+    {
+    		//TODO:VER 4
     }
     
     /* (non-Javadoc)
@@ -887,7 +775,7 @@ public class RemoteWebApp extends GenericAdmResource
     public String getResourceCacheID(HttpServletRequest request, SWBParamRequest paramRequest) throws SWBResourceException
     {
         String retValue=null;
-        if (paramRequest.getCallMethod()!=paramRequest.Call_DIRECT)
+        if (paramRequest.getCallMethod()!=SWBParamRequest.Call_DIRECT)
         {
             retValue = super.getResourceCacheID(request, paramRequest);
         }

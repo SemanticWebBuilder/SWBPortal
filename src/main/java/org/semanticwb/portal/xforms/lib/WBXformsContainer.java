@@ -24,6 +24,7 @@ package org.semanticwb.portal.xforms.lib;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import org.semanticwb.xforms.lib.XformsBase;
 import org.semanticwb.xforms.lib.XformsBaseImp;
 
@@ -62,7 +63,7 @@ public abstract class WBXformsContainer extends XformsBaseImp
      * @return the xform
      */
     public String getXform() {
-        StringBuffer strb = new StringBuffer();
+        StringBuilder strb = new StringBuilder();
         Iterator iobj = formelements.iterator();
         while(iobj.hasNext())
         {
@@ -84,7 +85,7 @@ public abstract class WBXformsContainer extends XformsBaseImp
       * @return the xform binds
       */
      public String getXformBinds() {
-        StringBuffer strb = new StringBuffer();
+        StringBuilder strb = new StringBuilder();
         Iterator iobj = formelements.iterator();
         do {
             if(!iobj.hasNext()){

@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
@@ -27,17 +27,15 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
-import org.semanticwb.base.util.SWBMailSender;
 import org.semanticwb.model.ResourceType;
-import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.UserRepository;
 import org.semanticwb.model.WebSite;
 import org.semanticwb.platform.SemanticModel;
-import org.semanticwb.platform.SemanticProperty;
 import org.semanticwb.portal.api.SWBResource;
 import org.semanticwb.repository.Workspace;
 import org.w3c.dom.Document;
@@ -74,13 +72,13 @@ public class InstallZipThread extends java.lang.Thread {
     public void run() {
         try {
             String modelspath = SWBPortal.getWorkPath() + "/models/";
-            
+
             //Begins New 29/Abril/2013
-            String siteTemplateTmpPath= SWBPortal.getWorkPath() + "/sitetemplates/tmp/";    
+            String siteTemplateTmpPath= SWBPortal.getWorkPath() + "/sitetemplates/tmp/";
             File dirUnzipTmp=new File(siteTemplateTmpPath);
             if(!dirUnzipTmp.exists()) dirUnzipTmp.mkdirs();
             //Ends New
-                
+
             if (file2read == null) {
                 file2read = "siteInfo.xml";
             }
@@ -109,7 +107,7 @@ public class InstallZipThread extends java.lang.Thread {
                         iteraModels(node, smodels);
                     }
                 }
-                
+
                 String newId = newWebSiteid;
                 if (newId == null) {
                     newId = oldIDModel;
@@ -156,7 +154,7 @@ public class InstallZipThread extends java.lang.Thread {
                         }
                     }
                 }
-                
+
                 //Parseo de nombre de NameSpace anteriores por nuevos
                 String newNs = "http://www." + newId + ".swb#";
                 File fileModel = new File(dirUnzipTmp + "/" + newId + "/" + oldIDModel + ".nt");
@@ -190,10 +188,10 @@ public class InstallZipThread extends java.lang.Thread {
                 }
                 istatus = 30;
                 SemanticModel model = SWBPlatform.getSemanticMgr().createDBModelByRDF(newId, newNs, io, "N-TRIPLE");
-                System.out.println("model:"+model+" "+newId+" "+newNs+" "+io+" "+model.getName());
+                //System.out.println("model:"+model+" "+newId+" "+newNs+" "+io+" "+model.getName());
                 WebSite website = (WebSite)model.getModelObject().createGenericInstance();//   SWBContext.getWebSite(model.getName());
                 //System.out.println("Site:"+website);
-                
+
                 wsiteUri = website.getURI();
                 website.setTitle(newTitle);
                 website.setDescription(oldDescription);
@@ -240,10 +238,10 @@ public class InstallZipThread extends java.lang.Thread {
                             int pos = xmodelID.lastIndexOf("_rep");
                             if (pos > -1) {
                                 xmodelID = xmodelID.substring(0, pos);
-                                //System.out.println("replace:"+xmodelID+" "+newId);                                    
+                                //System.out.println("replace:"+xmodelID+" "+newId);
                                 rdfmodel = SWBUtils.TEXT.replaceAll(rdfmodel, "<http://repository."+xmodelID+".swb#", "<http://repository."+newId+".swb#");
                                 rdfmodel = SWBUtils.TEXT.replaceAll(rdfmodel, xmodelID+"_rep", newId+"_rep");
-                                
+
                                 io = SWBUtils.IO.getStreamFromString(rdfmodel);
                                 SemanticModel repomodel = SWBPlatform.getSemanticMgr().createDBModelByRDF(newId + "_rep", "http://repository." + newId + ".swb#", io, "N-TRIPLE");
                                 if (repomodel != null) {
@@ -254,7 +252,7 @@ public class InstallZipThread extends java.lang.Thread {
                                         repo.setTitle("Documents Repository (" + newWebSiteTitle + ")", "en");
                                     }else
                                     {
-                                        log.error("Error creating document repository...");                                        
+                                        log.error("Error creating document repository...");
                                     }
                                 }
                             }
@@ -330,7 +328,7 @@ public class InstallZipThread extends java.lang.Thread {
 
     /**
      * Metodo sobrado en este momento, pero servira para cuando un submodelo (sitio), tenga mas submodelos (sitios,repositorios).
-     * 
+     *
      * @param node the node
      * @param smodels the smodels
      */
