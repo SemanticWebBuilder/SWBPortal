@@ -83,7 +83,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
         }
     };
     /**BookmarkEntry name-based comparator. Comparador de entradas basado en nombre.*/
-    public static Comparator<BookmarkEntry> NAME_ORDER_DESC = new Comparator<BookmarkEntry>() {
+    public static final Comparator<BookmarkEntry> NAME_ORDER_DESC = new Comparator<BookmarkEntry>() {
 
         public int compare(BookmarkEntry arg0, BookmarkEntry arg1) {
             BookmarkEntry e1 = arg0;
