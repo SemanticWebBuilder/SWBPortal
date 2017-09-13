@@ -25,9 +25,9 @@ package org.semanticwb.portal;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+
 import javax.servlet.http.HttpServletRequest;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SWBFormButton.
  * 
@@ -53,8 +53,8 @@ public class SWBFormButton
      */
     public SWBFormButton()
     {
-        attributes=new HashMap();
-        titles=new HashMap();
+        attributes=new HashMap<>();
+        titles=new HashMap<>();
     }
 
     /**
@@ -68,15 +68,10 @@ public class SWBFormButton
      */
     public String renderButton(HttpServletRequest request, String codetype, String lang)
     {
-        boolean DOJO=false;
-        boolean IPHONE=false;
-        boolean XHTML=false;
-        if(codetype.equals(SWBFormMgr.TYPE_XHTML))XHTML=true;
-        if(codetype.equals(SWBFormMgr.TYPE_DOJO))DOJO=true;
-        if(codetype.equals(SWBFormMgr.TYPE_IPHONE))IPHONE=true;
-        StringBuffer ret=new StringBuffer();
+        boolean isDojo=codetype.equals(SWBFormMgr.TYPE_DOJO);
+        StringBuilder ret=new StringBuilder();
         ret.append("<button");
-        if(DOJO)
+        if(isDojo)
         {
             //TODO: Bug in IE
             if(busyButton)
@@ -145,7 +140,7 @@ public class SWBFormButton
      */
     public String getAttributes()
     {
-        StringBuffer ret=new StringBuffer();
+        StringBuilder ret=new StringBuilder();
         Iterator<Entry<String,String>> it=attributes.entrySet().iterator();
         while(it.hasNext())
         {

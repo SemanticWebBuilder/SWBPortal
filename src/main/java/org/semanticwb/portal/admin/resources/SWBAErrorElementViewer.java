@@ -133,10 +133,10 @@ public class SWBAErrorElementViewer extends GenericResource{
             String fecha = request.getParameter("fecha");
             String stacktrace = request.getParameter("stacktrace");
             Properties sysInfo = System.getProperties();
-            StringBuffer ret = new StringBuffer();
+            StringBuilder ret = new StringBuilder();
             ret.append("\n"+paramRequest.getLocaleString("msgErroInfoGenerated")+":\n");
             InetAddress iAddr = InetAddress.getLocalHost();
-            StringBuffer addrStr = new StringBuffer();
+            StringBuilder addrStr = new StringBuilder();
             byte[] bytes = iAddr.getAddress();
             for(int cnt = 0; cnt < bytes.length; cnt++){
                 int uByte = bytes[cnt] < 0 ? bytes[cnt] + 256 : bytes[cnt];

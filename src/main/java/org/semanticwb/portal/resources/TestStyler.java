@@ -24,44 +24,33 @@ package org.semanticwb.portal.resources;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
-import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
+import org.semanticwb.model.GenericObject;
+import org.semanticwb.model.Resource;
 import org.semanticwb.model.Role;
 import org.semanticwb.model.User;
 import org.semanticwb.model.UserGroup;
-import org.semanticwb.model.WebPage;
-import org.semanticwb.model.WebSite;
-import org.semanticwb.model.GenericObject;
 import org.semanticwb.platform.SemanticOntology;
-import org.semanticwb.model.Resource;
-import org.semanticwb.portal.api.SWBResourceURL;
 import org.semanticwb.portal.api.GenericResource;
-import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceURL;
 
-
-import org.semanticwb.portal.admin.resources.StyleInner;
-
-// TODO: Auto-generated Javadoc
 /**
  * The Class TestStyler.
  */
 public class TestStyler extends GenericResource {
     
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(TestStyler.class);
+    private static final Logger log = SWBUtils.getLogger(TestStyler.class);
     
-    /** The si. */
-    private StyleInner si;
-
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#doView(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
      */
@@ -74,15 +63,6 @@ public class TestStyler extends GenericResource {
 
             if(base.getAttribute("css")!=null) {
                 out.println("<script type=\"text/javascript\">");
-//                out.println("dojo.require(\"dojox.html.styles\");");
-//                out.println("function setStyleSheetByInstance(rules, sufix, title) {");
-//                out.println("  rules = rules.split('}');");
-//                out.println("  for(i=0; i<rules.length; i++) {");
-//                out.println("    rule = rules[i].split('{');");
-//                out.println("    if(rule[1])");
-//                out.println("      dojox.html.insertCssRule(rule[0]+'_'+sufix, rule[1]);");
-//                out.println("  }");
-//                out.println("}");
                 out.println("setStyleSheetByInstance('"+base.getAttribute("css")+"','"+base.getId()+"');");
                 out.println("</script>");
             }
@@ -118,102 +98,7 @@ public class TestStyler extends GenericResource {
      */
     @Override
     public void doAdmin(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-//        Resource base = getResourceBase();
-//        PrintWriter out = response.getWriter();
-//
-//        String action = request.getParameter("action");
-//        if(action!=null) {
-//            out.println("<script type=\"text/javascript\">");
-//            out.println("   alert('recurso actualizado con identificador "+ base.getId()+"');");
-//            out.println("   location='"+paramRequest.getRenderUrl().toString()+"';");
-//            out.println("</script>");
-//        }
-//        
-//        User user = paramRequest.getUser();
-//
-//        WebPage wpage = paramRequest.getWebPage();
-//        WebSite wsite = wpage.getWebSite();
-//
-//        String str_role = base.getAttribute("editRole","0");
-//        out.println("<div class=\"swbform\">");
-//        SWBResourceURL urlA = paramRequest.getActionUrl();
-//        urlA.setAction("update");
-//        out.println("<form id=ilta_\""+base.getId()+"\" name=\"ilta_"+base.getId()+"\" action=\"" + urlA + "\" method=\"post\" >");
-//        out.println("<fieldset>");
-//        out.println("<legend>");
-//        out.println("Datos");
-//        out.println("</legend>");
-//        out.println("<table width=\"100%\" border=\"0\" >");
-//
-//        String strTemp = "<option value=\"-1\">" + "No se encontaron roles" + "</option>";
-//        Iterator<Role> iRoles = wsite.getUserRepository().listRoles();
-//        StringBuffer strRules = new StringBuffer("");
-//        String selected = "";
-//        if(str_role.equals("0")) {
-//            selected = "selected=\"selected\"";
-//        }
-//        strRules.append("\n<option value=\"0\" " + selected +" >" + "Ninguno" + "</option>");
-//        strRules.append("\n<optgroup label=\"Roles\">");
-//        while (iRoles.hasNext()) {
-//            Role oRole = iRoles.next();
-//            selected = "";
-//            if (str_role.trim().equals(oRole.getURI())) {
-//                selected = "selected=\"selected\"";
-//            }
-//            strRules.append("\n<option value=\"" + oRole.getURI() + "\" " + selected + ">" + oRole.getDisplayTitle(user.getLanguage()) + "</option>");
-//        }
-//        strRules.append("\n</optgroup>");
-//        strRules.append("\n<optgroup label=\"User Groups\">");
-//        Iterator<UserGroup> iugroups = wsite.getUserRepository().listUserGroups();
-//        while (iugroups.hasNext()) {
-//            UserGroup oUG = iugroups.next();
-//            selected = "";
-//            if (str_role.trim().equals(oUG.getURI())) {
-//                selected = "selected";
-//            }
-//            strRules.append("\n<option value=\"" + oUG.getURI() + "\" " + selected + " >" + oUG.getDisplayTitle(user.getLanguage()) + "</option>");
-//        }
-//        strRules.append("\n</optgroup>");
-//        if (strRules.toString().length() > 0) {
-//            strTemp = strRules.toString();
-//        }
-//
-//        out.println("<tr>");
-//        out.println("<td align=\"right\" width=\"150\">Rol o grupo:</td>");
-//        out.println("<td><select name=\"editar_"+base.getId()+"\">" + strTemp + "</select></td>");
-//        out.println("</tr>");
-//
-//        out.println("<tr>");
-//        out.println("<td align=\"right\" width=\"150\">Texto:</td>");
-//        out.println("<td><textarea name=\"txt\" rows=\"4\" cols=\"50\">" + base.getAttribute("text", "") + "</textarea></td>");
-//        out.println("</tr>");
-//
-//        out.println("</table>");
-//        out.println("</fieldset>");
-//
-//        out.println("<fieldset>");
-//        out.println("<legend>Estilo</legend>");
-//        String cssResPath = "/"+SWBUtils.TEXT.replaceAll(getClass().getName(), ".", "/")+".css";
-//        si = new StyleInner(getResourceBase());
-//        String script = null;
-//        try {
-//            script = si.render(paramRequest, cssResPath);
-//        }catch(NullPointerException e) {
-//            log.error("Tal vez no exite el archivo "+cssResPath+" en el recurso: "+base.getId() +"-"+ base.getTitle(), e);
-//        }catch(IOException e) {
-//            log.error("Error al leer el archivo "+cssResPath+" en el recurso: "+base.getId() +"-"+ base.getTitle(), e);
-//        }catch(Exception e) {
-//            log.error("Error en el recurso: "+base.getId() +"-"+ base.getTitle(), e);
-//        }
-//        out.println(script);
-//        out.println("</fieldset>");
-//
-//        out.println("<fieldset>");
-//        out.println("<button dojoType=\"dijit.form.Button\" type=\"submit\">Guardar</button>");
-//        out.println("<button dojoType=\"dijit.form.Button\" type=\"reset\" >Restablecer</button>");
-//        out.println("</fieldset>");
-//        out.println("</form>");
-//        out.println("</div>");
+
     }
 
     /* (non-Javadoc)
@@ -262,48 +147,13 @@ public class TestStyler extends GenericResource {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void doEditStyle(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-//        Resource base = getResourceBase();
-//        String stel = request.getParameter("stel");
-//        String[] tkns = stel.split("@",3);
-//        HashMap tabs = (HashMap)si.getMm(base.getId());
-//        if( tabs!=null && tkns[1].length()>0 ) {
-//            try {
-//                HashMap t = (HashMap)tabs.get(tkns[0]);
-//                if(tkns[2].equalsIgnoreCase("empty") || tkns[2].length()==0)
-//                    t.remove(tkns[1]);
-//                else
-//                    t.put(tkns[1], tkns[2]);
-//                StringBuilder css = new StringBuilder();
-//                Iterator<String> ittabs = tabs.keySet().iterator();
-//                while(ittabs.hasNext()) {
-//                    String tab = ittabs.next();
-//                    css.append(tab);
-//                    css.append("{");
-//                    HashMap selectors = (HashMap)tabs.get(tab);
-//                    Iterator<String> its = selectors.keySet().iterator();
-//                    while(its.hasNext()) {
-//                        String l = its.next();
-//                        css.append(l+":"+selectors.get(l)+";");
-//                    }
-//                    css.append("}");
-//                }
-//                base.setAttribute("css", css.toString());
-//                try{
-//                    base.updateAttributesToDB();
-//                }catch(Exception e){
-//                    log.error("Error al guardar la hoja de estilos del recurso: "+base.getId() +"-"+ base.getTitle(), e);
-//                }
-//            }catch(IndexOutOfBoundsException iobe) {
-//                log.error("Error al editar la hoja de estilos del recurso: "+base.getId() +"-"+ base.getTitle(), iobe);
-//            }
-//        }
+
     }
 
     /**
      * Prints the matriz.
      */
     private void printMatriz() {
-        //si.printMatriz(getResourceBase().getId());
     }
 
     /**

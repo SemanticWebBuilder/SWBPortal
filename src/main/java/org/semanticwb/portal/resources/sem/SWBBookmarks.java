@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source¡),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources.sem;
 
@@ -30,8 +30,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+
 import javax.servlet.RequestDispatcher;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBUtils;
@@ -39,15 +42,17 @@ import org.semanticwb.model.Resourceable;
 import org.semanticwb.model.User;
 import org.semanticwb.model.WebPage;
 import org.semanticwb.model.WebSite;
-import org.semanticwb.portal.api.*;
+import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceURL;
 
-// TODO: Auto-generated Javadoc
 /**
  * A Bookmarks manager resource. The bookmarks are sorted in groups.
  * <p>
  * Recurso de administración de favoritos. Los favoritos se almacenan en grupos.
  * 
- * @author Hasdai Pacheco {haxdai@gmail.com}
+ * @author Hasdai Pacheco {haxdai}
  */
 public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBookmarksBase {
 
@@ -69,26 +74,26 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
     /** The Constant DISPLAY_CLOUD. */
     public static final int DISPLAY_CLOUD = 6;
     /**BookmarkEntry date-based comparator. Comparador de entradas basado en fecha.*/
-    public static final Comparator DATE_ORDER_ASC = new Comparator() {
+    public static final Comparator<BookmarkEntry> DATE_ORDER_ASC = new Comparator<BookmarkEntry>() {
 
-        public int compare(Object arg0, Object arg1) {
-            BookmarkEntry e1 = (BookmarkEntry) arg0;
-            BookmarkEntry e2 = (BookmarkEntry) arg1;
+        public int compare(BookmarkEntry arg0, BookmarkEntry arg1) {
+            BookmarkEntry e1 = arg0;
+            BookmarkEntry e2 = arg1;
             return e2.getCreated().compareTo(e1.getCreated());
         }
     };
     /**BookmarkEntry name-based comparator. Comparador de entradas basado en nombre.*/
-    public static Comparator NAME_ORDER_DESC = new Comparator() {
+    public static Comparator<BookmarkEntry> NAME_ORDER_DESC = new Comparator<BookmarkEntry>() {
 
-        public int compare(Object arg0, Object arg1) {
-            BookmarkEntry e1 = (BookmarkEntry) arg0;
-            BookmarkEntry e2 = (BookmarkEntry) arg1;
+        public int compare(BookmarkEntry arg0, BookmarkEntry arg1) {
+            BookmarkEntry e1 = arg0;
+            BookmarkEntry e2 = arg1;
             return -e2.getTitle().compareTo(e1.getTitle());
         }
     };
 
     /** The log. */
-    public static Logger log = SWBUtils.getLogger(SWBBookmarks.class);
+    public static final Logger log = SWBUtils.getLogger(SWBBookmarks.class);
 
     /**
      * Empty constructor.
@@ -136,10 +141,6 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
 
             entry.setTitle(response.getWebPage().getTitle());
             entry.setBookmarkURL(response.getWebPage().getUrl());
-            //entry.setTitle(stripHtmlTags(request.getParameter("title")));
-            //entry.setBookmarkURL(stripHtmlTags(request.getParameter("urllink")));
-            //entry.setDescription(stripHtmlTags(request.getParameter("description")));
-            //entry.setTags(tgs);
 
             //Separate tags string
             String tags[] = tgs.split(",");
@@ -180,8 +181,6 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
                 addGroup(group);
             }
             group.addEntry(entry);
-            //response.setCallMethod(response.Call_CONTENT);
-            //response.setMode(response.Mode_VIEW);
         } else if (action.equals("DELALL")) {
             if (user.isSigned()) {
                 //Get user's bookmark groups
@@ -202,14 +201,14 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
                     }
                 }
             }
-            response.setCallMethod(response.Call_CONTENT);
-            response.setMode(response.Mode_VIEW);
+            response.setCallMethod(SWBActionResponse.Call_CONTENT);
+            response.setMode(SWBActionResponse.Mode_VIEW);
         } else if (action.equals("SORT")) {
             if (user.isSigned()) {
                 setSortType(Integer.parseInt(request.getParameter("oType")));
             }
-            response.setCallMethod(response.Call_CONTENT);
-            response.setMode(response.Mode_VIEW);
+            response.setCallMethod(SWBActionResponse.Call_CONTENT);
+            response.setMode(SWBActionResponse.Mode_VIEW);
         } else if (action.equals("DELETE")) {
             if (user.isSigned()) {
                 //Get user's bookmark groups
@@ -229,8 +228,6 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
                     }
                 }
             }
-            //response.setCallMethod(response.Call_CONTENT);
-            //response.setMode(response.Mode_VIEW);
         } else if (action.equals("EDIT")) {
             //Get bookmarkgroup data from request
             String title = stripHtmlTags(request.getParameter("title"));
@@ -252,8 +249,8 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
                     entry.setTags(tgs);
                 }
             }
-            response.setCallMethod(response.Call_CONTENT);
-            response.setMode(response.Mode_VIEW);
+            response.setCallMethod(SWBActionResponse.Call_CONTENT);
+            response.setMode(SWBActionResponse.Mode_VIEW);
         } else {
             super.processAction(request, response);
         }
@@ -266,7 +263,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
     public void processRequest(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         String mode = paramRequest.getMode();
 
-        if (mode.equals(paramRequest.Mode_VIEW)) {
+        if (mode.equals(SWBParamRequest.Mode_VIEW)) {
             doView(request, response, paramRequest);
         } else if (mode.equals("ADDNEW")) {
             doAddNew(request, response, paramRequest);
@@ -308,7 +305,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
         SWBResourceURL aUrl = paramRequest.getActionUrl().setAction("ADDNEW");
         String url = request.getParameter("url");
         PrintWriter out = response.getWriter();
-        StringBuffer sbf = new StringBuffer();
+        StringBuilder sbf = new StringBuilder();
         String lang = "es";
 
         response.setContentType("text/html");
@@ -407,7 +404,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
         SWBResourceURL aUrl = paramRequest.getActionUrl().setAction("EDIT");
         PrintWriter out = response.getWriter();
         String id = request.getParameter("id");
-        StringBuffer sbf = new StringBuffer();
+        StringBuilder sbf = new StringBuilder();
         String lang = "es";
 
         response.setContentType("text/html;");
@@ -521,25 +518,13 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
         if (user.getURI() == null)
             return;
 
-        String url = "";
-        Resourceable rsa = paramRequest.getResourceBase().getResourceable();
-        if (rsa != null && rsa instanceof WebPage) {
-                url = ((WebPage) rsa).getUrl();
-        }
-        
-        /*if (paramRequest.getCallMethod() == paramRequest.Call_STRATEGY) {
-            doShowGadget(request, response, paramRequest);
-        } else {
-            doShowAdmin(request, response, paramRequest);
-        }*/
-
         Iterator<BookmarkEntry> entries = listAllEntriesByUser(user);
         try {
-            if (entries != null && entries.hasNext())
+            if (entries != null && entries.hasNext()) {
                 request.setAttribute("entries", entries);
+            }
             request.setAttribute("paramRequest", paramRequest);
             request.setAttribute("l", Boolean.valueOf(showList));
-            //request.setAttribute("admurl", url);
             
             RequestDispatcher rd = request.getRequestDispatcher(path);
             rd.include(request, response);
@@ -576,7 +561,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
         SWBResourceURL rUrl = paramRequest.getRenderUrl();
         SWBResourceURL aUrl = paramRequest.getActionUrl();
         PrintWriter out = response.getWriter();
-        StringBuffer sbf = new StringBuffer();
+        StringBuilder sbf = new StringBuilder();
         int sType = getSortType();
 
         response.setContentType("text/html");
@@ -650,7 +635,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
 
         BookmarkGroup generalGp = getUserBookmarkGroupByName(paramRequest.getUser(), "general");
         //Set url mode to VIEW
-        rUrl.setMode(rUrl.Mode_VIEW);
+        rUrl.setMode(SWBResourceURL.Mode_VIEW);
         sbf.append("    </div>\n" +
                 "  </div>\n" +
                 "  <div class=\"swb-bkm-wrapper\">\n" +
@@ -677,7 +662,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
         PrintWriter out = response.getWriter();
         SWBResourceURL rUrl = paramRequest.getRenderUrl();
         User user = paramRequest.getUser();
-        StringBuffer sbf = new StringBuffer();
+        StringBuilder sbf = new StringBuilder();
         String lang = "es";
         
         response.setContentType("text/html");
@@ -747,7 +732,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
                 "    </script>\n");
 
         //Set url call method to Call_DIRECT to make an AJAX call
-        rUrl.setCallMethod(rUrl.Call_DIRECT).setMode("ADDNEW");
+        rUrl.setCallMethod(SWBResourceURL.Call_DIRECT).setMode("ADDNEW");
         rUrl.setParameter("url", paramRequest.getWebPage().getRealUrl());
 
         sbf.append("<div dojoType=\"dijit.Dialog\" class=\"soria\" style=\"display:none;\" id=\"swbDialog\" " +
@@ -778,7 +763,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
             if (generalGp != null) {
                 //Set url call method to Call_DIRECT to make an AJAX call
                 rUrl = paramRequest.getRenderUrl();
-                rUrl.setCallMethod(rUrl.Call_DIRECT).setMode("RLIST");
+                rUrl.setCallMethod(SWBResourceURL.Call_DIRECT).setMode("RLIST");
 
                 ////-------Inicia formulario con select
                 sbf.append("<p>\n" +
@@ -835,8 +820,8 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
 
         if (group != null)
             return group.listEntrys();
-        else
-            return null;
+        
+        return null;
     }
 
     /**
@@ -855,13 +840,9 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
      */
     public String renderEntriesByUserGroup(String groupId, int sortType, SWBParamRequest paramRequest) throws SWBResourceException {
         ArrayList<BookmarkEntry> sEntries = new ArrayList<BookmarkEntry>();
-        Format formatter = new SimpleDateFormat("dd MMM");
-        SWBResourceURL rUrl = paramRequest.getRenderUrl();
-        SWBResourceURL aUrl = paramRequest.getActionUrl();
         User user = paramRequest.getUser();
         BookmarkGroup group = getUserBookmarkGroupById(user, groupId);
-        StringBuffer sbf = new StringBuffer();
-        String lang = "es";
+        StringBuilder sbf = new StringBuilder();
 
         //If user is not logged, abort
         if (!user.isSigned()) {
@@ -870,11 +851,6 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
 
         if (group == null || group.getEntryCount() == 0) {
             return " ";
-        }
-
-        //Get user language
-        if (paramRequest.getUser() != null) {
-            lang = paramRequest.getUser().getLanguage();
         }
 
         //Add entries to a temp Array
@@ -926,7 +902,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
         SWBResourceURL aUrl = paramRequest.getActionUrl();
         User user = paramRequest.getUser();
         BookmarkGroup group = getUserBookmarkGroupById(user, groupId);
-        StringBuffer sbf = new StringBuffer();
+        StringBuilder sbf = new StringBuilder();
         String lang = "es";
 
         //If user is not logged, abort
@@ -977,7 +953,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
                         formatter.format(entry.getCreated()) + "&nbsp;");
 
                 //Set url call method to Call_DIRECT to make an AJAX call
-                rUrl.setCallMethod(rUrl.Call_DIRECT).setMode("EDIT");
+                rUrl.setCallMethod(SWBResourceURL.Call_DIRECT).setMode("EDIT");
                 rUrl.setParameter("id", eid);
 
                 //Add EDIT link
@@ -1150,7 +1126,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
     public String renderMenu(SWBParamRequest paramRequest) throws SWBResourceException {
         SWBResourceURL rUrl = paramRequest.getRenderUrl();
         SWBResourceURL aUrl = paramRequest.getActionUrl();
-        StringBuffer sbf = new StringBuffer();
+        StringBuilder sbf = new StringBuilder();
         String lang = "es";
         User user = paramRequest.getUser();
 
@@ -1165,7 +1141,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
         }
 
         //Set url call method to Call_DIRECT to make an AJAX call
-        rUrl.setCallMethod(rUrl.Call_DIRECT).setMode("RCONTENT");
+        rUrl.setCallMethod(SWBResourceURL.Call_DIRECT).setMode("RCONTENT");
 
         sbf.append("<div class=\"swb-bkm-navbarmain\">\n" +
                 "  <div class=\"swb-bkm-navigation\">\n");
@@ -1215,7 +1191,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
 
         //Set url call method to Call_DIRECT to make an AJAX call
         rUrl = paramRequest.getRenderUrl();
-        rUrl.setCallMethod(rUrl.Call_DIRECT).setMode("ADDNEW");
+        rUrl.setCallMethod(SWBResourceURL.Call_DIRECT).setMode("ADDNEW");
 
         //Add 'NEW BOOKMARK' link
         sbf.append("    <a href=\"#\" onclick=\"showDialog('" + rUrl + "', '" +
@@ -1269,7 +1245,7 @@ public class SWBBookmarks extends org.semanticwb.portal.resources.sem.base.SWBBo
      */
     public String renderEntriesByUserGroup(String gid, SWBParamRequest paramRequest) throws IOException, SWBResourceException {
         BookmarkGroup group = getUserBookmarkGroupById(paramRequest.getUser(), gid);
-        StringBuffer sbf = new StringBuffer();
+        StringBuilder sbf = new StringBuilder();
         int sType = getSortType();
 
         if (group == null) {

@@ -109,7 +109,7 @@ public class SWBUsrRep extends GenericResource {
             }
             SWBResourceURL url = paramRequest.getRenderUrl();
             SWBResourceURL urlAction = paramRequest.getActionUrl();
-            StringBuffer strbf = new StringBuffer();
+            StringBuilder strbf = new StringBuilder();
             File file = new File(ZIPDIRECTORY);
             if(file.exists() && file.isDirectory())
             {
@@ -363,7 +363,7 @@ public class SWBUsrRep extends GenericResource {
                 ArrayList<File> aFiles = new ArrayList<>();
                 File file = new File(ZIPDIRECTORY + "siteInfo.xml");
                 FileOutputStream out = new FileOutputStream(file);
-                StringBuffer strbr = new StringBuffer();
+                StringBuilder strbr = new StringBuilder();
                 try {
                     strbr.append("<model>\n");
                     strbr.append("<id>" + site.getId() + "</id>\n");

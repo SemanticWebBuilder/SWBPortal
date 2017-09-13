@@ -85,7 +85,7 @@ public class PythonEditor extends GenericAdmResource {
             SWBParamRequest paramReq)
             throws IOException, SWBResourceException {
 
-        StringBuffer ret = new StringBuffer(1000);
+    		StringBuilder ret = new StringBuilder(1000);
         String language = paramReq.getUser().getLanguage();
         Resource base = paramReq.getResourceBase();
         String code = "";

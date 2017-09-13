@@ -22,45 +22,34 @@
  */
 package org.semanticwb.portal.resources;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBUtils;
-import org.semanticwb.model.FormValidateException;
 import org.semanticwb.model.GenericObject;
 import org.semanticwb.model.Resource;
 import org.semanticwb.model.Role;
 import org.semanticwb.model.User;
 import org.semanticwb.model.UserGroup;
-import org.semanticwb.model.VersionInfo;
-import org.semanticwb.model.Versionable;
 import org.semanticwb.model.WebPage;
 import org.semanticwb.model.WebSite;
-//import org.semanticwb.platform.SemanticObject;
-import org.semanticwb.platform.SemanticObject;
 import org.semanticwb.platform.SemanticOntology;
-//import org.semanticwb.portal.SWBFormMgr;
 import org.semanticwb.portal.api.GenericResource;
 import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.SWBResource;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
-// TODO: Auto-generated Javadoc
-//import org.semanticwb.portal.resources.sem.HTMLContent;
 
 /**
  * The Class WebPageOnLineCreate.
  * 
- * @author juan.fernandez
+ * @author Juan Fernández {juan.fernandez}
  */
 public class WebPageOnLineCreate extends GenericResource {
 
@@ -74,10 +63,7 @@ public class WebPageOnLineCreate extends GenericResource {
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
 
         PrintWriter out = response.getWriter();
-
         WebPage wpParent = paramRequest.getWebPage();
-
-
 
         if (userCanEdit(paramRequest)) {
             SWBResourceURL urladd = paramRequest.getActionUrl();
@@ -171,37 +157,6 @@ public class WebPageOnLineCreate extends GenericResource {
                     res.setTitle("Contenido autogenerado");
                     res.setActive(Boolean.FALSE);
                     wp.addResource(res);
-
-//                    SemanticObject so =  res.getResourceData();
-//                    GenericObject go =  so.getGenericInstance();
-//
-//
-//                    VersionInfo vi = wsite.createVersionInfo();
-//                    vi.setVersionFile("index.html");
-//                    vi.setVersionNumber(1);
-//                    vi.setVersionComment("Versión inicial");
-//
-//                    SWBResource swres = (SWBResource) go;
-//
-//                    Versionable vswres = (Versionable) go;
-//                    vswres.setActualVersion(vi);
-//                    vswres.setLastVersion(vi);
-//
-//                    String rutaFS_target_path = SWBPlatform.getWorkPath() + swres.getResourceBase().getWorkPath() + "/1/";
-//                    File f = new File(rutaFS_target_path);
-//                    if (!f.exists()) {
-//                        f.mkdirs();
-//                    }
-//
-//                    File ftmpl = new File(SWBPlatform.getWorkPath() + swres.getResourceBase().getWorkPath() + "/1/index.html");
-//                    Writer output = new BufferedWriter(new FileWriter(ftmpl));
-//                    try {
-//                        output.write("Contenido HTML...");
-//                    } finally {
-//                        output.close();
-//                    }
-
-
                 }
 
             } catch (Exception e) {
@@ -244,7 +199,7 @@ public class WebPageOnLineCreate extends GenericResource {
         out.println("<table width=\"100%\" border=\"0\" >");
         String strTemp = "<option value=\"-1\">" + "No se encontaron roles" + "</option>";
         Iterator<Role> iRoles = wsite.getUserRepository().listRoles(); //DBRole.getInstance().getRoles(topicmap.getDbdata().getRepository());
-        StringBuffer strRules = new StringBuffer("");
+        StringBuilder strRules = new StringBuilder("");
         String selected = "";
         if (str_role.equals("0")) {
             selected = "selected";

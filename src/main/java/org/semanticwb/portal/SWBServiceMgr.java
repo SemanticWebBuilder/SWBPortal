@@ -22,12 +22,9 @@
  */
 package org.semanticwb.portal;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Statement;
 import java.util.Date;
 import java.util.StringTokenizer;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -56,11 +53,15 @@ import org.semanticwb.repository.Unstructured;
 import org.semanticwb.repository.Workspace;
 import org.semanticwb.triplestore.SWBTSUtil;
 
-// TODO: Auto-generated Javadoc
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Statement;
+
 /**
  * The Class SWBServiceMgr.
  * 
- * @author javier.solis
+ * @author Javier Solís {javier.solis}
  */
 public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBObserver {
 
@@ -95,16 +96,10 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
         User usr = SWBContext.getSessionUser();
         if(obj!=null && obj.getModel().isDataModel())return;
         
-        //log.trace("obj:" + obj + " prop:" + prop + " action:" + action + " " + usr);
         try
         {
-            //System.out.println("obj:" + obj + " prop:" + prop + " action:" + action + " " + usr);
-
             if(obj.getModel().isTraceable())SWBPortal.getDBAdmLog().saveAdmLog(usr, obj, prop, action);
             
-            //boolean iswebsite=false;
-            //if(obj!=null && obj.getModel().getModelObject().instanceOf(WebSite.sclass))iswebsite=true;            
-
             SemanticClass cls = obj.getSemanticClass();
             if(cls!=null && cls.isSWB())
             {
@@ -180,7 +175,6 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
                     }
                 } else if (prop instanceof SemanticProperty)
                 {
-                    //System.out.println("obj2:"+obj+" "+Resource.sclass+"="+Resource.sclass+" prop:"+prop+"="+Resource.swb_resourceSubType);
                     if(prop.equals(ResourceType.swb_resourceClassName) && obj.instanceOf(ResourceType.sclass))
                     {
                         try
@@ -207,7 +201,6 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
                         if(res.getResourceType()==null)
                         {
                             ResourceSubType sub=res.getResourceSubType();
-                            //System.out.println("sub:"+sub);
                             if(sub!=null)
                             {
                                 res.setResourceType(sub.getType());
@@ -222,25 +215,7 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
             }
         }finally
         {
-            //no se envian a otras maquinas
-//                if(!SWBPortal.isStandAlone())
-//                {
-//                    StringBuffer msg=new StringBuffer();
-//                    msg.append("tri");
-//                    msg.append("|");
-//                    msg.append(instanceid);
-//                    msg.append("|");
-//                    msg.append(obj.getURI());
-//                    msg.append("|");
-//                    if(prop!=null)msg.append(prop);
-//                    else msg.append("_");
-//                    msg.append("|");
-//                    if(lang!=null)msg.append(lang);
-//                    else msg.append("_");
-//                    msg.append("|");
-//                    msg.append(action);
-//                    SWBPortal.getMessageCenter().sendMessage(msg.toString());
-//                }
+
         }
     }
     
@@ -258,7 +233,6 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
             //TODO:Una rapida aproximacion para no estar actualizando al modificar cada propiedad
             if(obj.hashCode()!=lastobj || Thread.currentThread().getId()!=lastthread || System.currentTimeMillis()>(lasttime+100))
             {
-                //System.out.println("updateObject:"+obj+" user:"+usr);
                 lastobj=obj.hashCode();
                 lastthread=Thread.currentThread().getId();
                 lasttime=System.currentTimeMillis();
@@ -286,7 +260,6 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
      */
     public void updateTraceable(SemanticObject obj, User usr)
     {
-        //System.out.println("obj:" + obj + " " + usr.getName()+" "+usr.isRegistered());
         if (obj.instanceOf(Traceable.swb_Traceable))
         {
             Date date = new Date();
@@ -316,7 +289,6 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
         if(!SWBPortal.isStandAlone())
         {
             instanceid=SWBPortal.getMessageCenter().getAddress()+"."+System.currentTimeMillis();
-            //SWBPortal.getMessageCenter().registerObserver("tri", this);
             SWBPortal.getMessageCenter().registerObserver("rdf", this);
         }
     }
@@ -334,46 +306,33 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
         String key=st.nextToken();
         String date=st.nextToken();
         String sid=st.nextToken();        
-        //
+
+        if(key.equals("rdf"))
         {
-//            if(key.equals("tri"))
-//            {
-//                //System.out.println(obj);
-//                String uri=st.nextToken();
-//                String puri=st.nextToken();
-//                if(puri.equals("_"))puri=null;
-//                String lang=st.nextToken();
-//                if(lang.equals("_"))lang=null;
-//                String action=st.nextToken();
-//                SWBPlatform.getSemanticMgr().processExternalChange(uri, puri, lang, action);
-//            }else 
-            if(key.equals("rdf"))
+            try
             {
-                try
+                String uri=st.nextToken();
+                String puri=st.nextToken();
+                if(puri.equals("_"))puri=null;
+                String node=st.nextToken();
+                if(node.equals("_"))
                 {
-                    String uri=st.nextToken();
-                    String puri=st.nextToken();
-                    if(puri.equals("_"))puri=null;
-                    String node=st.nextToken();
-                    if(node.equals("_"))
-                    {
-                        node=null;
-                    }else
-                    {
-                        node=node.replace("{!}", "|");
-                    }
-                    String action=st.nextToken();
-                    Node n=SWBTSUtil.string2Node(node,null);
-                    if(!sid.equals(instanceid))
-                    {
-                        SWBPlatform.getSemanticMgr().processExternalChange(uri, puri, n, action);
-                    }
-                }catch(Exception e)
+                    node=null;
+                }else
                 {
-                    log.error("Error processing:"+obj,e);
+                    node=node.replace("{!}", "|");
                 }
+                String action=st.nextToken();
+                Node n=SWBTSUtil.string2Node(node,null);
+                if(!sid.equals(instanceid))
+                {
+                    SWBPlatform.getSemanticMgr().processExternalChange(uri, puri, n, action);
+                }
+            }catch(Exception e)
+            {
+                log.error("Error processing:"+obj,e);
             }
-        }               
+        }
     }
 
     @Override
@@ -381,7 +340,7 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
     {
         if(!SWBPortal.isStandAlone() && !remote)
         {
-            StringBuffer msg=new StringBuffer();
+            StringBuilder msg=new StringBuilder();
             msg.append("rdf");
             msg.append("|");
             msg.append(instanceid);
@@ -423,9 +382,6 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
      */
     public void processCacheService(SemanticObject obj, Statement stmt, String action)            
     {
-        //log.trace("processCacheService: obj:" + obj + " stmt:" + stmt +" "+action);  
-        //System.out.println("processCacheService:"+obj+" stmt:" + stmt + " action:" + action);  
-        
         if(obj!=null)
         {            
             Property prop=null;
@@ -465,7 +421,6 @@ public class SWBServiceMgr implements SemanticObserver, SemanticTSObserver, SWBO
                     if(prop.equals(Resource.swb_updated.getRDFProperty()) && obj.instanceOf(Resource.sclass))
                     {
                         SWBResource res=SWBPortal.getResourceMgr().getResource(obj.getURI());
-                        //System.out.println("Instanceof SWBResource:"+res);
                         try
                         {
                             if(res!=null)

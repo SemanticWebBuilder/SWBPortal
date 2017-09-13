@@ -27,8 +27,10 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -47,7 +49,6 @@ import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Wiki.
  * 
@@ -95,16 +96,15 @@ public class Wiki extends GenericResource {
     public void doEdit(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
         String WBWikiTextbox = request.getParameter("WBWikiTextbox");
         String summary = request.getParameter("summary");
-        String lang = paramsRequest.getUser().getLanguage();
 
         String preview = "";
         if (request.getParameter("save") != null) {
             String header = backUpContent(paramsRequest, summary);
             writeContent(paramsRequest, header + WBWikiTextbox);
-            response.sendRedirect(paramsRequest.getRenderUrl().setMode(paramsRequest.Mode_VIEW).toString());
+            response.sendRedirect(paramsRequest.getRenderUrl().setMode(SWBParamRequest.Mode_VIEW).toString());
             return;
         } else if (request.getParameter("cancel") != null) {
-            response.sendRedirect(paramsRequest.getRenderUrl().setMode(paramsRequest.Mode_VIEW).toString());
+            response.sendRedirect(paramsRequest.getRenderUrl().setMode(SWBParamRequest.Mode_VIEW).toString());
             return;
         } else if (request.getParameter("preview") != null) {
             preview = parser.parse(WBWikiTextbox, request, paramsRequest);
@@ -200,7 +200,7 @@ public class Wiki extends GenericResource {
      * @return the string
      */
     public String backUpContent(SWBParamRequest paramsRequest, String summary) {
-        StringBuffer header = new StringBuffer();
+        StringBuilder header = new StringBuilder();
         String topic = paramsRequest.getWebPage().getId();
         User user = paramsRequest.getUser();
         try {
@@ -259,7 +259,7 @@ public class Wiki extends GenericResource {
         for (int i = 0; i < arr.length; i++) {
             ret[i] = arr[i];
         }
-        ret[arr.length] = paramRequest.Mode_EDIT;
+        ret[arr.length] = SWBParamRequest.Mode_EDIT;
         return ret;
     }
 
@@ -302,8 +302,8 @@ public class Wiki extends GenericResource {
         out.println("</legend>");
         out.println("<table width=\"100%\" border=\"0\" >");
         String strTemp = "<option value=\"-1\">" + "No se encontaron roles" + "</option>";
-        Iterator<Role> iRoles = wsite.getUserRepository().listRoles(); //DBRole.getInstance().getRoles(topicmap.getDbdata().getRepository());
-        StringBuffer strRules = new StringBuffer("");
+        Iterator<Role> iRoles = wsite.getUserRepository().listRoles();
+        StringBuilder strRules = new StringBuilder("");
         String selected = "";
         if (str_role.equals("0")) {
             selected = "selected";
@@ -350,16 +350,6 @@ public class Wiki extends GenericResource {
      */
     @Override
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
-//        if(request.getParameter("save")!=null)
-//        {
-//            String content=request.getParameter("WBWikiTextbox");
-//            writeContent(response,content);
-//            response.setMode(response.Mode_VIEW);
-//        }else if(request.getParameter("cancel")!=null)
-//        {
-//            response.setMode(response.Mode_VIEW);
-//        }
-//        ResourceMgr.getInstance().getResourceCacheMgr().removeResource(response.getResourceBase().getRecResource());
         String action = response.getAction();
         if (action == null) {
             action = "";
@@ -431,7 +421,7 @@ public class Wiki extends GenericResource {
         else if(!str_role.equals("0")&&user==null) access=false;
         else if(str_role.equals("0")&&user!=null) access=true;
 
-    return   access ;
-}
+	    return   access ;
+    }
 
 }

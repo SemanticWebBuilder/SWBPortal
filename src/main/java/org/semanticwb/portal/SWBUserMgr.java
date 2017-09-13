@@ -22,16 +22,16 @@
  */
 package org.semanticwb.portal;
 
-import org.semanticwb.security.SWBNeedToChangePassword;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
 import java.security.Principal;
 import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginContext;
@@ -40,6 +40,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -52,17 +53,18 @@ import org.semanticwb.model.SWBSessionUser;
 import org.semanticwb.model.User;
 import org.semanticwb.model.UserRepository;
 import org.semanticwb.model.WebSite;
+import org.semanticwb.platform.SemanticMgr;
 import org.semanticwb.platform.SemanticProperty;
+import org.semanticwb.security.SWBNeedToChangePassword;
 import org.semanticwb.servlet.internal.Login;
 import org.semanticwb.util.GetIterator;
 import org.semanticwb.util.SWBIteratorCache;
 
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SWBUserMgr.
  * 
- * @author Jei
+ * @author Javier Solís {Jei}
  */
 public class SWBUserMgr 
 {
@@ -72,7 +74,6 @@ public class SWBUserMgr
     
     /** The sessionobjects. */
     private ConcurrentHashMap<String, SWBSessionObject> sessionobjects;
-    //private HashMap<String, HttpSession> sessions;
     
     /** The Constant SUBJECTATT. */
     public static final String SUBJECTATT = "_swbsubject";
@@ -91,7 +92,6 @@ public class SWBUserMgr
     public void init() {
         log.event("Initializing SWBUserMgr...");
         sessionobjects=new ConcurrentHashMap<String, SWBSessionObject>();
-        //sessions=new HashMap<String, HttpSession>();
     }
     
     /**
@@ -114,7 +114,6 @@ public class SWBUserMgr
             if(SWBPlatform.getEnv("swb/usersTrace","false").equals("true"))
             {
                 sessionobjects.put(ses.getId(), sessobj);
-                //sessions.put(ses.getId(), ses);
             }
         }
         if(sessobj.isHaveToChangePassword())
@@ -162,7 +161,6 @@ public class SWBUserMgr
     public void unboundSessionObject(String sessID)
     {
         sessionobjects.remove(sessID);
-        //sessions.remove(sessID);
     }
     
     /**
@@ -178,7 +176,7 @@ public class SWBUserMgr
         UserRepository rep=site.getUserRepository();
         if(rep==null)rep=SWBContext.getDefaultRepository();
         Subject sub=getSubject(request, site.getId());
-        Iterator it=sub.getPrincipals().iterator();
+        Iterator<Principal> it=sub.getPrincipals().iterator();
         while(it.hasNext())
         {
             User usr=(User)it.next();
@@ -207,19 +205,16 @@ public class SWBUserMgr
                             return fsite.listLanguages();
                         }
                     } , 1000*120);                         
-                    //Iterator<Language> i=SWBUtils.Collections.copyIterator(site.listLanguages()).iterator();
                     if(i.hasNext())l=i.next();
                 }
                 if(l!=null)language=l.getId();
             }
 
-            //language=DBUser.getInstance(repository).getProperty("defaultLanguage",language);        
-            
             ret=new SWBSessionUser(rep); 
             if (null==ret.getId() && rep.isUserRepRememberUser()) 
             {
                 checkCookie(request, (SWBSessionUser)ret, rep);
-            }//System.out.println("retID:"+ret.getId());
+            }
             try
             {
                 sub.getPrincipals().add(ret);
@@ -232,7 +227,6 @@ public class SWBUserMgr
             Device dev=getDevice(request, site);
             if(dev!=null)
             {
-                //System.out.println("User:"+ret+" device:"+dev);
                 ret.setDevice(dev);
             }
             ret.setIp(request.getRemoteAddr());
@@ -259,7 +253,6 @@ public class SWBUserMgr
                             return fsite.listCountries();
                         }
                     } , 1000*120);                    
-                    //Iterator<Country> i=SWBUtils.Collections.copyIterator(site.listCountries()).iterator();
                     if(i.hasNext())c=i.next();
                 }
             }
@@ -267,7 +260,7 @@ public class SWBUserMgr
 
             //User session log
             {
-                StringBuffer logbuf=new StringBuffer();
+                StringBuilder logbuf=new StringBuilder();
                 logbuf.append("ses|");
                 logbuf.append(request.getRemoteAddr());
                 logbuf.append("|");
@@ -300,7 +293,6 @@ public class SWBUserMgr
         //Comienza detección de Dispositivo
         String useragent = request.getHeader("User-Agent");
         log.debug("User-Agent:"+useragent);
-        //System.out.println("User-Agent:"+useragent);
         if(useragent!=null)
         {            
             final WebSite fsite=site;
@@ -319,7 +311,6 @@ public class SWBUserMgr
                 Device dev = listaDev.next();
                 String auxuseragent=useragent;
                 String useragentmatch=dev.getUserAgent();
-                //System.out.println("dev: "+dev+" "+useragentmatch);
                 if(useragentmatch!=null)
                 {
                     int cont = 0;
@@ -327,9 +318,7 @@ public class SWBUserMgr
                     while (st.hasMoreElements())
                     {
                         String token = st.nextToken();
-                        //System.out.println("Token: "+token);
                         int pos = auxuseragent.indexOf(token);
-                        //System.out.println("Pos: "+pos);
                         if (pos >= 0)
                         {
                             cont++;
@@ -340,7 +329,6 @@ public class SWBUserMgr
                             break;
                         }
                     }
-                    //System.out.println(dev+" cont:"+cont);
                     if (cont > coincide)
                     {
                         coincide = cont;
@@ -379,10 +367,9 @@ public class SWBUserMgr
         CallbackHandler callback = (CallbackHandler) constructor[method].newInstance(request, response, ur.getAuthMethod(), website.getId());
         Subject subject = SWBPortal.getUserMgr().getSubject(request, website.getId());
         log.trace("Sending calback:"+callback);
-       // request.getSession(true).invalidate();
         LoginContext lc = new LoginContext(ur.getLoginContext(), subject, callback);
         lc.login();
-        Iterator it = subject.getPrincipals().iterator();
+        Iterator<Principal> it = subject.getPrincipals().iterator();
         if (it.hasNext())
         {
             User user = (User) it.next();
@@ -402,7 +389,7 @@ public class SWBUserMgr
     public Set<User> getSessionUsers(String website)
     {
         String ur = SWBContext.getWebSite(website).getUserRepository().getId();
-        HashSet<User> set=new HashSet();
+        HashSet<User> set=new HashSet<>();
         Iterator<SWBSessionObject> it=listSessionObjects();
         while (it.hasNext())
         {
@@ -428,11 +415,9 @@ public class SWBUserMgr
                 if (id.equals(current.getName())) {
                     try {
                         String value = SWBUtils.TEXT.decodeBase64(current.getValue());
-                        SemanticProperty sp = SWBPlatform.getSemanticMgr().getModel(SWBPlatform.getSemanticMgr().SWBAdmin).getSemanticProperty(SWBPlatform.getSemanticMgr().SWBAdminURI + "/PrivateKey");
-                        //System.out.println("sp:"+sp);
-                        String pass = SWBPlatform.getSemanticMgr().getModel(SWBPlatform.getSemanticMgr().SWBAdmin).getModelObject().getProperty(sp);
+                        SemanticProperty sp = SWBPlatform.getSemanticMgr().getModel(SemanticMgr.SWBAdmin).getSemanticProperty(SemanticMgr.SWBAdminURI + "/PrivateKey");
+                        String pass = SWBPlatform.getSemanticMgr().getModel(SemanticMgr.SWBAdmin).getModelObject().getProperty(sp);
                         byte[] buid = SWBUtils.CryptoWrapper.PBEAES128Decipher(pass, value.getBytes());
-                        //System.out.println("uid: "+ new String(buid));
                         String sbuid = new String(buid);
                         String uid = sbuid.substring(sbuid.lastIndexOf(':') + 1);
                         User user = urep.getUser(uid);

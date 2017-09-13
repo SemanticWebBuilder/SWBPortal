@@ -23,16 +23,17 @@
 package org.semanticwb.portal.resources;
 
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.semanticwb.portal.api.GenericAdmResource;
-import org.semanticwb.Logger;
 import java.io.IOException;
 import java.io.PrintWriter;
-import org.semanticwb.SWBPlatform;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.semanticwb.Logger;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Resource;
+import org.semanticwb.portal.api.GenericAdmResource;
 import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
@@ -67,7 +68,7 @@ public class Window extends GenericAdmResource {
      * objeto encargado de crear mensajes en los archivos log de SemanticWebBuilder (SWB).
      * <p>object that creates messages in SWB's log file.</p>
      */
-    private static Logger log = SWBUtils.getLogger(Window.class);
+    private static final Logger log = SWBUtils.getLogger(Window.class);
     
     /**
      * Crea una nueva instancia de esta clase.
@@ -168,8 +169,7 @@ public class Window extends GenericAdmResource {
             url.setWindowState(SWBResourceURL.WinState_MAXIMIZED);
             url.setParameter("ven_act", "ven_step2");
             url.setTopic(reqParams.getWebPage());
-            url.setCallMethod(reqParams.Call_DIRECT);
-            //response.sendRedirect(url.toString());
+            url.setCallMethod(SWBParamRequest.Call_DIRECT);
             String ret = null;
             ret = "<script type=\"text/javascript\">window.open('" 
                     + url.toString() + "','_newven','" + props + "');</script>";
@@ -202,7 +202,7 @@ public class Window extends GenericAdmResource {
                            SWBParamRequest reqParams)
                            throws SWBResourceException, java.io.IOException {
         
-        StringBuffer ret = new StringBuffer("");
+        StringBuilder ret = new StringBuilder("");
         Resource base = getResourceBase();
         
         ret.append("<html> \n");

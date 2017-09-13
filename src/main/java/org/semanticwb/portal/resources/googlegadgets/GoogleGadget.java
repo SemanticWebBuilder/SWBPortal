@@ -330,7 +330,7 @@ public class GoogleGadget extends GenericResource
      * @param endText the end text
      * @param replace the replace
      */
-    public static void replace(StringBuffer html, String startText, String endText, String replace)
+    public static void replace(StringBuilder html, String startText, String endText, String replace)
     {
         int pos = html.indexOf(startText);
         while (pos != -1)
@@ -355,7 +355,7 @@ public class GoogleGadget extends GenericResource
      * @param text the text
      * @param replace the replace
      */
-    public static void replace(StringBuffer html, String text, String replace)
+    public static void replace(StringBuilder html, String text, String replace)
     {
         int pos = html.indexOf(text);
         while (pos != -1)
