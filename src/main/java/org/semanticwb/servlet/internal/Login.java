@@ -88,17 +88,17 @@ public class Login implements InternalServlet
     private static SWBSoftkHashMap<String, FailedAttempt> blockedList = new SWBSoftkHashMap<String, FailedAttempt>();
 
     private static String codigoRSA1 = "\n"
-            + "<script language=\"JavaScript\" type=\"text/javascript\" src=\"/swbadmin/js/crypto/jsbn.js\"></script>\n"
-            + "<script language=\"JavaScript\" type=\"text/javascript\" src=\"/swbadmin/js/crypto/prng4.js\"></script>\n"
-            + "<script language=\"JavaScript\" type=\"text/javascript\" src=\"/swbadmin/js/crypto/rng.js\"></script>\n"
-            + "<script language=\"JavaScript\" type=\"text/javascript\" src=\"/swbadmin/js/crypto/rsa.js\"></script>\n"
-            + "<script> \n"
-            + "var rsa = new RSAKey();\n";
-    private static String codigoRSA2 = "function encrypt(){\n"
-            + "var res = rsa.encrypt(document.login.wb_password.value);\n"
-            + "if (res){ document.login.wb_password.value=res; return true;}\n"
-            + "else {return false;}\n}\n"
-            + "document.login.onsubmit=encrypt;\n"
+            + "<script src=\"__CONTEXTPATH__/swbadmin/js/crypto/jsbn.js\"></script>\n"
+            + "<script src=\"__CONTEXTPATH__/swbadmin/js/crypto/prng4.js\"></script>\n"
+            + "<script src=\"__CONTEXTPATH__/swbadmin/js/crypto/rng.js\"></script>\n"
+            + "<script src=\"__CONTEXTPATH__/swbadmin/js/crypto/rsa.js\"></script>\n"
+            + "<script>"
+            + "var rsa = new RSAKey();";
+    private static String codigoRSA2 = "function encrypt(){"
+            + "var res = rsa.encrypt(document.login.wb_password.value);"
+            + "if (res){ document.login.wb_password.value=res; return true;}"
+            + "else {return false;}}"
+            + "document.login.onsubmit=encrypt;"
             + "</script>";
     
 
@@ -467,7 +467,7 @@ public class Login implements InternalServlet
             login = login.replaceFirst("<SWBVERSION>", SWBPlatform.getVersion());
             if (SWBPlatform.getSecValues().isEncrypt()){
                 java.security.KeyPair key = SWBPortal.getUserMgr().getSessionKey(request);
-                String codigoRSA = codigoRSA1 + "rsa.setPublic(\""+ ((java.security.interfaces.RSAPublicKey)key.getPublic()).getModulus().toString(16)+"\", \""
+                String codigoRSA = codigoRSA1.replaceAll("__CONTEXTPATH__", SWBPortal.getContextPath()) + "rsa.setPublic(\""+ ((java.security.interfaces.RSAPublicKey)key.getPublic()).getModulus().toString(16)+"\", \""
             +((java.security.interfaces.RSAPublicKey)key.getPublic()).getPublicExponent().toString(16)+"\");\n"
                         +codigoRSA2;
                 login = login.replaceFirst("<SWBSECURITY>", codigoRSA);
