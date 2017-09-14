@@ -106,7 +106,7 @@ public class Distributor implements InternalServlet
     
     private String getCacheID(HttpServletRequest request, DistributorParams dparams)
     {
-        StringBuffer ret=new StringBuffer();
+        StringBuilder ret=new StringBuilder();
         WebPage page=dparams.getWebPage();
         WebSite site=page.getWebSite();
         if(site.getId().equals(SWBContext.WEBSITE_ADMIN))return null;

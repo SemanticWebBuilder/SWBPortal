@@ -164,7 +164,7 @@ public class XformsMgr extends WBXformsContainer
         String xml=SWBUtils.XML.domToXml(dom);
         
         HtmlTag tag = new HtmlTag();
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         try{
             HtmlStreamTokenizer tok = new HtmlStreamTokenizer(new ByteArrayInputStream(xml.getBytes()));
             while (tok.nextToken() != HtmlStreamTokenizer.TT_EOF) {

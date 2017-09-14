@@ -848,7 +848,7 @@ public class DistributorParams
     public String getNotAccResourceURI(String resid)
     {
         //new Exception().printStackTrace();
-        StringBuffer ret=new StringBuffer();
+        StringBuilder ret=new StringBuilder();
         Iterator it=getResourceIDs();
         while(it.hasNext())
         {
@@ -858,7 +858,7 @@ public class DistributorParams
             {
                 HashMap params=getResourceURI(id);
                 
-                StringBuffer aux=new StringBuffer();
+                StringBuilder aux=new StringBuilder();
                 
                 Iterator it2=params.keySet().iterator();
                 while(it2.hasNext())
@@ -975,7 +975,7 @@ public class DistributorParams
     {
         if(map!=null)
         {
-            StringBuffer ret=new StringBuffer();
+            StringBuilder ret=new StringBuilder();
             Iterator it=map.keySet().iterator();
             while(it.hasNext())
             {
@@ -1024,7 +1024,7 @@ public class DistributorParams
         {
             if(qs!=null)
             {
-                StringBuffer ret=new StringBuffer();
+                StringBuilder ret=new StringBuilder();
                 StringTokenizer st=new StringTokenizer(qs,"&");
                 while(st.hasMoreTokens())
                 {

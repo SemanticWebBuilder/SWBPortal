@@ -360,7 +360,7 @@ public class FBLogin implements InternalServlet
 public static void sendLoginLog(HttpServletRequest request, User usr) {
         //User session log
         {
-            StringBuffer logbuf = new StringBuffer();
+            StringBuilder logbuf = new StringBuilder();
             logbuf.append("lgn|");
             logbuf.append(request.getRemoteAddr());
             logbuf.append("|");
