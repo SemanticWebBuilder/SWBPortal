@@ -1552,7 +1552,13 @@ public class Promo extends GenericResource {
         htm.append("    <legend>Plantilla</legend>\n");
         htm.append("    <ul class=\"swbform-ul\">\n");
         htm.append("      <li class=\"swbform-li\">\n");
-        htm.append("        <label for=\"deftmp\" class=\"swbform-label\">Usar plantilla por defecto: <a href=\"#\">PromoRightAligned.xsl</a></label>\n");
+        
+        htm.append("        <label for=\"deftmp\" class=\"swbform-label\">Usar plantilla por defecto: <a href=\"");
+        htm.append(SWBPlatform.getContextPath());
+        htm.append("/showfile?file=/swbadmin/xsl/Promo/PromoRightAligned.xsl&pathType=def&resUri=");
+        htm.append(this.getResourceBase().getSemanticObject().getEncodedURI());
+        htm.append("&attr=template");
+        htm.append("\">PromoRightAligned.xsl</a></label>\n");
         htm.append("        <input type=\"checkbox\" id=\"deftmp\" name=\"deftmp\" value=\"true\" ");
         if(Boolean.parseBoolean(base.getAttribute("deftmp")))
             htm.append(" checked=\"checked\" ");
@@ -1564,8 +1570,13 @@ public class Promo extends GenericResource {
         htm.append("      </li>\n");
         htm.append("      <li class=\"swbform-li\">\n");
         htm.append("        <label class=\"swbform-label\"></label>\n");
-        if(base.getAttribute("template")!=null)
-          htm.append("      <a href=\"#\">"+base.getAttribute("template")+"</a>\n");
+        if (base.getAttribute("template")!=null) {
+            htm.append("      <a href=\"");
+            htm.append(SWBPlatform.getContextPath());
+            htm.append(("/showfile?file=" + base.getWorkPath() + "/" + base.getAttribute("template") + "&pathType=res&resUri="));
+            htm.append(this.getResourceBase().getSemanticObject().getEncodedURI());
+            htm.append(("&attr=template\">"+base.getAttribute("template") + "</a>"));
+        }
         htm.append("      </li>\n");
         if(base.getAttribute("template")!=null) {
             htm.append("  <li class=\"swbform-li\">\n");

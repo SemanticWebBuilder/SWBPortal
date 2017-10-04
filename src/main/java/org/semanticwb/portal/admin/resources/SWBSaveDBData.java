@@ -64,7 +64,7 @@ import org.w3c.dom.NodeList;
 public class SWBSaveDBData extends GenericResource {
 
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(SWBImportWebSite.class);
+    private static Logger log = SWBUtils.getLogger(SWBSaveDBData.class);
     /** The PATH. */
     String PATH = SWBPortal.getWorkPath() + "/";
     /** The WEBPATH. */

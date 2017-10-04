@@ -18,38 +18,42 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
-import com.sun.org.apache.xpath.internal.XPathAPI;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
+import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.ResourceType;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.WebSite;
 import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
-import java.util.Arrays;
-import java.util.HashMap;
-import org.semanticwb.SWBPortal;
-import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBResourceModes;
 import org.semanticwb.portal.api.SWBResourceURL;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.sun.org.apache.xpath.internal.XPathAPI;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -106,9 +110,6 @@ public class WBAResTypes extends GenericResource {
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
 
-        //SemanticObject sem=SemanticObject.createSemanticObject("sref");
-        //SemanticModel model=sem.getModel();
-        //WebSite website = WebSite.getWebSite();
         String tm="sep";
         String resType="Strategy";
 
@@ -252,7 +253,7 @@ public class WBAResTypes extends GenericResource {
             out.println("<table> \n");
             out.println("<tr><td colspan=\"3\" align=\"center\"> \n");
 
-            url.setMode(url.Mode_VIEW);
+            url.setMode(SWBResourceModes.Mode_VIEW);
 
             if (actualPage > 1) {
                  int gotop = (actualPage - 1);
@@ -499,7 +500,7 @@ public class WBAResTypes extends GenericResource {
         sbRet.append("<td colspan=\"2\" align=right><HR size=\"1\" noshade> \n");
 
         SWBResourceURL url=paramsRequest.getRenderUrl();
-        url.setMode(url.Mode_VIEW);
+        url.setMode(SWBResourceModes.Mode_VIEW);
         sbRet.append("\n <input type=button  class=\"boton\" name=Back onClick=location='" + url.toString() + "'; value=" + paramsRequest.getLocaleString("btnBack") + ">");
         sbRet.append("&nbsp;");
         sbRet.append("\n <input type=button  class=\"boton\" name=Edit onClick='javascript:if(validateForm()) this.form.submit();' value=" + paramsRequest.getLocaleString("btnAdd") + ">");
@@ -579,7 +580,7 @@ public class WBAResTypes extends GenericResource {
             } catch (Exception e) {
                 response.setRenderParameter("confirm", "notadded");
             }
-        response.setMode(response.Mode_VIEW);
+        response.setMode(SWBResourceModes.Mode_VIEW);
         response.setRenderParameter("tm", website.getId());
         response.setRenderParameter("resType", request.getParameter("resType"));
     }

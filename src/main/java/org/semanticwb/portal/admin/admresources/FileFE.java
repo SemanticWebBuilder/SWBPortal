@@ -431,10 +431,14 @@ public class FileFE extends WBJsInputFEAbs
                         xml+=msgfile;
                     else
                         xml+="Archivo: ";
-                    if(filename.endsWith(".html") || filename.endsWith(".htm") || filename.endsWith(".xml") || filename.endsWith(".xsl") || filename.endsWith(".xslt") || filename.endsWith(".jsp"))
+                    if (filename.endsWith(".html") || filename.endsWith(".htm") || filename.endsWith(".xml") || filename.endsWith(".jsp")) {
                         xml+="<a title=\""+editMsg+"\" href=\""+ SWBPlatform.getContextPath()+"/editfile?file="+SWBPortal.getWorkPath()+ base.getWorkPath() + "/" + filename + "&pathType=res&resUri="+base.getEncodedURI()+"\">"+filename+"</a>";
-                    else
+                    //next if, added to download directly the resources' administration templates
+                    } else if (filename.endsWith(".xsl") || filename.endsWith(".xslt")) {
+                        xml += "<a title=\"" + editMsg + "\" href=\"" + SWBPlatform.getContextPath() + "/showfile?file=" + base.getWorkPath() + "/" + filename + "&pathType=res&resUri=" + base.getEncodedURI() + "\">" + filename + "</a>";
+                    } else {
                         xml+="<a title=\""+editMsg+"\" href=\""+ SWBPortal.getWebWorkPath() + base.getWorkPath() +"/"+ filename +"\">"+filename+"</A>";
+                    }
                     Element root = dom.createElement("wbmsg");
                     root.appendChild(dom.createTextNode(xml));
                     dom.appendChild(root);

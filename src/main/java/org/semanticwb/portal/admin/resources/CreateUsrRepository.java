@@ -46,7 +46,7 @@ import org.semanticwb.portal.api.SWBResourceURL;
 public class CreateUsrRepository extends GenericResource {
 
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(SWBImportWebSite.class);
+    private static Logger log = SWBUtils.getLogger(CreateUsrRepository.class);
 
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#doView(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)

@@ -22,23 +22,53 @@
  */
 package org.semanticwb.portal.admin.resources;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.semanticwb.*;
-import org.semanticwb.model.*;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.semanticwb.Logger;
+import org.semanticwb.SWBPlatform;
+import org.semanticwb.SWBUtils;
+import org.semanticwb.model.Country;
+import org.semanticwb.model.Device;
+import org.semanticwb.model.DisplayProperty;
+import org.semanticwb.model.Language;
+import org.semanticwb.model.Role;
+import org.semanticwb.model.Rule;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.SWBRuleMgr;
+import org.semanticwb.model.User;
+import org.semanticwb.model.UserGroup;
+import org.semanticwb.model.UserRepository;
+import org.semanticwb.model.WebPage;
+import org.semanticwb.model.WebSite;
 import org.semanticwb.platform.SemanticOntology;
 import org.semanticwb.platform.SemanticProperty;
-import org.semanticwb.portal.api.*;
-import org.w3c.dom.*;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceModes;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class SWBARule.
+ * Admin resource to manage and edit SWBRules.
  * 
  * @author juan.fernandez
+ * @author Hasdai Pacheco
  */
 public class SWBARule extends GenericResource {
 
@@ -64,62 +94,12 @@ public class SWBARule extends GenericResource {
     String xmlAttr = null;
 
     /**
-     * Creates a new instance of Rules.
+     * Creates a new instance of SWBARule resource.
      */
-    public SWBARule() {
-    }
+    public SWBARule() {}
 
     /**
-     * User view, creates the rules.
-     * 
-     * @param request input parameters
-     * @param response an answer to the request
-     * @param paramRequest a list of objects (WebPage, user, action, ...)
-     * @return the applet
-     * @throws SWBResourceException an SWB Resource Exception
-     * @throws IOException an IO Exception
-     */
-
-    private String getApplet(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        StringBuffer ret = new StringBuffer();
-        String suri = request.getParameter("suri");
-        log.debug("getApplet: " + suri);
-        SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
-        Rule rRule = (Rule) ont.getGenericObject(suri);
-        WebPage tp = paramRequest.getWebPage();
-        String tmparam = request.getParameter("tm");
-        if (tmparam == null) {
-            tmparam = paramRequest.getWebPage().getWebSiteId();
-        }
-        if (request.getParameter("tm") != null && request.getParameter("tp") != null) {
-            tp = SWBContext.getWebSite(request.getParameter("tm")).getWebPage(request.getParameter("tp"));
-            tmparam = request.getParameter("tm");
-        }
-        ret.append("\n<div class=\"applet\">");
-        ret.append("\n<applet id=\"rulesApplet\" name=\"rulesApplet\" code=\"applets.rules.RuleApplet.class\" codebase=\"" + SWBPlatform.getContextPath() + "/\"  ARCHIVE=\"swbadmin/lib/SWBAplModeler.jar, swbadmin/lib/SWBAplCommons.jar, swbadmin/lib/SWBAplRules.jar\" width=\"100%\" height=\"500\">");  //ARCHIVE=\"wbadmin/lib/SWBAplGenericTree.jar, wbadmin/lib/SWBAplCommons.jar\"
-        SWBResourceURL urlapp = paramRequest.getRenderUrl();
-        urlapp.setMode("gateway");
-        urlapp.setCallMethod(urlapp.Call_DIRECT);
-        urlapp.setParameter("id", suri);
-        urlapp.setParameter("suri", suri);
-        ret.append("\n<param name=\"jsess\" value=\""+request.getSession().getId()+"\">");
-        ret.append("\n<param name =\"cgipath\" value=\"" + urlapp + "\">");
-        ret.append("\n<param name =\"tm\" value=\"" + rRule.getWebSite().getId() + "\">");
-        if (null != request.getParameter("suri")) {
-            ret.append("\n<param name =\"id\" value=\"" + rRule.getId() + "\">");
-            ret.append("\n<param name =\"suri\" value=\"" + rRule.getId() + "\">");
-        } else {
-            ret.append("\n<param name =\"id\" value=\"0\">");
-        }
-        ret.append("\n<param name =\"act\" value=\"edit\">");
-        ret.append("\n<param name =\"locale\" value=\"" + paramRequest.getUser().getLanguage() + "\">");
-        ret.append("\n</applet>");
-        ret.append("\n</div>");
-        return ret.toString();
-    }
-
-    /**
-     * Add, update or removes rules.
+     * Add, update or remove rules.
      * 
      * @param request input parameters
      * @param response an answer to the request
@@ -128,7 +108,6 @@ public class SWBARule extends GenericResource {
      */
     @Override
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
-
         String accion = request.getParameter("act");
         String id = request.getParameter("id");
         User user = response.getUser();
@@ -231,10 +210,312 @@ public class SWBARule extends GenericResource {
      */
     @Override
     public void processRequest(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        if (paramRequest.getMode().equals("gateway")) {
-            doGateway(request, response, paramRequest);
+    	String mode = paramRequest.getMode();
+    	if ("editRule".equals(mode)) {
+        	doEditRule(request, response, paramRequest);
+        } else if ("getRuleFilters".equals(mode)) {
+        	doGetRuleFilters(request, response, paramRequest);
+        } else if ("updateRuleDefinition".equals(mode)) {
+        	doUpdateRuleDefinition(request, response, paramRequest);
+        } else if ("getRuleDefinition".equals(mode)) {
+        	doGetRuleJson(request, response, paramRequest);
         } else {
             super.processRequest(request, response, paramRequest);
+        }
+    }
+
+    /**
+     * Processes requests to update rule definition object
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
+    public void doUpdateRuleDefinition(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	response.setContentType("text/html; charset=UTF-8");
+    	PrintWriter out = response.getWriter();
+    	User admUser = SWBContext.getAdminUser();
+    	int callm = paramRequest.getCallMethod();
+		
+		if (callm != SWBResourceModes.Call_DIRECT || null == admUser) { //Can only be used with direct call and by admin user
+			out.println("{\"status\":\"error\", \"msg\":\"permission denied\"}");
+			return;
+		}
+		
+		String tmparam = request.getParameter("tm");
+		String ruleId = request.getParameter("id");
+		WebSite site = SWBContext.getWebSite(tmparam);
+		if (null != site && null != site.getRule(ruleId)) {
+			Rule r = site.getRule(ruleId);
+			//Get request body and generate rule XML
+			String body = SWBUtils.IO.readInputStream(request.getInputStream(), "UTF-8");
+			//System.out.println("------request body-------");
+			//System.out.println(body);
+			//System.out.println("-------------------------");
+			if (null != body) {
+				JSONObject payload = new JSONObject(body);
+				String xml = getRuleXML(payload);
+				//System.out.println("------new rule definition------");
+				//System.out.println(xml);
+				r.setXml(xml);
+				out.println("{\"status\":\"ok\"}");
+			}
+		}
+    }
+    
+    /**
+     * Gets Rule element definitions recursively
+     * @param doc Main DOM Document
+     * @param parent current parent element
+     * @param elemDef JSON definition of element
+     */
+    private void getRuleElements(Document doc, Element parent, JSONObject elemDef) {
+    	boolean isNot = elemDef.optBoolean("not", false);
+    	String type = elemDef.optString("condition");
+    	Element el = null;
+    	
+    	if (type.isEmpty()) { //Add condition tag
+    		el = doc.createElement(elemDef.getString("id"));
+    		String op = elemDef.getString("operator");
+    		String val = elemDef.getString("value");
+    		
+    		switch(op) {
+    			case "equal":
+    				op = "=";
+    				break;
+    			case "not_equal":
+    				op = "!=";
+    				break;
+    			case "greater":
+    				op = "&gt;";
+    				break;
+    			case "less":
+    				op = "&lt;";
+    				break;
+    			case "history":
+    				op = val;
+    				break;
+    		}
+    		el.setAttribute("cond", op);
+    		el.setTextContent(val);
+    		parent.appendChild(el);
+    	} else { //Add condition node
+    		if (isNot) type = "not";
+    		JSONArray rules = elemDef.getJSONArray("rules");
+    		if (("AND".equals(type) || "OR".equals(type)) && rules.length() == 1) {
+    			el = parent;
+    		} else {
+    			el = doc.createElement(type.toLowerCase());
+    			parent.appendChild(el);
+    		}
+    		
+	    	for (int i = 0; i < rules.length(); i++) {
+	    		JSONObject rDef = rules.getJSONObject(i);
+	    		getRuleElements(doc, el, rDef);
+	    	}
+    	}
+    }
+    
+    /**
+     * Gets JSON object containing rule definition as required by query-builder.
+     * @param rule Rule to get definition from.
+     * @return JSON object containing rule definition or null if rule is undefined.
+     */
+    private JSONObject getRuleJSON(Rule rule) {
+    	Document dom = SWBUtils.XML.xmlToDom(rule.getXml());
+    	Element root = (Element) dom.getElementsByTagName("rule").item(0);
+    	JSONObject ret = null;
+    	
+    	if (null != root) {
+    		NodeList childs = root.getChildNodes();
+    		if (childs.getLength() > 0) {
+    			root = (Element) childs.item(0);
+    		} else {
+    			return ret;
+    		}
+    	}
+    	
+    	return getElementsJSON(root);
+    }
+
+    /**
+     * Gets subrule definitions
+     * @param root Root element to get definitions from
+     * @return Array with subrule definitions
+     */
+    private JSONArray getElementRules(Element root) {
+    	NodeList childs = root.getChildNodes();
+    	
+    	if (childs.getLength() == 0) return null;
+    	
+    	JSONArray rules = new JSONArray();
+    	for (int i = 0; i < childs.getLength(); i++) {
+    		Element child = (Element) childs.item(i);
+    		JSONObject c = getElementsJSON(child);
+    		rules.put(c);
+    	}
+    	
+    	return rules;
+    }
+
+    /**
+     * Gets JSON node with subrule definition or condition definition
+     * @param root Root element
+     * @return JSON node with subrule definition or condition definition
+     */
+    private JSONObject getElementsJSON(Element root) {
+    	JSONObject obj = new JSONObject();
+    	String tagName = root.getTagName();
+    	String types = "and|or|not";
+    	boolean isNot = false;
+    	
+    	if (types.contains(tagName)) {
+    		if("not".equals(tagName)) {
+    			tagName = "and";
+    			isNot = true;
+    		}
+    		obj.put("not", isNot);
+    		obj.put("condition", tagName.toUpperCase());
+    		JSONArray rules = getElementRules(root);
+    		if (null != rules) obj.put("rules", rules);
+    	} else {
+    		obj.put("id", tagName);
+    		String op = root.getAttribute("cond");
+    		String val = root.getTextContent();
+    		switch(op) {
+    			case "=":
+    				op = "equal";
+    				break;
+    			case "!=":
+    				op = "not_equal";
+    				break;
+    			case "&gt;":
+    				op = "greater";
+    				break;
+    			case "&lt;":
+    				op = "less";
+    				break;
+    			default:
+    				if (op.startsWith("-")) op = "history";
+    				break;
+    		}
+    		obj.put("operator", op);
+    		obj.put("value", val);
+    	}
+    	
+    	return obj;
+    }
+    
+    /**
+     * Gets XML string for JSON rule definition
+     * @param ruleDef JSON object for rule definition
+     * @return XML representation of JSON rule definition
+     */
+    private String getRuleXML(JSONObject ruleDef) {
+    	Document ret = SWBUtils.XML.xmlToDom("<?xml version=\"1.0\" encoding=\"UTF-8\"?><rule/>");
+    	Element root = (Element) ret.getElementsByTagName("rule").item(0);
+    	
+    	getRuleElements(ret, root, ruleDef);
+
+    	return SWBUtils.XML.domToXml(ret);
+    }
+    
+    /**
+     * Process requests to get rule configuration options (conditions, operators, values)
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
+    public void doGetRuleFilters(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	response.setContentType("text/html; charset=UTF-8");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Pragma", "no-cache");
+    	
+    	PrintWriter out = response.getWriter();
+    	
+    	out.print(getJSONComboAttr());
+    }
+    
+    /**
+     * Process requests to get rule configuration data
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
+    public void doGetRuleJson(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    	response.setContentType("text/html; charset=UTF-8");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Pragma", "no-cache");
+    	
+        String rrid = request.getParameter("suri");
+        Rule rRule = (Rule) SWBPlatform.getSemanticMgr().getOntology().getGenericObject(rrid);
+        
+    	PrintWriter out = response.getWriter();
+    	JSONObject ret = getRuleJSON(rRule);
+    	if (null != ret) {
+    		out.print(ret.toString());
+    	} else {
+    		out.print("{}");
+    	}
+    }
+    
+    /**
+     * Shows edit UI for rules
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws SWBResourceException
+     * @throws IOException
+     */
+    public void doEditRule(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+        SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
+        String rrid = request.getParameter("suri");
+        Rule rRule = (Rule) ont.getGenericObject(rrid);
+        String tmsid = rRule.getWebSite().getId();
+        if (tmsid == null) {
+            tmsid = paramRequest.getWebPage().getWebSiteId();
+        }
+
+        log.debug("tm:"+tmsid);
+
+        comboAtt = null;
+        vecOrderAtt = null;
+        loadComboAttr(tmsid, rRule.getURI(), paramRequest);
+        
+        String accion = request.getParameter("act");
+        if (accion == null) {
+            accion = "edit";
+        }
+
+        try {
+            if (null != rRule) {
+                if (accion.equals("edit") || accion.equals("details")) {
+                    String xml = rRule.getXml();
+                    if (null == xml) {
+                        xml = "<rule/>";
+                        rRule.setXml(xml);
+                    }
+
+                    Document docxml = SWBUtils.XML.xmlToDom(xml);
+                    
+                    if (docxml != null) {
+                    	String jsp = "/swbadmin/jsp/SWBARules/view.jsp";
+                    	RequestDispatcher rd = request.getRequestDispatcher(jsp);
+                	
+                		request.setAttribute("paramRequest", paramRequest);
+                		request.setAttribute("ruleId", rRule.getId());
+                		request.setAttribute("ruleModel", rRule.getSemanticObject().getModel().getName());
+                		rd.include(request, response);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(paramRequest.getLocaleString("msgErrorEditRule") + ", WBARules.doEdit", e);
         }
     }
 
@@ -250,89 +531,8 @@ public class SWBARule extends GenericResource {
      */
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-
-        response.setContentType("text/html; charset=ISO-8859-1");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Pragma", "no-cache");
-        SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
-        String rrid = request.getParameter("suri");
-        Rule rRule = (Rule) ont.getGenericObject(rrid);
-        String tmsid = rRule.getWebSite().getId();
-        if (tmsid == null) {
-            tmsid = paramRequest.getWebPage().getWebSiteId();
-        }
-
-        log.debug("tm:"+tmsid);
-
-        comboAtt = null;
-        vecOrderAtt = null;
-        loadComboAttr(tmsid, rRule.getURI(), paramRequest);
-        StringBuffer ret = new StringBuffer("");
-        String accion = request.getParameter("act");
-        if (accion == null) {
-            accion = "edit";
-        }
-        String id = "0";
-        SWBResourceURL url = paramRequest.getActionUrl();
-
-        if (request.getParameter("suri") != null) {
-            id = request.getParameter("suri");
-        }
-
-        try {
-            if (!id.equals("0")) {
-                SWBResourceURL urlEdit = paramRequest.getRenderUrl().setMode(paramRequest.Mode_EDIT);
-                urlEdit.setParameter("act", "edit");
-                urlEdit.setParameter("id", id);
-                SWBResourceURL urlDetail = paramRequest.getRenderUrl().setMode(paramRequest.Mode_EDIT);
-                urlDetail.setParameter("act", "details");
-                urlDetail.setParameter("id", id);
-                SWBResourceURL urlHistory = paramRequest.getRenderUrl().setMode(paramRequest.Mode_EDIT);
-                urlHistory.setParameter("act", "history");
-                urlHistory.setParameter("id", id);
-                ret.append("\n<div class=\"swbform\">");
-//                ret.append("\n<fieldset>");
-//                ret.append("\n<TABLE width=\"98%\"  border=\"0\" cellpadding=\"5\" cellspacing=\"0\">");
-//                ret.append("\n<TR>");
-//                ret.append("\n<TD width=\"150\" align=\"right\"> " + paramRequest.getLocaleString("msgIdentifier") + "&nbsp;&nbsp;&nbsp;</TD>");
-//                ret.append("\n<TD>");
-//                ret.append(rRule.getId());
-//                ret.append("\n</TD>");
-//                ret.append("\n</TR>");
-//                ret.append("\n</TABLE></fieldset>");
-
-                if (accion.equals("edit") || accion.equals("details")) {
-                    String xml = null;
-                    xml = rRule.getXml();
-                    if (null == xml) {
-                        xml = "<rule/>";
-                        rRule.setXml(xml);
-                    }
-                    Document docxml = SWBUtils.XML.xmlToDom(xml);
-
-                    sbTree = new StringBuffer();
-                    if (docxml != null) {
-                        Element rule = (Element) docxml.getFirstChild();
-                        elemNum = 0;
-                        rRule = null;
-                        //ret.append("\n<fieldset>");
-                        ret.append("\n<table width=\"100%\"  border=\"0\" cellpadding=\"5\" cellspacing=\"0\" >");
-                        //ret.append("\n<tr><td >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + paramRequest.getLocaleString("msgCriteriaDefinition") + "</td></tr>");
-                        ret.append("\n<tr><td >");
-                        ret.append(getApplet(request, response, paramRequest));
-                        ret.append("\n</td></tr>");
-                        ret.append("\n</table>");
-                        //ret.append("\n</fieldset>");
-                    }
-                    sbTree = null;
-                    docxml = null;
-                }
-                ret.append("\n</div>");
-            }
-        } catch (Exception e) {
-            log.error(paramRequest.getLocaleString("msgErrorEditRule") + ", WBARules.doEdit", e);
-        }
-        response.getWriter().print(ret.toString());
+    	PrintWriter out = response.getWriter();
+        out.print("<iframe style=\"border:0px; width:100%; height:100%; position:absolute; top:0px; left:0px;\" frameborder=\"0\" scrolling=\"no\" src=\""+paramRequest.getRenderUrl().setMode("editRule").setParameter("suri", request.getParameter("suri"))+"\"></iframe>");
     }
 
     /**
@@ -813,248 +1013,67 @@ public class SWBARule extends GenericResource {
 //        }
 
     }
-
+    
     /**
-     * Gets the document with the user attributes.
-     * 
-     * @return a document with the user attributes
-     * @throws SWBResourceException the sWB resource exception
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Gets a JSON String with the user attributes.
+     * @return JSON String with the user attributes
      */
-    private Document getXMLComboAttr() throws SWBResourceException, java.io.IOException {
-        Document dom = null;
-        try {
-            dom = SWBUtils.XML.getNewDocument();
-            Element attributes = dom.createElement("attributes");
-            dom.appendChild(attributes);
+    private String getJSONComboAttr() {
+    	JSONArray attributes = new JSONArray();
+    	
+    	for (int i = 0; i < vecOrderAtt.size(); i++) {
+            String valor = (String) vecOrderAtt.get(i);
+            HashMap hmAttr = (HashMap) comboAtt.get(valor);
+            String label = (String) hmAttr.get("Etiqueta");
 
-            for (int i = 0; i < vecOrderAtt.size(); i++) {
-                String valor = (String) vecOrderAtt.get(i);
-                HashMap hmAttr = (HashMap) comboAtt.get(valor);
-                String label = (String) hmAttr.get("Etiqueta");
+        	JSONObject attribute = new JSONObject();
+            attribute.put("type", (String) hmAttr.get("Tipo"));
+            attribute.put("name", valor);
+            attribute.put("title", label);
 
-                // armando combo de operadores
-                Element attribute = dom.createElement("attribute");
-                attribute.setAttribute("type", (String) hmAttr.get("Tipo"));
-                attribute.setAttribute("name", valor);
-                attribute.setAttribute("title", label);
+            HashMap hmOper = (HashMap) hmAttr.get("Operador");
+            Iterator itOper = hmOper.keySet().iterator();
+            JSONArray operators = new JSONArray();
+            
+            while (itOper.hasNext()) {
+                String thisValue = (String) itOper.next();
+                String thisLabel = (String) hmOper.get(thisValue);
+                JSONObject operator = new JSONObject();
+                operator.put("value", thisValue);
+                operator.put("title", thisLabel);
+                operators.put(operator);
+            }
+            attribute.put("operators", operators);
+            
+            hmOper = null;
+            JSONArray attValues = new JSONArray();
 
-                HashMap hmOper = (HashMap) hmAttr.get("Operador");
-                Iterator itOper = hmOper.keySet().iterator();
-                Element operators = dom.createElement("operators");
-                while (itOper.hasNext()) {
-                    String thisValue = (String) itOper.next();
-                    String thisLabel = (String) hmOper.get(thisValue);
-
-                    //System.out.println("Operadores cargados: "+thisLabel+", "+thisValue);
-
-                    Element operator = dom.createElement("operator");
-                    operator.setAttribute("value", thisValue);
-                    operator.setAttribute("title", thisLabel);
-                    operators.appendChild(operator);
+            if (!hmAttr.get("Tipo").equals("TEXT")) {
+                HashMap valoresCombo = (HashMap) hmAttr.get("Valor");
+                Iterator itValCombo = valoresCombo.keySet().iterator();
+                
+                while (itValCombo.hasNext()) {
+                    String nomValCombo = (String) itValCombo.next();
+                    String labelValCombo = (String) valoresCombo.get(nomValCombo);
+                    JSONObject attValue = new JSONObject();
+                    attValue.put("title", labelValCombo);
+                    attValue.put("value", nomValCombo);
+                    attValues.put(attValue);
                 }
-                attribute.appendChild(operators);
-                hmOper = null;
-                Element attValues = dom.createElement("catalog");
-                attValues.setAttribute("name", "attValues");
-
-                // armando combo para armar valores posibles del elemento
-                if (!hmAttr.get("Tipo").equals("TEXT")) {
-                    HashMap valoresCombo = (HashMap) hmAttr.get("Valor");
-                    Iterator itValCombo = valoresCombo.keySet().iterator();
-                    while (itValCombo.hasNext()) {
-                        String nomValCombo = (String) itValCombo.next();
-                        String labelValCombo = (String) valoresCombo.get(nomValCombo);
-                        Element attValue = dom.createElement("option");
-                        attValue.setAttribute("title", labelValCombo);
-                        attValue.setAttribute("value", nomValCombo);
-                        attValues.appendChild(attValue);
-                    }
-                    attribute.appendChild(attValues);
-                } else {
-                    //armar text para pedir/mostrar valor
-                    Element attValue = dom.createElement("option");
-                    attValue.setAttribute("title", "");
-                    attValue.setAttribute("value", "TEXT");
-                    attValues.appendChild(attValue);
-                    attribute.appendChild(attValues);
-                }
-                attributes.appendChild(attribute);
-            }
-        } catch (Exception e) {
-        }
-        log.debug("XML: "+SWBUtils.XML.domToXml(dom));
-        return dom;
-    }
-
-    /**
-     * Gets the error.
-     * 
-     * @param id the id
-     * @return the error
-     */
-    private Document getError(int id) {
-        Document dom = null;
-        try {
-            dom = SWBUtils.XML.getNewDocument();
-            Element res = dom.createElement("res");
-            dom.appendChild(res);
-            Element err = dom.createElement("err");
-            res.appendChild(err);
-            addElement("id", "" + id, err);
-            if (id == 0) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_loginfail") + "...", err);
-            } else if (id == 1) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_nouser") + "...", err);
-            } else if (id == 2) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_noservice") + "...", err);
-            } else if (id == 3) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_serviceprocessfail") + "...", err);
-            } else if (id == 4) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_parametersprocessfail") + "...", err);
-            } else if (id == 5) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_noTopicmap") + "...", err);
-            } else if (id == 6) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_noTopic") + "...", err);
-            } else if (id == 7) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_usernopermiss") + "...", err);
-            } else if (id == 8) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_TopicAlreadyexist") + "...", err);
-            } else if (id == 9) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_byImplement") + "...", err);
-            } else if (id == 10) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_TopicMapAlreadyExist") + "...", err);
-            } else if (id == 11) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_FileNotFound") + "...", err);
-            } else if (id == 12) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_noversions") + "...", err);
-            } else if (id == 13) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getError_xmlinconsistencyversion") + "...", err);
-            } else if (id == 14) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getError_noResourcesinMemory") + "...", err);
-            } else if (id == 15) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getError_noTemplatesinMemory") + "...", err);
-            } else if (id == 16) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getError_TemplatenotRemovedfromFileSystem") + "...", err);
-            } else if (id == 17) {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getError_adminUsernotCreated") + "...", err);
+                attribute.put("catalog", attValues);
             } else {
-                addElement("message", SWBUtils.TEXT.getLocaleString("locale_Gateway", "usrmsg_Gateway_getService_errornotfound") + "...", err);
+                //armar text para pedir/mostrar valor
+            	JSONObject attValue = new JSONObject();
+                attValue.put("title", "");
+                attValue.put("value", "TEXT");
+                attValues.put(attValue);
+                attribute.put("catalog", attValues);
             }
-        } catch (Exception e) {
-            log.error(SWBUtils.TEXT.getLocaleString("locale_Gateway", "error_Gateway_getService_documentError") + "...", e);
+            attributes.put(attribute);
         }
-        return dom;
-    }
-
-    /**
-     * Do gateway.
-     * 
-     * @param request the request
-     * @param response the response
-     * @param paramRequest the param request
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws SWBResourceException the sWB resource exception
-     */
-    public void doGateway(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        PrintWriter out = response.getWriter();
-        //log.debug("doGateway: URI"+request.getParameter("suri")+", id:"+request.getParameter("id"));
-        ServletInputStream in = request.getInputStream();
-        String sin=SWBUtils.IO.readInputStream(in);
-        //System.out.println("sin:"+sin);
-        Document dom = SWBUtils.XML.xmlToDom(sin);
-
-        if (!dom.getFirstChild().getNodeName().equals("req")) {
-            response.sendError(404, request.getRequestURI());
-            return;
-        }
-
-        String cmd = null;
-        if (dom.getElementsByTagName("cmd").getLength() > 0) {
-            cmd = dom.getElementsByTagName("cmd").item(0).getFirstChild().getNodeValue();
-        }
-        if (cmd == null) {
-            response.sendError(404, request.getRequestURI());
-            return;
-        }
-        String ret;
-        Document res = getService(cmd, dom, paramRequest.getUser(), request, response, paramRequest);
-        if (res == null) {
-            ret = SWBUtils.XML.domToXml(getError(3));
-        } else {
-            ret = SWBUtils.XML.domToXml(res, true);
-        }
-        out.print(new String(ret.getBytes()));
-    }
-
-    /**
-     * Adds the element.
-     * 
-     * @param name the name
-     * @param value the value
-     * @param parent the parent
-     * @return the element
-     */
-    private Element addElement(String name, String value, Element parent) {
-        Document doc = parent.getOwnerDocument();
-        Element ele = doc.createElement(name);
-        if (value != null) {
-            ele.appendChild(doc.createTextNode(value));
-        }
-        parent.appendChild(ele);
-        return ele;
-    }
-
-    /**
-     * Gets the service.
-     * 
-     * @param cmd the cmd
-     * @param src the src
-     * @param user the user
-     * @param request the request
-     * @param response the response
-     * @param paramRequest the param request
-     * @return the service
-     */
-    private Document getService(String cmd, Document src, User user, HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) {
-        SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
-        String tmpcmd = cmd, tm = null, id = null;
-        if (null != cmd && cmd.indexOf('.') != -1) {
-            tmpcmd = cmd.substring(0, cmd.indexOf('.'));
-            tm = cmd.substring(cmd.indexOf('.') + 1, cmd.lastIndexOf('.'));
-            id = cmd.substring(cmd.lastIndexOf('.') + 1);
-        }
-
-        log.debug("getService: " + request.getParameter("suri"));
-        if (tmpcmd.equals("getXMLAttr")) {
-            try {
-                return getXMLComboAttr();
-            } catch (Exception e) {
-                log.error("Error while trying to get XML user attributes. ", e);
-            }
-        } else if (tmpcmd.equals("getXMLRule")) {
-            Rule rRule = null;
-            rRule = (Rule) ont.getGenericObject(request.getParameter("suri"));
-            return SWBUtils.XML.xmlToDom(rRule.getXml());
-        } else if (tmpcmd.equals("updateRule")) {
-            Document dom = null;
-            Rule rRule = (Rule) ont.getGenericObject(request.getParameter("suri"));
-            String strXMLRule = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-            String strTmp = SWBUtils.XML.domToXml(src);
-            if (strTmp.indexOf("<rule>") != -1) {
-                strXMLRule += strTmp.substring(strTmp.indexOf("<rule>"), strTmp.lastIndexOf("</rule>") + 7);
-            } else {
-                strXMLRule += "<rule/>";
-            }
-            try {
-                rRule.setXml(strXMLRule);
-                rRule = null;
-                dom = SWBUtils.XML.xmlToDom(strXMLRule);
-            } catch (Exception e) {
-                log.error("Error while trying to update rule.", e);
-            }
-            return dom;
-        }
-        return getError(2);
+        
+    	JSONObject ret = new JSONObject();
+    	ret.put("attributes", attributes);
+        return ret.toString();
     }
 }

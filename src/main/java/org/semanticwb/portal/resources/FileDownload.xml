@@ -9,7 +9,9 @@
                 <input type="TEXT" name="fileName1" label="Dirección Web del archivo" size="50" />
                 <input type="TEXT" name="architecture" label="arquitectura" size="50" />
                 <input type="TEXT" name="historyUrl" label="Url de estadisticas" size="50" />
-                <input type="FILE" name="template" label="template(xsl)" size="50" showfile="true" isremovefile="true" />
+                <input type="file" name="template" label="Plantilla (xsl, xslt):" size="50" filetype="xsl|xslt" jsrequired="false" showfile="true" isshowfiletype="true" 
+                       isremovefile="true" showmsg="Ver plantilla..." editmsg="Editar plantilla..." removemsg="Quitar plantilla" msg="Plantilla actual: " 
+                       bydefault="/swbadmin/xsl/FileDownload/WBFileDownload.xslt" msgbydefault="Plantilla por defecto: " />
 		<input type="SUBMIT" name="btnSave"  value="Guardar" class="boton"/>
 		<input type="RESET"  name="btnReset" value="Cancelar" class="boton"/>
         </fieldset>

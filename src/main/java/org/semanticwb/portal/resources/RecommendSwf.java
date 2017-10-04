@@ -18,16 +18,17 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
-import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Resource;
@@ -40,8 +41,8 @@ import org.semanticwb.portal.api.SWBResourceURLImp;
 import org.semanticwb.portal.util.FileUpload;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 
 
@@ -53,9 +54,8 @@ import org.w3c.dom.Node;
  * Object that is in charge to unfold and to administer recommendations of end users
  * interacts with Flash type archives under certain criteria (resource configuration).
  *
- * @author : Vanessa Arredondo N��ez
+ * @author : Vanessa Arredondo Núñez
  * @version 1.0
- * @see com.infotec.wb.resources.Recomendar
  */
 public class RecommendSwf extends Recommend {
     

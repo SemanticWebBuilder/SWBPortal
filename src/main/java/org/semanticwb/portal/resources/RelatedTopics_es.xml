@@ -3,7 +3,7 @@
 	<xslfile>admresource.xslt</xslfile>
 	<form name="frmRelatedTopics" action="true" method="POST" enctype="multipart/form-data">
 		<admdbconnmgr defconn="true"/>
-		<input type="FILE" name="template" label="Plantilla (xsl, xslt):" showfile="true" msg="Plantilla actual " bydefault="{@webpath}wbadmin/xsl/RelatedTopics/RelatedTopics.xslt" msgbydefault="Plantilla por defecto " filetype="xsl|xslt" isshowfiletype="true" size="40"/>
+		<input type="FILE" name="template" label="Plantilla (xsl, xslt):" showfile="true" msg="Plantilla actual " bydefault="{@webpath}/swbadmin/xsl/RelatedTopics/RelatedTopics.xslt" msgbydefault="Plantilla por defecto " filetype="xsl|xslt" isshowfiletype="true" size="40"/>
 		<input type="TEXT" name="title" label="Título:" size="50"/>
 		<statictext name="txtSort">Ordenado por:</statictext>
 		<input type="RADIO" name="sort" label="Rol" value="1"/>

@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.api;
 
@@ -37,16 +37,14 @@ import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.Resource;
 
-// TODO: Auto-generated Javadoc
 /** Objeto: Implementa una administración genérica de recursos bajo el API de administración de
- * recursos de Infotec WebBuilder.
+ * recursos de SemanticWebBuilder.
  *
  * Object: A generic administration of resources under the API of administration of
- * resources of Infotec WebBuilder.
+ * resources of SemanticWebBuilder.
  *
  * @author Javier Solis Gonzalez
  * @version 1.0
- * @see com.infotec.wb.admin.admresources
  */
 public class GenericAdmResource extends GenericResource
 {
@@ -58,7 +56,7 @@ public class GenericAdmResource extends GenericResource
     static Templates plt; 
     
     /** The bundles. */
-    static Hashtable bundles=new Hashtable();
+    static Hashtable<String, XmlBundle> bundles=new Hashtable<String, XmlBundle>();
     
     /** The bundle. */
     XmlBundle bundle=null;
@@ -134,7 +132,7 @@ public class GenericAdmResource extends GenericResource
         if(action.equals("add") || action.equals("edit")) 
         {
             url.setAction("update");
-            xml=bundle.getBundle(getClass().getName(), new java.util.Locale(paramsRequest.getUser().getLanguage()));
+            xml=XmlBundle.getBundle(getClass().getName(), new java.util.Locale(paramsRequest.getUser().getLanguage()));
             if(xml!=null && xml.trim().length()>0) ret.append(adResUtils.transformAdmResourceByXml(paramsRequest.getUser(), xml, url.toString(),base, plt, request));
         }
         else  if(action.equals("update") || action.equals("remove"))
@@ -196,7 +194,7 @@ public class GenericAdmResource extends GenericResource
         if(action.equals("add") || action.equals("edit")) 
         {
             url.setAction("update");
-            xml=bundle.getBundle(getClass().getName(), new java.util.Locale(paramsRequest.getUser().getLanguage()));
+            xml=XmlBundle.getBundle(getClass().getName(), new java.util.Locale(paramsRequest.getUser().getLanguage()));
             if(xml!=null && xml.trim().length()>0) ret.append(adResUtils.transformAdmResourceByXml(paramsRequest.getUser(), xml, url.toString(),base, plt, request));
         }
         else  if(action.equals("update") || action.equals("remove"))

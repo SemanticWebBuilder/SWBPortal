@@ -25,7 +25,7 @@ import org.semanticwb.portal.util.WBFileUpload;
  */
 public class SWBWebSiteTpls extends GenericResource {
 
-    private static Logger log = SWBUtils.getLogger(SWBImportWebSite.class);
+    private static Logger log = SWBUtils.getLogger(SWBWebSiteTpls.class);
 
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {

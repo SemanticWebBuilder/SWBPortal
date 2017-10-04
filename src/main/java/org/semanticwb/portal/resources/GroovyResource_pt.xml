@@ -2,9 +2,9 @@
 <admresource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <!--
  * GroovyResource_pt.xml
- *
+ * Allows the user to define two paths to the groovy files to execute for the
+ * default view and the process action of this resource
  * Created on 20 de julio de 2009, 06:06 PM
- *
  * @author  Jose R. Jimenez
  -->
 	<xslfile>admresource.xslt</xslfile>

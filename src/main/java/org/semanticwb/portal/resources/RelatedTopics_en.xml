@@ -3,7 +3,7 @@
 	<xslfile>admresource.xslt</xslfile>
 	<form name="frmRelatedTopics" action="true" method="POST" enctype="multipart/form-data">
 		<admdbconnmgr defconn="true"/>
-		<input type="FILE" name="template" label="Template (xsl, xslt):" showfile="true" msg="Current template " bydefault="{@webpath}wbadmin/xsl/RelatedTopics/RelatedTopics.xslt" msgbydefault="Template by default " filetype="xsl|xslt" isshowfiletype="true" size="40"/>
+		<input type="FILE" name="template" label="Template (xsl, xslt):" showfile="true" msg="Current template " bydefault="{@webpath}/swbadmin/xsl/RelatedTopics/RelatedTopics.xslt" msgbydefault="Template by default " filetype="xsl|xslt" isshowfiletype="true" size="40"/>
 		<input type="TEXT" name="title" label="Title:" size="50"/>
 		<statictext name="txtSort">Order by:</statictext>
 		<input type="RADIO" name="sort" label="Role" value="1"/>

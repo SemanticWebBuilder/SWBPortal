@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.admresources.db;
 
@@ -38,11 +38,11 @@ import org.semanticwb.portal.util.WBFileUpload;
 
 // TODO: Auto-generated Javadoc
 /**
- * Objeto que administra conecci�n o connecciones de bd de la api de administraci�n de recursos
+ * Objeto que administra conexión o connexiones de bd de la api de administración de recursos
  * <p>
  * Object that administers bd conections in the resources administration api.
  * 
- * @author  Jorge Alberto Jim�nez
+ * @author  Jorge Alberto Jiménez
  */
 public class AdmDBConnMgr {
 
@@ -263,7 +263,7 @@ public class AdmDBConnMgr {
     }
 
     /**
-     * Crea el xml de la administraci�n de un recurso,
+     * Crea el xml de la administración de un recurso,
      * esto para cuando se edite el recurso ya tenga valores por defecto.
      * 
      * @param req the req
@@ -298,7 +298,7 @@ public class AdmDBConnMgr {
                                         defconn = true;
                                         this.conname = SWBPlatform.getEnv("wb/db/nameconn", "wb"); //conexion por defecto
                                         init();
-                                    } else {  //Es otra conexi�n
+                                    } else {  //Es otra conexión
                                         defconn = false;
                                         this.conname = value.trim();
                                     }
@@ -382,7 +382,7 @@ public class AdmDBConnMgr {
                         }
                     }
                 }
-                //strbxmlp.append(com.infotec.appfw.util.AFUtils.getInstance().DomtoXml(dom));
+
                 strbxmlp.append(SWBUtils.XML.domToXml(dom, "ISO-8859-1", true));
             }
         } catch (Exception e) {
@@ -459,7 +459,7 @@ public class AdmDBConnMgr {
     }
 
     /**
-     * Coloca atributos de conecci�n a propiedades de la clase
+     * Coloca atributos de conexión a propiedades de la clase
      * insert connection attributes to class properties.
      */
     public void setAttrConn() {
@@ -479,7 +479,7 @@ public class AdmDBConnMgr {
                                     hiddenfe.setValue("true");
                                     formfe.add(hiddenfe);
                                 }
-                            } else { // es otra conexi�n
+                            } else { // es otra conexión
                                 defconn = false;
                             }
                         } else {
@@ -579,7 +579,7 @@ public class AdmDBConnMgr {
                     init();
                 }
             } else {
-                if (base != null) { //si no se puso nada en el tag admdbconnmgr, crea conexi�n por defecto
+                if (base != null) { //si no se puso nada en el tag admdbconnmgr, crea conexión por defecto
                     defconn = true;
                     init();
                     if (formfe != null) {
@@ -990,7 +990,7 @@ public class AdmDBConnMgr {
     }
 
     /**
-     * Obtiene el nombre de la conecci�n.
+     * Obtiene el nombre de la conección.
      * 
      * @return the con name
      */

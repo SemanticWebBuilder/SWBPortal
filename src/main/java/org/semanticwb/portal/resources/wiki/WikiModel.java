@@ -22,45 +22,46 @@
  */
 package org.semanticwb.portal.resources.wiki;
 
-import info.bliki.wiki.filter.Encoder;
-import info.bliki.wiki.model.Configuration;
-import info.bliki.wiki.model.ImageFormat;
-import info.bliki.wiki.tags.WPATag;
 import java.util.Locale;
-import org.htmlcleaner.ContentToken;
+
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.model.WebPage;
 import org.semanticwb.portal.api.SWBParamRequest;
 
+import info.bliki.htmlcleaner.ContentToken;
+import info.bliki.wiki.filter.Encoder;
+import info.bliki.wiki.model.Configuration;
+import info.bliki.wiki.model.ImageFormat;
+import info.bliki.wiki.tags.WPATag;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class WikiModel.
- * 
+ *
  * @author Javier Solis Gonzalez
  */
-public class WikiModel extends info.bliki.wiki.model.WikiModel
-{
-    
+public class WikiModel extends info.bliki.wiki.model.WikiModel {
+
     /** The params request. */
     private SWBParamRequest paramsRequest;
-    
+
     /** The request. */
     private javax.servlet.http.HttpServletRequest request;
-    
+
     /**
      * Instantiates a new wiki model.
-     * 
+     *
      * @param imageBaseURL the image base url
      * @param linkBaseURL the link base url
      */
-    public WikiModel(String imageBaseURL, String linkBaseURL) 
+    public WikiModel(String imageBaseURL, String linkBaseURL)
     {
         super(imageBaseURL, linkBaseURL);
     }
-    
+
     /**
      * Instantiates a new wiki model.
-     * 
+     *
      * @param request the request
      * @param paramsRequest the params request
      * @param imageBaseURL the image base url
@@ -68,45 +69,45 @@ public class WikiModel extends info.bliki.wiki.model.WikiModel
      */
     public WikiModel(javax.servlet.http.HttpServletRequest request, SWBParamRequest paramsRequest, String imageBaseURL, String linkBaseURL)
     {
-        super(Configuration.DEFAULT_CONFIGURATION, new Locale(paramsRequest.getUser().getLanguage()), imageBaseURL, linkBaseURL);
+        super(new Configuration(), new Locale(paramsRequest.getUser().getLanguage()), imageBaseURL, linkBaseURL);
         this.paramsRequest=paramsRequest;
         this.request=request;
-        Configuration.DEFAULT_CONFIGURATION.addTokenTag("resource",new ResourceTag());
+        addTokenTag("resource",new ResourceTag());
+        //Configuration.addTokenTag("resource",new ResourceTag());
     }
 
-    
+
     /* (non-Javadoc)
      * @see info.bliki.wiki.model.WikiModel#appendInternalLink(java.lang.String, java.lang.String, java.lang.String)
      */
     /**
      * Append internal link.
-     * 
+     *
      * @param link the link
      * @param hashSection the hash section
      * @param linkText the link text
      */
     @Override
-    public void appendInternalLink(String link, String hashSection, String linkText) 
-    {
+    public void appendInternalLink(String link, String hashSection, String linkText, String cssClass, boolean parseRecursive) {
             String encodedtopic="";
             WebPage topic=null;
             String lang="es";
             if(paramsRequest!=null)lang=paramsRequest.getUser().getLanguage();
             if(link.indexOf(':')>=0)
             {
-                encodedtopic= Encoder.encodeTitleUrl(link);
+                encodedtopic= Encoder.encodeTitleToUrl(link, false);
             }else
             {
                 encodedtopic = SWBPlatform.getIDGenerator().getID(link,null,false);
                 if(paramsRequest!=null)topic=paramsRequest.getWebPage().getWebSite().getWebPage(encodedtopic);
             }
 
-            if (replaceColon()) 
+            if (replaceColon())
             {
                     encodedtopic = encodedtopic.replaceAll(":", "/");
             }
-            String hrefLink = fExternalWikiBaseURL.replace("${title}", encodedtopic);
-            
+            String hrefLink = getWikiBaseURL().replace("${title}", encodedtopic);
+
             WPATag aTagNode = new WPATag();
             append(aTagNode);
             aTagNode.addAttribute("id", "w", true);
@@ -119,17 +120,17 @@ public class WikiModel extends info.bliki.wiki.model.WikiModel
 
             //System.out.println("link:"+link+" "+hashSection+" "+linkText);
             if(topic!=null && link.equals(linkText))linkText=topic.getDisplayName(lang);
-            
+
             ContentToken text = new ContentToken(linkText);
-            aTagNode.addChild(text);            
+            aTagNode.addChild(text);
     }
-    
+
     /* (non-Javadoc)
      * @see info.bliki.wiki.model.AbstractWikiModel#appendInternalImageLink(java.lang.String, java.lang.String, info.bliki.wiki.model.ImageFormat)
      */
     /**
      * Append internal image link.
-     * 
+     *
      * @param hrefImageLink the href image link
      * @param srcImageLink the src image link
      * @param imageFormat the image format
@@ -146,7 +147,7 @@ public class WikiModel extends info.bliki.wiki.model.WikiModel
 
     /**
      * Gets the params request.
-     * 
+     *
      * @return the params request
      */
     public SWBParamRequest getParamsRequest()
@@ -156,12 +157,12 @@ public class WikiModel extends info.bliki.wiki.model.WikiModel
 
     /**
      * Gets the request.
-     * 
+     *
      * @return the request
      */
     public javax.servlet.http.HttpServletRequest getRequest()
     {
         return request;
     }
-    
+
 }

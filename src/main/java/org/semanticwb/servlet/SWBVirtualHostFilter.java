@@ -18,11 +18,10 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.servlet;
 
-//import com.infotec.wb.core.WBVirtualHostMgr;
 import java.io.*;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +59,6 @@ import org.semanticwb.servlet.internal.RobotFile;
 import org.semanticwb.servlet.internal.ShowFile;
 import org.semanticwb.servlet.internal.TreeSelectFormElement;
 import org.semanticwb.servlet.internal.Work;
-//import cn.bluejoe.elfinder.servlet.SWBConnectorServlet;
 
 /* MAPS74 Dynamic Tracing - Requires Java SDK 7.0 y Solaris* /
 import com.sun.tracing.ProviderFactory;
@@ -243,18 +241,6 @@ public class SWBVirtualHostFilter implements Filter
                 iserv="swb";
             }
 
-    //        log.trace("uri:"+uri);
-    //        log.trace("cntx:"+cntx);
-    //        log.trace("path:"+path);
-    //        log.trace("host:"+host);
-    //        log.trace("iserv:"+iserv);
-
-            //System.out.println("uri:"+uri);
-            //System.out.println("cntx:"+cntx);
-            //System.out.println("path:"+path);
-            //System.out.println("host:"+host);
-            //System.out.println("iserv:"+iserv);
-
             boolean isjsp = false;
             InternalServlet serv = intServlets.get(iserv);
             if (serv != null && (path.endsWith(".jsp") || path.endsWith(".groovy")))
@@ -422,10 +408,6 @@ public class SWBVirtualHostFilter implements Filter
                             _response.sendError(resp.getError(), resp.getErrorMsg());
                     }
                 }
-//                else
-//                {                    
-//                    _response.getOutputStream().write(resp.toByteArray());
-//                }
             }
             else
             {
@@ -530,12 +512,11 @@ public class SWBVirtualHostFilter implements Filter
             InternalServlet FCKEditorConnector = new SWBConnectorServlet();
             intServlets.put("FCKEditorConnector", FCKEditorConnector);
             FCKEditorConnector.init(filterConfig.getServletContext());
-            
-            InternalServlet elFinderConnector = new SWBConnectorServlet();
+*/            
+            InternalServlet elFinderConnector = new cn.bluejoe.elfinder.servlet.SWBConnectorServlet();
             intServlets.put("elFinderConnector", elFinderConnector);
             elFinderConnector.init(filterConfig.getServletContext());
-*/
-            
+
             InternalServlet frmprocess = new FrmProcess();
             intServlets.put("frmprocess", frmprocess);
             frmprocess.init(filterConfig.getServletContext());
@@ -682,7 +663,6 @@ public class SWBVirtualHostFilter implements Filter
         String msg = null;
         try
         {
-            //System.out.println("modelid:"+modelid);
             if(modelid!=null)
             {
                 msg = SWBUtils.IO.getFileFromPath(SWBPortal.getWorkPath() + "/models/"+modelid + path + "_"+dparams.getUser().getLanguage()+".html");
@@ -703,7 +683,6 @@ public class SWBVirtualHostFilter implements Filter
             }
 
             if(msg==null)msg="";
-            //System.out.println("msg:"+msg);
         }
         catch (Exception e)
         {
@@ -715,8 +694,6 @@ public class SWBVirtualHostFilter implements Filter
         response.setHeader("Cache-Control", "no-cache");
         OutputStream out = response.getOutputStream();
         out.write(msg.getBytes());
-        //out.flush();
-        //out.close();
     }
     
     public static SWBVirtualHostFilter getInstance()

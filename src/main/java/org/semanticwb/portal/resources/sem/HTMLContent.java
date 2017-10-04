@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,40 +18,37 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources.sem;
 
-import com.arthurdo.parser.HtmlStreamTokenizer;
-import com.arthurdo.parser.HtmlTag;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.semanticwb.model.VersionInfo;
-import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -60,16 +57,24 @@ import org.semanticwb.model.GenericObject;
 import org.semanticwb.model.Resource;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.User;
+import org.semanticwb.model.VersionInfo;
 import org.semanticwb.model.Versionable;
 import org.semanticwb.model.WebPage;
 import org.semanticwb.model.WebSite;
+import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResource;
+import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
 import org.semanticwb.portal.util.ContentUtils;
 import org.semanticwb.portal.util.WBFileUpload;
 
+import com.arthurdo.parser.HtmlStreamTokenizer;
+import com.arthurdo.parser.HtmlTag;
+
 /**
  * Componente que permite editar un contenido en HTML utilizando CKEditor.
+ * @author Jorge Jiménez
+ * @author Hasdai Pacheco
  */
 public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLContentBase 
 {
@@ -143,10 +148,8 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
         
         if (null == version || version.isEmpty()) version = "1";
         
-        String actualcontext = (!"".equals(SWBPlatform.getContextPath()) ? SWBPlatform.getContextPath() : "");
-        String workPath = actualcontext+SWBPortal.getWorkPath()+getResourceBase().getWorkPath()+"/"+version+"/images/";
-        String webWorkPath = actualcontext+SWBPortal.getWebWorkPath()+getResourceBase().getWorkPath()+"/"+version+"/images/";
-        
+        String workPath = SWBPortal.getWorkPath()+getResourceBase().getWorkPath()+"/"+version+"/images/";
+        String webWorkPath = SWBPortal.getWebWorkPath()+getResourceBase().getWorkPath()+"/"+version+"/images/";
         ArrayList<String> extensions = HTMLContentUtils.getFileTypes(type);
         
         File wp = new File(workPath);
@@ -274,7 +277,6 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
                         if (tag.getTagString().toLowerCase().equals("title") && !tag.isEndTag())
                         {
                             tok.nextToken();
-                            //System.out.println("tok-------------:"+tok!=null?tok.getStringValue():"null");
                             if(tok.getStringValue().toString().trim().length()==0) continue;
                             tok.parseTag(tok.getStringValue(), tag);
                             ttype = tok.getTokenType();
@@ -410,7 +412,6 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
             vswres.setActualVersion(vi);
             vswres.setLastVersion(vi);
 
-
             String rutaFS_target_path = SWBPortal.getWorkPath() + resource.getWorkPath() + "/" + vnum + "/";
             File f = new File(rutaFS_target_path);
             if (!f.exists()) {
@@ -460,7 +461,6 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
                 }
                 ContentUtils contentUtils = new ContentUtils();
                 fileContent = contentUtils.predefinedStyles(fileContent, resource, true); //Estilos predefinidos
-                //fileContent = contentUtils.predefinedStyles(fileContent, base, isTpred()); //Estilos predefinidos
                 if (paginated) {
                     fileContent = contentUtils.paginationMsWord(request,fileContent, page, request.getParameter("page"), resource, snpages, stxtant, stxtsig, stfont, position);
                 }//Paginación
@@ -510,9 +510,9 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
         int versionNumber = Integer.parseInt(request.getParameter("numversion"));
         String fileName = null;
         String action = paramRequest.getAction();
-        StringBuilder pathToRead = new StringBuilder(64);
+        StringBuilder pathToRead = new StringBuilder();
         //comentar siguiente linea
-        StringBuilder pathToWrite = new StringBuilder(64);
+        StringBuilder pathToWrite = new StringBuilder();
         String content = "";
         //Para mostrar el contenido de una versión temporal
         String tmpPath = request.getParameter("tmpPath");
@@ -520,7 +520,6 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
         fileName = vio.getVersionFile();
 
         pathToRead.append(resource.getWorkPath()).append("/");
-        //siguiente linea tenía "work/" en lugar de "SWBPortal.getWebWorkPath()"
         String webWorkpath = SWBPortal.getWebWorkPath();
         pathToWrite.append(webWorkpath).append(resource.getWorkPath()).append("/");
 
@@ -563,7 +562,7 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
             RequestDispatcher rd = request.getRequestDispatcher("/swbadmin/jsp/HtmlContentSemAdmin.jsp");
             rd.include(request, response);
         } catch (Exception e) {
-            log.debug(e);
+            log.error(e);
         }
     }
 
@@ -610,7 +609,6 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
             HttpServletResponse response, SWBParamRequest paramRequest)
             throws SWBResourceException, IOException {
         
-
         Resource resource = paramRequest.getResourceBase();
         String contentPath = resource.getWorkPath() + "/";
         String textToSave = request.getParameter("EditorDefault");
@@ -677,7 +675,7 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
                         }
                         String fileName = textToSave.substring(i + 11, textToSave.indexOf(delimiter, i + 11));
                         String s = SWBPortal.getWorkPath() + resource.getWorkPath() + "/" + versionNumber + "/" + fileName;
-                        int ls = fileName.indexOf("/");
+                        int ls = fileName.indexOf('/');
                         if (ls > -1) {
                             fileName = fileName.substring(ls + 1);
                         }
@@ -691,8 +689,6 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
                     i = textToSave.indexOf("<workpath/>", i + 11);
                 }
                 
-//                System.out.println("textToSave2:"+textToSave);
-
                 writer.write(textToSave);
                 writer.flush();
                 writer.close();
@@ -764,7 +760,6 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
         String hiddenPath = null;
 
         ArrayList values = fUpload.getValue("numversion");
-        int g = 0;
         if (values != null && !values.isEmpty()) {
             numversion = Integer.parseInt(((String) values.get(0)).trim());
         }
@@ -787,7 +782,7 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
 
         filename = fUpload.getFileName("NewFile");
         filename = filename.replace('\\', '/');
-        int i = filename.lastIndexOf("/");
+        int i = filename.lastIndexOf('/');
         String strAttaches = fUpload.FindAttaches("NewFile");
 
         if (i > -1) {
@@ -795,13 +790,13 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
             filename = filename.substring(i + 1);
         }
         clientFilePath = hiddenPath;
-        i = filename.lastIndexOf("/");
+        i = filename.lastIndexOf('/');
         if (i != -1) {
             filename = filename.substring(i + 1);
         }
         //Obtiene la extension del archivo cargado
         if (filename.contains(".")) {
-            extension = filename.substring(filename.lastIndexOf("."));
+            extension = filename.substring(filename.lastIndexOf('.'));
         }
 
         if (extension != null && (extension.equalsIgnoreCase(".htm")
@@ -812,7 +807,7 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
             //Almacena la ruta relativa (de la máquina cliente) de los archivos relacionados al html.
             if (filesAttached.length > 0 && filesAttached[0].contains("/")) {
                 localRelativePath = filesAttached[0].substring(0,
-                        filesAttached[0].lastIndexOf("/"));
+                        filesAttached[0].lastIndexOf('/'));
             } else if (filesAttached.length > 0 && !filesAttached[0].contains("/")) {
                 localRelativePath = "";
             }
@@ -990,14 +985,13 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private void selectFileInterface(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
-        String actualcontext = (!"".equals(SWBPlatform.getContextPath()) ? SWBPlatform.getContextPath() : "");
         String version = (request.getParameter("numversion") != null && !"".equals(request.getParameter("numversion"))) ? request.getParameter("numversion") : "1";
-        String jsp = actualcontext + "/swbadmin/jsp/HTMLContentUploadDialog.jsp";
+        String jsp = "/swbadmin/jsp/HTMLContentUploadDialog.jsp";
         String fileType = request.getParameter("type");
         if (null == fileType) fileType = "";
         
         RequestDispatcher rd = request.getRequestDispatcher(jsp);
-        ArrayList types = HTMLContentUtils.getFileTypes(fileType);
+        ArrayList<String> types = HTMLContentUtils.getFileTypes(fileType);
         
         try {
             response.setContentType("text/html;charset=ISO-8859-1");//Forced because of encoding problems
@@ -1077,7 +1071,7 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
     public Map<String, Long> getFileList(HttpServletRequest hsr, String version, ArrayList<String> allowedTypes) {
         Map<String, Long> files = new TreeMap<String, Long>();
         Resource base = getResourceBase();
-        String resPath = SWBPlatform.getContextPath()+SWBPortal.getWorkPath()+base.getWorkPath()+"/"+version+"/images/";
+        String resPath = SWBPortal.getWorkPath()+base.getWorkPath()+"/"+version+"/images/";
         
         if (HTMLContentUtils.isEnabledForFileBrowsing(hsr)) {
             final File resourcePath = new File(resPath);
@@ -1097,13 +1091,6 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
     private class ExtFilter implements FileFilter {
         private ArrayList<String> types = new ArrayList<String>();
         private boolean showHidden = false;
-        
-        /**
-         * Constructor por defecto. 
-         * Crea una instancia de {@code ExtFileFilter}.
-         * No debe ser usado pues no listará ningún archivo.
-         */
-        public ExtFilter () {}
         
         /**
          * Constructor.
@@ -1192,9 +1179,9 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
         public static String sanitizeFileName(String fileName) {
             String ret = fileName;
             
-            if (ret.lastIndexOf(".") > -1) {
-                String tfname = ret.substring(0, ret.lastIndexOf("."));
-                String tfext = ret.substring(ret.lastIndexOf("."), ret.length());
+            if (ret.lastIndexOf('.') > -1) {
+                String tfname = ret.substring(0, ret.lastIndexOf('.'));
+                String tfext = ret.substring(ret.lastIndexOf('.'), ret.length());
                 ret = SWBUtils.TEXT.replaceSpecialCharactersForFile(tfname, ' ', true) + tfext;
             } else {
                 ret = SWBUtils.TEXT.replaceSpecialCharactersForFile(ret, ' ', true);
@@ -1225,7 +1212,7 @@ public class HTMLContent extends org.semanticwb.portal.resources.sem.base.HTMLCo
          * @return Lista de extensiones filtradas por tipo.
          */
         public static ArrayList<String> getFileTypes(String typeFilter) {
-            ArrayList types = new ArrayList<String>();
+            ArrayList<String> types = new ArrayList<>();
             if (TYPE_ALL.equals(typeFilter) || TYPE_FLASH.equals(typeFilter)) {
                 types.addAll(Arrays.asList(swfType));
             }
