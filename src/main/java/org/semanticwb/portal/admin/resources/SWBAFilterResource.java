@@ -429,16 +429,22 @@ public class SWBAFilterResource extends GenericResource {
             reader.close();
             
             //Se transforma el JSON de la petición a XML y se guarda en el objeto del filtro
-            String res = null;
+            String ret = null;
             try {
                 JSONObject payload = new JSONObject(body.toString());
                 WebSite site = WebSite.ClassMgr.getWebSite(payload.optString("siteId"));
                 if (null != site) {
-                    ResourceFilter filter = ResourceFilter.ClassMgr.getResourceFilter(payload.optString("id"), site);
-                    if (null != filter) {
-                        res = getXMLFilterData(payload);
-                        filter.setXml(res);
-                    }
+                		SemanticObject ob = SWBPlatform.getSemanticMgr().getOntology().getSemanticObject(request.getParameter("suri"));
+                		if (null != ob && ob.instanceOf(Resource.sclass)) {
+	                		Resource res = (Resource) ob.createGenericInstance();
+	                		if (null != res) {
+		                    ResourceFilter filter = res.getResourceFilter();
+		                    if (null != filter) {
+		                        ret = getXMLFilterData(payload);
+		                        filter.setXml(ret);
+		                    }
+	                		}
+                		}
                 }
             } catch (JSONException jsex) {
                 log.error("Error getting response body", jsex);
