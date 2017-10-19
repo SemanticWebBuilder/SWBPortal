@@ -231,26 +231,21 @@ public class GroovyEditor extends GenericAdmResource {
 
         code = request.getParameter("GroovyEditor" + base.getId());
         if (code != null && !"".equals(code)) {
-            try {
-                if (fileName == null) {
-                    fileName = UUID.randomUUID().toString().replaceAll("-", "") + ".groovy";
-                    base.setAttribute("fileName", fileName);
-                    base.updateAttributesToDB();
+            if (fileName == null) {
+                fileName = UUID.randomUUID().toString().replaceAll("-", "") + ".groovy";
+                base.setAttribute("fileName", fileName);
+                base.updateAttributesToDB();
+            }
+            //Escribe el codigo en un archivo de file system
+            synchronized (code) {
+                if (!pathToWrite.exists()) {
+                    pathToWrite.mkdirs();
                 }
-                //Escribe el codigo en un archivo de file system
-                synchronized (code) {
-                    if (!pathToWrite.exists()) {
-                        pathToWrite.mkdirs();
-                    }
-                    pathToWrite = new File(resourcePath + "/" + fileName);
-                    FileWriter writer = new FileWriter(pathToWrite);
-                    writer.write(code);
-                    writer.flush();
-                    writer.close();
-                }
-            } catch (org.semanticwb.SWBException e) {
-                msg = "not ok";
-                log.error("Al escribir en disco.", e);
+                pathToWrite = new File(resourcePath + "/" + fileName);
+                FileWriter writer = new FileWriter(pathToWrite);
+                writer.write(code);
+                writer.flush();
+                writer.close();
             }
             response.setRenderParameter("_msg", msg);
         }

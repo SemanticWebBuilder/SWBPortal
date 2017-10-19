@@ -1045,12 +1045,7 @@ public class SWBALogs extends GenericResource {
                     showPages = "0";
                 }
                 base.setAttribute("showPages", showPages);
-
-                try {
-                    base.updateAttributesToDB();
-                } catch (SWBException ex) {
-                    log.error(ex);
-                }
+                base.updateAttributesToDB();
                 if (request.getParameter("suri") != null) {
                     response.setRenderParameter("suri", request.getParameter("suri"));
                 }

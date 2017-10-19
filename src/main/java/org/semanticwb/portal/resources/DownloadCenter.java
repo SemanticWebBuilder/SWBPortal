@@ -239,15 +239,7 @@ public class DownloadCenter extends GenericResource
             {
                 log.error(ex);
             }
-            try
-            {
-                paramRequest.getResourceBase().updateAttributesToDB();
-
-            }
-            catch (SWBException e)
-            {
-                log.error(e);
-            }    
+            paramRequest.getResourceBase().updateAttributesToDB();
             PrintWriter out = response.getWriter();
             out.println("<script type=\"text/javascript\" language=\"JavaScript\">");
             out.println("   alert('" + paramRequest.getLocaleLogString("OK") + "');");            
@@ -311,14 +303,7 @@ public class DownloadCenter extends GenericResource
                     int hits=Integer.parseInt(shits);
                     hits++;
                     base.setAttribute("hits_"+id, String.valueOf(hits));
-                    try
-                    {
-                        base.updateAttributesToDB();                    
-                    }
-                    catch(SWBException e)
-                    {
-                        log.error(e);                        
-                    }
+                    base.updateAttributesToDB();                    
                     base.addHit(request, paramRequest.getUser(), paramRequest.getWebPage());
                     SWBUtils.IO.copyStream(new FileInputStream(fileName), response.getOutputStream());
                 }

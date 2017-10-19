@@ -483,14 +483,8 @@ System.out.println("request.getParameterValues(\"sites\")="+request.getParameter
                 }
             }
             
-            try {
-                response.getResourceBase().updateAttributesToDB();
-                response.setRenderParameter("msg", "msgOkUpdateResource");
-            }catch(SWBException swbe) {
-                //response.setRenderParameter("msg", "msgOkUpdateResource");
-            }finally {
-                //response.setAction(SWBResourceURL.Action_ADD);
-            }
+            response.getResourceBase().updateAttributesToDB();
+            response.setRenderParameter("msg", "msgOkUpdateResource");
             
             final String supil = request.getParameter("supil");
             if(supil != null) {

@@ -548,14 +548,7 @@ public class LDAPLoadUsers extends GenericResource
                 return;
             }
             paramRequest.getResourceBase().setAttribute("file", file);
-            try
-            {
-                paramRequest.getResourceBase().updateAttributesToDB();
-            }
-            catch (SWBException e)
-            {
-                log.error(e);
-            }
+            paramRequest.getResourceBase().updateAttributesToDB();
             
             try
             {
@@ -637,14 +630,7 @@ public class LDAPLoadUsers extends GenericResource
                 else
                 {
                     paramRequest.getResourceBase().setAttribute("file", file);
-                    try
-                    {
-                        paramRequest.getResourceBase().updateAttributesToDB();
-                    }
-                    catch (SWBException e)
-                    {
-                        log.error(e);
-                    }
+                    paramRequest.getResourceBase().updateAttributesToDB();
                     url = paramRequest.getRenderUrl().setAction("sync").toString();
                     out.println("<script type=\"text/javascript\">");
                     
