@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,7 +18,7 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal;
 
@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.model.GenericIterator;
@@ -48,7 +49,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PFlowManager.
  * 
@@ -88,7 +88,7 @@ public class PFlowManager
      */
     public PFlow[] getFlowsToSendContent(Resource resource)
     {
-        HashSet<PFlow> flows = new HashSet<PFlow>();
+        HashSet<PFlow> flows = new HashSet<>();
         WebSite site = resource.getWebSite();
         Iterator<Resourceable> resourceables = resource.listResourceables();
         while (resourceables.hasNext())
@@ -149,7 +149,7 @@ public class PFlowManager
      */
     public Resource[] getContentsAtFlowOfUser(User user, WebSite site)
     {
-        HashSet<Resource> getContentsAtFlowOfUser = new HashSet<Resource>();
+        HashSet<Resource> getContentsAtFlowOfUser = new HashSet<>();
         if (site != null)
         {
             Iterator<PFlow> flows = site.listPFlows();
@@ -225,8 +225,6 @@ public class PFlowManager
                     boolean inFlow = isInFlow(resource);
                     boolean reviewer = this.isReviewer(resource, user);
                     
-                    //System.out.println("For flow "+flow);
-                    //System.out.println("isInFlow: "+inFlow+", isReviewer:"+reviewer);
                     if (resource != null && inFlow && reviewer)
                     {
                         getContentsAtFlow.add(resource);
@@ -370,7 +368,6 @@ public class PFlowManager
             PFlow flow = instance.getPflow();
             String version = String.valueOf(instance.getVersion());
             version += ".0";
-            //System.out.println("::isReviewer instance version: "+version+", activityName: "+activityName);
             
             if (activityName != null)
             {
@@ -379,7 +376,6 @@ public class PFlowManager
                 for (int iworkflow = 0; iworkflow < workflows.getLength(); iworkflow++)
                 {
                     Element eworkflow = (Element) workflows.item(iworkflow);
-                    //System.out.println("::isReviewer workflowVersion: "+eworkflow.getAttribute("version"));
                     if (eworkflow.getAttribute("version").equals(version))
                     {
                         NodeList activities = eworkflow.getElementsByTagName("activity");
@@ -442,7 +438,6 @@ public class PFlowManager
         {
             String version = String.valueOf(instance.getVersion());
             version = version + ".0";
-            //System.out.println("::approveResource instance version: "+version);
             PFlow flow = instance.getPflow();
             if (this.isReviewer(resource, user))
             {
@@ -454,7 +449,6 @@ public class PFlowManager
                 {
                     Element workflow = (Element) workflows.item(i);
                     String wfVersion = workflow.getAttribute("version");
-                    //System.out.println("::approveResource workflow version: "+wfVersion);
                     if (wfVersion.equals(version))
                     {
                         Element ecurrentActivity = null;
@@ -481,7 +475,6 @@ public class PFlowManager
                                     {
                                         try
                                         {
-                                            //System.out.println("::approveResource next activity: "+newActivity);
                                             instance.setStep(newActivity);
                                             long tinit = System.currentTimeMillis();
                                             instance.setTime(new Date(tinit));
@@ -503,9 +496,6 @@ public class PFlowManager
                                                     long milliseconds = ((hours * 3600) + (days * 86400)) * 1000;
                                                     Date timestart = instance.getTime();
                                                     long timefirst = timestart.getTime() + milliseconds;
-                                                    // TODO:Como controlar las altertas de tiempo
-                                                    /*ControlFlow alert = new ControlFlow(occ, new java.util.Date(timefirst), activityName);
-                                                    PFlowSrv.addControlFlow(alert);*/
                                                 }
                                             }
                                         }
@@ -588,14 +578,12 @@ public class PFlowManager
         PFlowInstance instance = resource.getPflowInstance();
         String version = String.valueOf(instance.getVersion());
         version += ".0";
-        //System.out.println("::rejectContent instance version: "+version);
         Document docxml = SWBUtils.XML.xmlToDom(pflow.getXml());
         NodeList workflows = docxml.getElementsByTagName("workflow");
         for (int i = 0; i < workflows.getLength(); i++)
         {
             Element workflow = (Element) workflows.item(i);
             String wfVersion = workflow.getAttribute("version");
-            //System.out.println("::rejectContent workflow version: "+wfVersion);
             if (wfVersion.equals(version))
             {
                 Element ecurrentActivity = null;
@@ -622,17 +610,6 @@ public class PFlowManager
                             {
                                 try
                                 {
-                                    /*Vector control = PFlowSrv.getControlFlow();
-                                    for (int iControl = 0; iControl < control.size(); iControl++)
-                                    {
-                                    ControlFlow controlFlow = (ControlFlow) control.elementAt(iControl);
-                                    if (controlFlow.getOcurrence().equals(occ.getId()) && controlFlow.getTopicMap().equals(occ.getDbdata().getIdtm()))
-                                    {
-                                    PFlowSrv.removeControlFlow(controlFlow);
-                                    break;
-                                    }
-
-                                    }*/
                                     long tinit = System.currentTimeMillis();
                                     instance.setTime(new Date(tinit));
                                     instance.setStep(newActivity);
@@ -647,12 +624,6 @@ public class PFlowManager
                                         if (days > 0 || hours > 0)
                                         {
                                             long milliseconds = ((hours * 3600) + (days * 86400)) * 1000;
-                                            // TODO: Constrol de tiempo
-                                            /*Timestamp timestart = occ.getDbdata().getFlowtime();
-                                            long timefirst = timestart.getTime() + milliseconds;
-                                            ControlFlow alert = new ControlFlow(occ, new java.util.Date(timefirst), activity);
-                                            PFlowSrv.addControlFlow(alert);*/
-
                                         }
                                     }
 
@@ -755,10 +726,6 @@ public class PFlowManager
         for (int i = 0; i < workflows.getLength(); i++)
         {
             Element workflow = (Element) workflows.item(i);
-            /*System.out.println("XML to check");
-            System.out.println(SWBUtils.XML.domToXml(docxml));
-            System.out.println("Recovered version: "+version);
-            System.out.println("Flow version: "+workflow.getAttribute("version"));*/
             if ((workflow.getAttribute("version")).equals(version))
             {
                 Element ecurrentActivity = null;
@@ -789,10 +756,6 @@ public class PFlowManager
                         {
                             long milliseconds = ((hours * 3600) + (days * 86400)) * 1000;
                             //TODO agregar control de tiempo
-                            /*Timestamp timestart = occ.getDbdata().getFlowtime();
-                            long timefirst = timestart.getTime() + milliseconds;
-                            ControlFlow controlFlow = new ControlFlow(occ, new java.util.Date(timefirst), activity);
-                            PFlowSrv.addControlFlow(controlFlow);*/
                         }
                     }
                 }
@@ -1278,7 +1241,6 @@ public class PFlowManager
             String activityName = instance.getStep();
             String version = String.valueOf(instance.getVersion());
             version += ".0";
-            //System.out.println("::noauthorizeContent instance version:"+version);
             PFlow pflow = instance.getPflow();
             if (instance.getStep() != null)
             {
@@ -1287,7 +1249,6 @@ public class PFlowManager
                 for (int iworkflow = 0; iworkflow < workflows.getLength(); iworkflow++)
                 {
                     Element eworkflow = (Element) workflows.item(iworkflow);
-                    //System.out.println("::noauthorizeContent workflow version:"+eworkflow.getAttribute("version"));
                     if (eworkflow.getAttribute("version").equals(version))
                     {
                         NodeList activities = eworkflow.getElementsByTagName("activity");

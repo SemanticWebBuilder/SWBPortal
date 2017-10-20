@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,11 +18,12 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -30,13 +31,12 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.base.db.DBConnectionPool;
 
-
-// TODO: Auto-generated Javadoc
 /**
  * The Class SWBMonitor.
  */
@@ -50,7 +50,7 @@ public class SWBMonitor implements Serializable
     private transient Timer timer;
     
     /** The vec. */
-    private transient Vector vec=new Vector();
+    private transient ArrayList vec=new ArrayList<>();
     
     /** The max. */
     private transient int max=500;
@@ -79,7 +79,7 @@ public class SWBMonitor implements Serializable
      */
     public void init()
     {
-        vec=new Vector(max);
+        vec=new ArrayList<>(max);
         t=new TimerTask(){
             public void run()
             {
@@ -137,13 +137,14 @@ public class SWBMonitor implements Serializable
     }   
     
     /**
+     * Use ArrayList getMonitorRecords instead.
      * Gets the monitor records.
      * 
      * @return the monitor records
      */
     public Vector getMonitorRecords()
     {
-        return vec;
+        return new Vector (vec);
     }
     
     /**
@@ -154,14 +155,12 @@ public class SWBMonitor implements Serializable
      */
     public Vector getAverageMonitorRecords(int ratio)
     {
-        Vector ret=new Vector();
+        ArrayList ret=new ArrayList<>();
         Vector data=getMonitorRecords();
         int x=0;
         int y=0;
-        //int z=((data.size()-1)/max)+1;
         int z=ratio;
 
-        //long max=0;
         long total=0;
         long free=0;
         long time=0;
@@ -171,7 +170,7 @@ public class SWBMonitor implements Serializable
         long resourceHits=0;
         long cacheResHits=0;
         long cacheResLoadHits=0;     
-        HashMap pools=new HashMap();
+        HashMap pools=new HashMap<>();
 
         Enumeration en=data.elements();
         while(en.hasMoreElements())
@@ -237,7 +236,7 @@ public class SWBMonitor implements Serializable
                 pools=new HashMap();
             }
         }        
-        return ret;
+        return new Vector(ret);
     }
     
     /**

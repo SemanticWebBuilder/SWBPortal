@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,16 +18,23 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources;
 
-import com.hp.hpl.jena.rdf.model.Statement;
-import java.io.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
-import org.w3c.dom.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -45,11 +52,15 @@ import org.semanticwb.portal.api.GenericResource;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
-// TODO: Auto-generated Javadoc
+import com.hp.hpl.jena.rdf.model.Statement;
+
 /**
- * Recurso para la administraci�n de WebBuilder que llama al applet para
- * administrar los mapa de t�picos.
+ * Recurso para la administración de WebBuilder que llama al applet para
+ * administrar los mapa de tópicos.
  *
  * WebBuilder administration resource that calls an applet for topic maps
  * administration.
@@ -104,7 +115,6 @@ public class SWBATMAdmin extends GenericResource
      */
     private Document getService(String cmd, Document src, User user, HttpServletRequest request, HttpServletResponse response, Topic tp)
     {
-        System.out.println("Service mi entrada:"+cmd);
         if (cmd.equals("getTopicMaps"))
         {
             return getTopicMaps(user, src);
@@ -146,19 +156,16 @@ public class SWBATMAdmin extends GenericResource
      */
     public Document getTopicMaps(User user, Document src)
     {
-        Vector vect = new Vector();
         Document dom = null;
         try
         {
             dom = SWBUtils.XML.getNewDocument();
             Element res = dom.createElement("res");
             dom.appendChild(res);
-            Iterator it = SWBContext.listWebSites();
+            Iterator<WebSite> it = SWBContext.listWebSites();
             while (it.hasNext())
             {
-                WebSite tm = (WebSite) it.next();
-                //TODO:
-                //if(tm==SWBContext.getGlobalWebSite() || !AdmFilterMgr.getInstance().haveAccess2Topic(user, tm.getHome()))continue;
+                WebSite tm = it.next();
                 if(tm==SWBContext.getGlobalWebSite())continue;
                 if (!tm.isDeleted())
                 {
@@ -175,7 +182,6 @@ public class SWBATMAdmin extends GenericResource
                     addElement("created", "" + tm.getCreated(), topicmap);
                     if(tm.getLanguage()!=null)addElement("language", tm.getLanguage().getId(), topicmap);
                     else addElement("language", "es", topicmap);
-                    //addElement("size",""+SWBContext.getWebSite(tm.getId()).getTopics().size(),topicmap);
                     addElement("size", "" + 0, topicmap);
                 }
             }
@@ -200,7 +206,7 @@ public class SWBATMAdmin extends GenericResource
         try
         {
             String tm = src.getElementsByTagName("topicmap").item(0).getFirstChild().getNodeValue();
-            Iterator listaTem = SWBContext.getWebSite(tm).listLanguages();
+            Iterator<Language> listaTem = SWBContext.getWebSite(tm).listLanguages();
             if (listaTem.hasNext())
             {
                 dom = SWBUtils.XML.getNewDocument();
@@ -211,7 +217,7 @@ public class SWBATMAdmin extends GenericResource
                 res.appendChild(TempEle);
                 while (listaTem.hasNext())
                 {
-                    Language templateactual = (Language) listaTem.next();
+                    Language templateactual = listaTem.next();
 
                     Element AdmUs = dom.createElement("Lenguaje");
                     addElement("id", templateactual.getId(), AdmUs);
@@ -285,13 +291,11 @@ public class SWBATMAdmin extends GenericResource
             NodeList lista = src.getElementsByTagName("name");
             if (nuevo != null)
             {
-                //ArrayList basenames = new ArrayList();
                 for (int i = 0; i < lista.getLength(); i++)
                 {
                     Element elm = (Element) lista.item(i);
                     String title= elm.getAttribute("value");
                     String scope= elm.getAttribute("scope");
-                    System.out.println("ut: title:"+title+" scope:"+scope);
                     if(scope!=null && !scope.equals("IDM_WB"))
                     {
                         if(scope.startsWith("IDM_WB"))scope=scope.substring(6);
@@ -300,29 +304,7 @@ public class SWBATMAdmin extends GenericResource
                     {
                         nuevo.setTitle(title);
                     }
-                    //TODO:
-                    /*
-                    ArrayList variants = new ArrayList();
-                    NodeList lvar = elm.getElementsByTagName("variant");
-                    for (int j = 0; j < lvar.getLength(); j++)
-                    {
-                        Element var = (Element) lvar.item(j);
-                        Variant vari = new Variant();
-                        VariantName vn = new VariantName();
-                        vn.setResourceData((String) var.getFirstChild().getNodeValue());
-                        vari.setVariantName(vn);
-                        variants.add(vari);
-                    }
-                    bn.setVariants(variants);
-                    */
-
                 }
-                //nuevo.setBaseNames(basenames);
-
-                //new TopicSrv().updateTopic(nuevo, user.getId());
-                //nuevo.getDbdata().setIdAdm(user.getId());
-                //tm.update2DB();
-                //DBAdmLog.getInstance().saveTopicLog(user.getId(), tm.getId(), nuevo.getId(), "update", 0, SWBUtils.TEXT.getLocaleString("locale_Gateway", "admlog_Gateway_getService_TopicUpdated") + " " + nuevo.getId());
                 result = "1";
 
                 dom = SWBUtils.XML.getNewDocument();
@@ -446,8 +428,6 @@ public class SWBATMAdmin extends GenericResource
                 Element res = dom.createElement("res");
                 dom.appendChild(res);
 
-                //TODO:
-                //WebSite tm = AdmFilterMgr.getInstance().getTopicMapFiltered(SWBContext.getWebSite(topicmap),user);
                 WebSite tm = SWBContext.getWebSite(topicmap);
                 if (tm == null) return getError(5);
 
@@ -485,31 +465,6 @@ public class SWBATMAdmin extends GenericResource
                             if(lang!=null)ptr.print("s:IDM_WB" + lang + "\n");
                         }
 
-                        //ptr.print("n:" + t1.getTitle() + "\n");
-                        //TODO
-                        /*
-                        Iterator na = t1.getBaseNames().iterator();
-                        while (na.hasNext())
-                        {
-                            BaseName bn = (BaseName) na.next();
-                            ptr.print("n:" + bn.getBaseNameString() + "\n");
-                            if (bn.getScope() != null)
-                            {
-                                Iterator sit = bn.getScope().getTopicRefs().values().iterator();
-                                while (sit.hasNext())
-                                {
-                                    ptr.print("s:" + ((Topic) (sit.next())).getId() + "\n");
-                                }
-                            }
-                            Iterator va = bn.getVariants().iterator();
-                            while (va.hasNext())
-                            {
-                                Variant v = (Variant) va.next();
-                                VariantName vn = v.getVariantName();
-                                ptr.print("v:" + vn.getResource() + "\n");
-                            }
-                        }
-                        */
                     }
                 }
 
@@ -531,7 +486,7 @@ public class SWBATMAdmin extends GenericResource
                             ptr.print("p:" + t1.getId() + "\n");
                         }
 
-                        Iterator itaux = t1.listVirtualParents();
+                        Iterator<WebPage> itaux = t1.listVirtualParents();
                         while (itaux.hasNext())
                         {
                             type = (WebPage) itaux.next();
@@ -569,13 +524,7 @@ public class SWBATMAdmin extends GenericResource
                                 {
                                     ptr.print("r:null");
                                 }
-//                                Iterator itpla = mem.getMember();
-//                                while (itpla.hasNext())
-//                                {
-//                                    Topic tpla = (Topic) itpla.next();
-//                                    //System.out.println("p:"+trim(topicmap.getSGMLId(tpla)));
-                                    ptr.print("p:" + mem.getMember().getId() + "\n");
-//                                }
+                                ptr.print("p:" + mem.getMember().getId() + "\n");
                             }
                         } else
                         {
@@ -615,8 +564,6 @@ public class SWBATMAdmin extends GenericResource
             if (src.getElementsByTagName("data").getLength() > 0)
                 data = src.getElementsByTagName("data").item(0).getFirstChild().getNodeValue();
 
-            System.out.println("data:"+data);
-
             if (topicmap != null && data != null)
             {
                 dom = SWBUtils.XML.getNewDocument();
@@ -628,12 +575,6 @@ public class SWBATMAdmin extends GenericResource
 
                 Element map = dom.createElement("ok");
                 res.appendChild(map);
-
-                //System.out.println(data);
-
-//                Topic tpl = tm.getWebPage("CNF_WBTemplate");
-//                Topic rule = tm.getWebPage("CNF_WBRule");
-//                Topic pflow = tm.getWebPage("CNF_WBPFlow");
 
                 int type = 1;
 
@@ -657,7 +598,6 @@ public class SWBATMAdmin extends GenericResource
 
                         int nass = 0;
                         WebPage mem[] = new WebPage[2];
-                        String assName = "";
                         String assTypeId = "";
                         String assRole[] = new String[2];
 
@@ -665,7 +605,6 @@ public class SWBATMAdmin extends GenericResource
 
                         while ((aux = in.readLine()) != null)
                         {
-                            //System.out.println(aux);
                             if (aux.startsWith("Type:"))
                             {
                                 type = Integer.parseInt(aux.substring(5));
@@ -717,7 +656,6 @@ public class SWBATMAdmin extends GenericResource
                                 topic = false;
                                 assoc = true;
                                 isnew = true;
-                                assName = "";
                                 assTypeId = "";
                             } else if (aux.equals("Topic"))
                             {
@@ -737,7 +675,6 @@ public class SWBATMAdmin extends GenericResource
                                 topic = false;
                                 assoc = true;
                                 isnew = true;
-                                assName = "";
                                 assTypeId = "";
                             } else
                                 isnew = false;
@@ -749,7 +686,6 @@ public class SWBATMAdmin extends GenericResource
                                     if (!(aux.substring(2).length() == 0))
                                     {
                                         bad = false;
-                                        //System.out.println(aux.substring(2));
                                         if (remove) 
                                         {
                                             //TODO: validar no eliminar dependencias
@@ -763,7 +699,7 @@ public class SWBATMAdmin extends GenericResource
                                         }
                                         if (add)
                                         {
-                                            WebPage page=tm.createWebPage(aux.substring(2));
+                                            tm.createWebPage(aux.substring(2));
                                         }
                                         if (update)
                                         {
@@ -774,7 +710,6 @@ public class SWBATMAdmin extends GenericResource
                                             } else
                                             {
                                                 //Eliminar titulos
-                                                System.out.println("Eliminar Titulos...");
                                                 auxtopic.setTitle(null);
                                                 Iterator<Language> langit=auxtopic.getWebSite().listLanguages();
                                                 while(langit.hasNext())
@@ -800,7 +735,6 @@ public class SWBATMAdmin extends GenericResource
                                 {
                                     if(auxname!=null)
                                     {
-                                        System.out.println("setTitle:"+auxname);
                                         auxtopic.setTitle(auxname);    
                                     }
                                     auxname=aux.substring(2);
@@ -810,22 +744,12 @@ public class SWBATMAdmin extends GenericResource
                                     if(lang.startsWith("IDM_WB"))lang=lang.substring(6);
                                     if(lang.length()>0)
                                     {
-                                        System.out.println("setTitle:"+auxname+" lang:"+lang);
                                         auxtopic.setTitle(auxname, lang);
                                         auxname=null;
                                     }
                                 } else if (aux.startsWith("v:") && !bad)
                                 {
-                                    //TODO:
-                                    //System.out.println("v:"+aux.substring(2));
-                                    /*
-                                    Variant v = new Variant();
-                                    VariantName vn = new VariantName();
-                                    vn.setResourceData(aux.substring(2));
-                                    v.setVariantName(vn);
-                                    auxname.getVariants().add(v);
-                                    //System.out.println(aux.substring(2));
-                                     */
+                                    
                                 }
                             }
 
@@ -847,13 +771,7 @@ public class SWBATMAdmin extends GenericResource
                                 }
                                 if (aux.startsWith("n:"))
                                 {
-                                    if (!(aux.substring(2).length() == 0))
-                                    {
-                                        assName = aux.substring(2);
-                                    } else
-                                    {
-                                        assName = "";
-                                    }
+                                  
                                 } else if (aux.startsWith("r:"))
                                 {
                                     if (!(aux.substring(2).length() == 0))
@@ -870,9 +788,6 @@ public class SWBATMAdmin extends GenericResource
                                     {
                                         if (asstype == 0)
                                         {
-                                            //TopicImpl[] arr=new TopicImpl[1];
-                                            //arr[0]=mem[0];
-                                            //mem[1].setTypes(arr);
                                             if (!mem[1].isParentof(mem[0]))
                                             {
                                                 if(mem[1].getParent()==null)
@@ -880,7 +795,6 @@ public class SWBATMAdmin extends GenericResource
                                                 else
                                                     mem[1].addVirtualParent(mem[0]);
                                             }
-                                            //System.out.println("Addtype:"+mem[0].getDisplayName());
                                         } else
                                         {
                                             Association as=tm.createAssociation();
@@ -896,8 +810,6 @@ public class SWBATMAdmin extends GenericResource
                                             me.setMember(mem[1]);
                                             me.setRole(tm.getWebPage(assRole[1]));
 
-                                            //System.out.println("Addmember:"+mem[0].getDisplayName());
-                                            //System.out.println("Addmember:"+mem[1].getDisplayName());
                                         }
                                     }
                                 }
@@ -905,7 +817,6 @@ public class SWBATMAdmin extends GenericResource
                         }
                         if(auxname!=null)
                         {
-                            System.out.println("setTitle:"+auxname+" fin");
                             auxtopic.setTitle(auxname);
                         }                        
                     }
@@ -914,10 +825,6 @@ public class SWBATMAdmin extends GenericResource
                     log.error(SWBUtils.TEXT.getLocaleString("locale_Gateway", "error_Gateway_getService_UpdateTopicError"), ex);
                     return getError(3);
                 }
-//                if (tm.isDBSyncronized())
-//                    tm.update2DB();
-//                else
-//                    TopicMgr.getInstance().writeTopicMap(tm, "e:/default.xtm.xml");
             } else
                 return getError(4);
         } catch (Exception e)
@@ -926,24 +833,6 @@ public class SWBATMAdmin extends GenericResource
             return getError(3);
         }
         return dom;
-    }    
-    
-    
-    /**
-     * Adds the node.
-     * 
-     * @param node the node
-     * @param id the id
-     * @param name the name
-     * @param parent the parent
-     * @return the element
-     */
-    private Element addNode(String node, String id, String name, Element parent)
-    {
-        Element ret=addElement(node,null,parent);
-        if(id!=null)ret.setAttribute("id",id);
-        if(name!=null)ret.setAttribute("name",name);
-        return ret;
     }
 
     /**
@@ -1129,22 +1018,16 @@ public class SWBATMAdmin extends GenericResource
             response.sendError(404, request.getRequestURI());
             return;
         }
-        String ret;
-        
-        //WebSite tm=SWBContext.getWebSite(request.getParameter("tm"));
-        //if(tm!=null)
+        String ret;        
+        Document res = getService(cmd, dom, paramsRequest.getUser(), request, response,null);
+        if (res == null)
         {
-            //Topic tp=tm.getWebPage(request.getParameter("tp"));
-            Document res = getService(cmd, dom, paramsRequest.getUser(), request, response,null);
-            if (res == null)
-            {
-                ret = SWBUtils.XML.domToXml(getError(3));
-            } else
-                ret = SWBUtils.XML.domToXml(res, true);
-            out.print(new String(ret.getBytes()));
-            out.flush();
-            out.close();            
-        }
+            ret = SWBUtils.XML.domToXml(getError(3));
+        } else
+            ret = SWBUtils.XML.domToXml(res, true);
+        out.print(new String(ret.getBytes()));
+        out.flush();
+        out.close();            
         
     }
     
@@ -1162,14 +1045,10 @@ public class SWBATMAdmin extends GenericResource
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException
     {
         PrintWriter out=response.getWriter();
-        String act=request.getParameter("act");
-        //out.println("<table border=\"0\" cellspacing=\"0\" height=\"100%\" cellpadding=\"0\" width=\"100%\"><tr><td width=\"100%\" height=\"100%\">");
         out.println("<applet id=\"appttmadmin\" name=\"appttmadmin\" code=\"applets.mapsadm.TMWBAdmin.class\" codebase=\""+SWBPlatform.getContextPath()+"/\" ARCHIVE=\"swbadmin/lib/SWBAplTMAdmin.jar, swbadmin/lib/SWBAplCommons.jar\" width=\"100%\" height=\"100%\">");
         SWBResourceURL url=paramsRequest.getRenderUrl();
         url.setMode("gateway");
-        url.setCallMethod(url.Call_DIRECT);
-        //url.setParameter("id",request.getParameter("id"));
-        //url.setParameter("tp",paramsRequest.getTopic().getId());
+        url.setCallMethod(SWBResourceURL.Call_DIRECT);
         out.println("<param name =\"cgipath\" value=\""+url+"\">");
         out.println("<param name =\"jsess\" value=\""+request.getSession().getId()+"\">");
         out.println("<param name=\"foreground\" value=\"3f88b4\">");
@@ -1182,7 +1061,6 @@ public class SWBATMAdmin extends GenericResource
         if(request.getParameter("tp")!=null)
             out.println("<param name=\"TP\" value=\""+request.getParameter("tp")+"\">");
         out.println("</applet>");
-        //out.println("</td></tr></table>");
     }
     
     

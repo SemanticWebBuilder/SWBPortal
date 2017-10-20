@@ -58,7 +58,7 @@ import org.semanticwb.SWBPortal;
 public class WBAAccessSessionReport extends GenericResource {
 
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(WBAAccessSessionReport.class);
+    private static Logger LOG = SWBUtils.getLogger(WBAAccessSessionReport.class);
     
     /** The str rsc type. */
     public String strRscType;
@@ -84,7 +84,7 @@ public class WBAAccessSessionReport extends GenericResource {
      */
     @Override
     public void render(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
-        if (!paramsRequest.WinState_MINIMIZED.equals(paramsRequest.getWindowState())) {
+        if (!SWBParamRequest.WinState_MINIMIZED.equals(paramsRequest.getWindowState())) {
             processRequest(request, response, paramsRequest);
         }
     }
@@ -126,7 +126,6 @@ public class WBAAccessSessionReport extends GenericResource {
         JSONObject jobj = new JSONObject();
         JSONArray jarr = new JSONArray();
         try {
-            //jobj.put("identifier", "uri");
             jobj.put("label", "agregate");
             jobj.put("items", jarr);
         } catch (JSONException jse) {
@@ -138,7 +137,6 @@ public class WBAAccessSessionReport extends GenericResource {
             String[] cols = records.next();
             JSONObject obj = new JSONObject();
             try {
-                //obj.put("detail", "<a onClick=\"doDetail('width=860, height=580, scrollbars, resizable, alwaysRaised, menubar','" + cols[0] + "')\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/SEARCH.png\" border=\"0\" alt=\"detail\"></a>&nbsp;");
                 obj.put("folio", Long.toString(i++));
                 obj.put("date", cols[0]);
                 obj.put("agregate", cols[1]);
@@ -171,7 +169,6 @@ public class WBAAccessSessionReport extends GenericResource {
 
         if (null != hm_detail) {
             if (null != s_key) {
-                //Vector vec_rep = (Vector) hm_detail.get(s_key);
                 List list_rep = (List) hm_detail.get(s_key);
                 if (null != list_rep && !list_rep.isEmpty()) {
                     Iterator<String> ite_rep = list_rep.iterator();
@@ -229,7 +226,7 @@ public class WBAAccessSessionReport extends GenericResource {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
                 SWBResourceURL url = paramsRequest.getRenderUrl();
-                url.setCallMethod(url.Call_DIRECT);
+                url.setCallMethod(SWBResourceURL.Call_DIRECT);
 
                 // javascript
                 ret.append("<script type=\"text/javascript\">\n");
@@ -372,8 +369,6 @@ public class WBAAccessSessionReport extends GenericResource {
                 ret.append("<td align=\"left\" colspan=\"2\">\n");
                 ret.append("<label for=\"wb_fecha11\">" + paramsRequest.getLocaleString("from") + ":&nbsp;</label>\n");
                 ret.append("<input type=\"text\" name=\"wb_fecha11\" onblur=\"if(!this.value){this.focus();}\" id=\"wb_fecha11\" value=\"" + sdf.format(now.getTime()) + "\" dojoType=\"dijit.form.DateTextBox\" required=\"true\" constraints=\"{datePattern:'dd/MM/yyyy'}\" maxlength=\"10\" style=\"width:110px;\" hasDownArrow=\"true\" />\n");
-                /*ret.append("</td>\n");
-                ret.append("<td>\n");*/
                 ret.append("&nbsp;&nbsp;");
                 ret.append("<label for=\"wb_t11\">" + paramsRequest.getLocaleString("time") + ":&nbsp;</label>\n");
                 ret.append("<input type=\"text\" name=\"wb_t11\" id=\"wb_t11\" size=\"6\" style=\"width:40px;\" />\n");
@@ -464,7 +459,7 @@ public class WBAAccessSessionReport extends GenericResource {
                 ret.append("\n</table></form>");
             }
         } catch (Exception e) {
-            log.error("Error on method DoView() resource " + strRscType + " with id " + base.getId(), e);
+            LOG.error("Error on method DoView() resource " + strRscType + " with id " + base.getId(), e);
         }
         response.getWriter().print(ret.toString());
     }
@@ -482,7 +477,7 @@ public class WBAAccessSessionReport extends GenericResource {
         PrintWriter out = response.getWriter();
 
         SWBResourceURL url = paramsRequest.getRenderUrl();
-        url.setCallMethod(paramsRequest.Call_DIRECT).setMode("fillGridDtd");
+        url.setCallMethod(SWBResourceURL.Call_DIRECT).setMode("fillGridDtd");
 
         request.getSession(true).setAttribute("alfilter", request.getParameter("key"));
 
@@ -633,7 +628,7 @@ public class WBAAccessSessionReport extends GenericResource {
             ret.append("</html>\n");
         }
         catch (Exception e) {
-            log.error("Error on method doGraph() resource " + strRscType + " with id " + base.getId(), e);
+            LOG.error("Error on method doGraph() resource " + strRscType + " with id " + base.getId(), e);
         }
         response.getWriter().print(ret.toString());
     }
@@ -699,7 +694,6 @@ public class WBAAccessSessionReport extends GenericResource {
                 out.println("<td>" + paramsRequest.getLocaleString("th_IDsession") + "</td>");
                 out.println("</tr>");
 
-                //Vector vec_rep = (Vector) hm_detail.get(key);
                 List list_rep = (List) hm_detail.get(key);
                 Iterator<String> ite_rep = list_rep.iterator();
                 int i = 1;
@@ -728,7 +722,7 @@ public class WBAAccessSessionReport extends GenericResource {
             out.println("</body>");
             out.println("</html>");
         } catch (Exception ex) {
-            log.error("Error on method doRepExcel() resource " + strRscType + " with id " + base.getId(), ex);
+            LOG.error("Error on method doRepExcel() resource " + strRscType + " with id " + base.getId(), ex);
         }
         out.flush();
         out.close();
@@ -782,7 +776,6 @@ public class WBAAccessSessionReport extends GenericResource {
                 detail.appendChild(dom.createTextNode(""));
                 report.appendChild(detail);
 
-                //Vector vec_rep = (Vector) hm_detail.get(key);
                 List list_rep = (List) hm_detail.get(key);
                 Iterator<String> ite_rep = list_rep.iterator();
                 renglones = 0;
@@ -821,33 +814,12 @@ public class WBAAccessSessionReport extends GenericResource {
                 detail.setAttribute("rows", Integer.toString(renglones));
             }
         } catch (Exception e) {
-            log.error("Error on method doRepXml() resource " + strRscType + " with id " + base.getId(), e);
+            LOG.error("Error on method doRepXml() resource " + strRscType + " with id " + base.getId(), e);
         }
         out.print(SWBUtils.XML.domToXml(dom));
         out.flush();
         out.close();
     }
-
-    /*public String[] DoArrMonth(SWBParamRequest paramsRequest) {
-        String[] arr_month = new String[12];
-        try {
-            arr_month[0] = paramsRequest.getLocaleString("month_january");
-            arr_month[1] = paramsRequest.getLocaleString("month_february");
-            arr_month[2] = paramsRequest.getLocaleString("month_march");
-            arr_month[3] = paramsRequest.getLocaleString("month_april");
-            arr_month[4] = paramsRequest.getLocaleString("month_may");
-            arr_month[5] = paramsRequest.getLocaleString("month_june");
-            arr_month[6] = paramsRequest.getLocaleString("month_july");
-            arr_month[7] = paramsRequest.getLocaleString("month_august");
-            arr_month[8] = paramsRequest.getLocaleString("month_september");
-            arr_month[9] = paramsRequest.getLocaleString("month_october");
-            arr_month[10] = paramsRequest.getLocaleString("month_november");
-            arr_month[11] = paramsRequest.getLocaleString("month_december");
-        } catch (Exception e) {
-            log.error("Error on method DoArrMonth() resource " + strRscType + " with id " + getResourceBase().getId(), e);
-        }
-        return arr_month;
-    }*/
 
     /**
      * Gets the file names.
@@ -860,7 +832,7 @@ public class WBAAccessSessionReport extends GenericResource {
      */
     //public Iterator<String> getFileNames(HttpServletRequest request) {
     public Iterator<String> getFileNames(String repId, GregorianCalendar first, GregorianCalendar last) {
-        ArrayList files = new ArrayList();
+        ArrayList files = new ArrayList<>();
 
         String accessLogPath = SWBPortal.getEnv("swb/accessLog");
         String period = SWBPortal.getEnv("swb/accessLogPeriod");
@@ -911,7 +883,7 @@ public class WBAAccessSessionReport extends GenericResource {
         final int I_ONE = 1;        
         final int I_TWENTYFOUR = 24;
 
-        hm_detail = new HashMap();
+        hm_detail = new HashMap<>();
 
         ArrayList al_pag = new ArrayList();
         GregorianCalendar datefile = null;
@@ -983,7 +955,6 @@ public class WBAAccessSessionReport extends GenericResource {
         try {
             sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             //Get log filenames
-            //Iterator<String> files = getFileNames(request);
             Iterator<String> files = getFileNames(repId, (GregorianCalendar)first.clone(), (GregorianCalendar)last.clone());
             //If there are files
             if (files.hasNext()) {
@@ -1205,7 +1176,7 @@ public class WBAAccessSessionReport extends GenericResource {
                         //ends read of file
                         rf_in.close();
                     } else {
-                        log.error("File " + filename + " not found on method getReportResults() resource " + strRscType + " with id " + getResourceBase().getId());
+                        LOG.error("File " + filename + " not found on method getReportResults() resource " + strRscType + " with id " + getResourceBase().getId());
                     }
                 }
             }
@@ -1214,7 +1185,7 @@ public class WBAAccessSessionReport extends GenericResource {
             if (agregateId.equalsIgnoreCase("1") || agregateId.equalsIgnoreCase("2")) {
                 i_start = 0;
                 s_year = null;
-                ArrayList al_aux = new ArrayList();
+                ArrayList al_aux = new ArrayList<>();
                 for (int h = 0; h < al_pag.size(); h++) {
                     String[] arr_dataaux = (String[]) al_pag.get(h);
                     if (i_start == 0) {
@@ -1243,7 +1214,7 @@ public class WBAAccessSessionReport extends GenericResource {
                 al_pag = al_aux;
             }
         } catch (Exception e) {
-            log.error("Error on method getReportResults() resource " + strRscType + " with id " + getResourceBase().getId(), e);
+            LOG.error("Error on method getReportResults() resource " + strRscType + " with id " + getResourceBase().getId(), e);
         }
         return al_pag.iterator();
     }
@@ -1260,7 +1231,7 @@ public class WBAAccessSessionReport extends GenericResource {
             return null;
         }
 
-        HashMap result = new HashMap();
+        HashMap result = new HashMap<>();
         GregorianCalendar cal = new GregorianCalendar();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         StringTokenizer tokens = new StringTokenizer(line, "|");

@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,11 +18,13 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.lib;
 
-// TODO: Auto-generated Javadoc
+import java.util.ArrayList;
+import java.util.Collections;
+
 /**
  * Clase que implementa HttpSession, la cual se utiliza para remplazar la
  * Sesión por defecto para se enviado al recurso.
@@ -62,7 +64,7 @@ public class SWBSession implements javax.servlet.http.HttpSession
      */
     public java.util.Enumeration getAttributeNames()
     {
-        return (new java.util.Vector()).elements();
+        return Collections.enumeration(new ArrayList<>());
     }
 
     /* (non-Javadoc)

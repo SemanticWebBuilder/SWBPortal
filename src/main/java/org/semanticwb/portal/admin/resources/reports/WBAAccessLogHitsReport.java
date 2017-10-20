@@ -34,7 +34,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -180,7 +179,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
      * @param space the space
      */
     private void renderDeviceSelect(ArrayList origList, Device node, String language, StringBuilder ret, String space) {
-        ArrayList<Device> devs=new ArrayList<Device>();
+        ArrayList<Device> devs=new ArrayList<>();
         Iterator<Device> itDevices = node.listChilds();
         while(itDevices.hasNext()) {
             devs.add(itDevices.next());
@@ -387,7 +386,7 @@ public class WBAAccessLogHitsReport extends GenericResource {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
                 SWBResourceURL url = paramsRequest.getRenderUrl();
-                url.setCallMethod(url.Call_DIRECT);
+                url.setCallMethod(SWBResourceURL.Call_DIRECT);
 
                 // javascript
                 ret.append("<script type=\"text/javascript\">\n");
@@ -1270,7 +1269,6 @@ public class WBAAccessLogHitsReport extends GenericResource {
         String userId = request.getParameter("userid");
         String languageId = request.getParameter("langid");
         String deviceId = request.getParameter("devid");
-        String usertypeId = null;
         String resourceId = request.getParameter("resid");
         String agregateId = request.getParameter("agregate")==null ? "2":request.getParameter("agregate");
         

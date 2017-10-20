@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -18,47 +18,53 @@
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ *  http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.admin.resources.reports;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.text.ParseException;
-import java.util.*;
 import java.text.SimpleDateFormat;
-
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
-import javax.servlet.http.HttpServletResponse;
+
 import javax.servlet.http.HttpServletRequest;
-
-import org.semanticwb.Logger;
-import org.semanticwb.SWBUtils;
-import org.semanticwb.SWBPlatform;
-import org.semanticwb.model.Resource;
-import org.semanticwb.model.UserRepository;
-
-import org.semanticwb.model.SWBContext;
-import org.semanticwb.portal.api.SWBResourceURL;
-import org.semanticwb.portal.api.GenericResource;
-import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.SWBResourceException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.semanticwb.Logger;
+import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
+import org.semanticwb.SWBUtils;
+import org.semanticwb.model.Resource;
+import org.semanticwb.model.SWBContext;
+import org.semanticwb.model.UserRepository;
+import org.semanticwb.portal.api.GenericResource;
+import org.semanticwb.portal.api.SWBParamRequest;
+import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.api.SWBResourceURL;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class WBAAccessLoginReport.
  */
 public class WBAAccessLoginReport extends GenericResource {
 
     /** The log. */
-    private static Logger log = SWBUtils.getLogger(WBAAccessLoginReport.class);
+    private static Logger LOG = SWBUtils.getLogger(WBAAccessLoginReport.class);
     
     /** The str rsc type. */
     public String strRscType;
@@ -84,7 +90,7 @@ public class WBAAccessLoginReport extends GenericResource {
      */
     @Override
     public void render(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramsRequest) throws SWBResourceException, IOException {
-        if (!paramsRequest.WinState_MINIMIZED.equals(paramsRequest.getWindowState())) {
+        if (!SWBParamRequest.WinState_MINIMIZED.equals(paramsRequest.getWindowState())) {
             processRequest(request, response, paramsRequest);
         }
     }
@@ -172,7 +178,6 @@ public class WBAAccessLoginReport extends GenericResource {
 
         if (null != hm_detail) {
             if (null != s_key) {
-                //Vector vec_rep = (Vector) hm_detail.get(s_key);
                 List list_rep = (List) hm_detail.get(s_key);
                 if (null != list_rep && !list_rep.isEmpty()) {
                     Iterator<String> ite_rep = list_rep.iterator();
@@ -215,7 +220,7 @@ public class WBAAccessLoginReport extends GenericResource {
         Resource base = paramsRequest.getResourceBase();
         StringBuilder ret = new StringBuilder();
 
-        HashMap hm_repository = new HashMap();
+        HashMap hm_repository = new HashMap<>();
 
         try {
             // Evaluates if there are repository
@@ -231,7 +236,7 @@ public class WBAAccessLoginReport extends GenericResource {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
                 SWBResourceURL url = paramsRequest.getRenderUrl();
-                url.setCallMethod(url.Call_DIRECT);
+                url.setCallMethod(SWBResourceURL.Call_DIRECT);
 
                 // javascript
                 ret.append("<script type=\"text/javascript\">\n");
@@ -466,7 +471,7 @@ public class WBAAccessLoginReport extends GenericResource {
                 ret.append("\n</table></form>");
             }
         } catch (Exception e) {
-            log.error("Error on method DoView() resource " + strRscType + " with id " + base.getId(), e);
+            LOG.error("Error on method DoView() resource " + strRscType + " with id " + base.getId(), e);
         }
         response.getWriter().print(ret.toString());
     }
@@ -484,7 +489,7 @@ public class WBAAccessLoginReport extends GenericResource {
         PrintWriter out = response.getWriter();
 
         SWBResourceURL url = paramsRequest.getRenderUrl();
-        url.setCallMethod(paramsRequest.Call_DIRECT).setMode("fillGridDtd");
+        url.setCallMethod(SWBResourceURL.Call_DIRECT).setMode("fillGridDtd");
 
         request.getSession(true).setAttribute("alfilter", request.getParameter("key"));
 
@@ -635,7 +640,7 @@ public class WBAAccessLoginReport extends GenericResource {
             ret.append("</html>\n");
         }
         catch (Exception e) {
-            log.error("Error on method doGraph() resource " + strRscType + " with id " + base.getId(), e);
+            LOG.error("Error on method doGraph() resource " + strRscType + " with id " + base.getId(), e);
         }
         response.getWriter().print(ret.toString());
     }
@@ -729,7 +734,7 @@ public class WBAAccessLoginReport extends GenericResource {
             out.println("</body>");
             out.println("</html>");
         } catch (Exception ex) {
-            log.error("Error on method doRepExcel() resource " + strRscType + " with id " + base.getId(), ex);
+            LOG.error("Error on method doRepExcel() resource " + strRscType + " with id " + base.getId(), ex);
         }
         out.flush();
         out.close();
@@ -821,7 +826,7 @@ public class WBAAccessLoginReport extends GenericResource {
                 detail.setAttribute("rows", Integer.toString(renglones));
             }
         } catch (Exception e) {
-            log.error("Error on method doRepXml() resource " + strRscType + " with id " + base.getId(), e);
+            LOG.error("Error on method doRepXml() resource " + strRscType + " with id " + base.getId(), e);
         }
         out.print(SWBUtils.XML.domToXml(dom));
         out.flush();
@@ -839,7 +844,7 @@ public class WBAAccessLoginReport extends GenericResource {
      */
     //public Iterator<String> getFileNames(HttpServletRequest request) {
     public Iterator<String> getFileNames(String repId, GregorianCalendar first, GregorianCalendar last) {
-        ArrayList files = new ArrayList();
+        ArrayList files = new ArrayList<>();
 
         String accessLogPath = SWBPlatform.getEnv("swb/accessLog");
         String period = SWBPortal.getEnv("swb/accessLogPeriod");
@@ -892,7 +897,7 @@ public class WBAAccessLoginReport extends GenericResource {
 
         hm_detail = new HashMap();
 
-        ArrayList al_pag = new ArrayList();
+        ArrayList al_pag = new ArrayList<>();
         GregorianCalendar datefile = null;
         GregorianCalendar datedefault = null;
         String[] arr_data = null;
@@ -962,12 +967,10 @@ public class WBAAccessLoginReport extends GenericResource {
         try {
             sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             //Get log filenames
-            //Iterator<String> files = getFileNames(request);
             Iterator<String> files = getFileNames(repId, (GregorianCalendar)first.clone(), (GregorianCalendar)last.clone());
             //If there are files
             if (files.hasNext()) {
                 String s_key = null;
-                //Vector vec_rep = null;
                 List list_rep = null;
                 //While a file exist
                 while (files.hasNext()) {
@@ -1184,7 +1187,7 @@ public class WBAAccessLoginReport extends GenericResource {
                         //ends read of file
                         rf_in.close();
                     } else {
-                        log.error("File " + filename + " not found on method getReportResults() resource " + strRscType + " with id " + getResourceBase().getId());
+                        LOG.error("File " + filename + " not found on method getReportResults() resource " + strRscType + " with id " + getResourceBase().getId());
                     }
                 }
             }
@@ -1193,7 +1196,7 @@ public class WBAAccessLoginReport extends GenericResource {
             if (agregateId.equalsIgnoreCase("1") || agregateId.equalsIgnoreCase("2")) {
                 i_start = 0;
                 s_year = null;
-                ArrayList al_aux = new ArrayList();
+                ArrayList al_aux = new ArrayList<>();
                 for (int h = 0; h < al_pag.size(); h++) {
                     String[] arr_dataaux = (String[]) al_pag.get(h);
                     if (i_start == 0) {
@@ -1222,7 +1225,7 @@ public class WBAAccessLoginReport extends GenericResource {
                 al_pag = al_aux;
             }
         } catch (Exception e) {
-            log.error("Error on method getReportResults() resource " + strRscType + " with id " + getResourceBase().getId(), e);
+            LOG.error("Error on method getReportResults() resource " + strRscType + " with id " + getResourceBase().getId(), e);
         }
         return al_pag.iterator();
     }
@@ -1239,7 +1242,7 @@ public class WBAAccessLoginReport extends GenericResource {
             return null;
         }
 
-        HashMap result = new HashMap();
+        HashMap result = new HashMap<>();
         GregorianCalendar cal = new GregorianCalendar();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         StringTokenizer tokens = new StringTokenizer(line, "|");
