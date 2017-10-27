@@ -150,7 +150,11 @@ public class GenericAdmResource extends GenericResource
                     msg=SWBUtils.TEXT.getLocaleString("org.semanticwb.portal.api.GenericAdmResource","msgOkUpdateResource", new Locale(paramsRequest.getUser().getLanguage())) +" "+ base.getId();
                     ret.append(
                         "<script language=\"JavaScript\">\n"+
-                        "   alert('"+msg+"');\n"+
+                        "  if (parent.showStatus && typeof parent.showStatus === 'function') {"+
+                        "     parent.showStatus('"+msg+"'); "+
+                        "   } else {"+
+                        "     alert('"+msg+"');"+
+                        "   }\n"+
                         "</script>\n"); 
                     if(applet!=null && !applet.trim().equals("")) ret.append(applet);
                     else
