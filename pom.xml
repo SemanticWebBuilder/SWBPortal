@@ -156,20 +156,55 @@
           <activeByDefault>true</activeByDefault>
         </activation>
         <build>
-            <resources>
-                <resource>
-                    <directory>src/main/java</directory>
-                    <includes>
-                        <include>**/*.owl</include>
-                        <include>**/*.jasper</include>
-                        <include>**/*.jrxml</include>
-                        <include>**/*.properties</include>
-                        <include>**/*.xml</include>
-                        <include>**/*.xslt</include>
-                        <include>**/*.jpg</include>
-                    </includes>
-                </resource>
-            </resources>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.10.4</version>
+              <configuration>
+                <failOnError>false</failOnError>
+              </configuration>
+              <executions>
+                <execution>
+                  <id>attach-javadocs</id>
+                  <goals>
+                    <goal>jar</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-source-plugin</artifactId>
+              <version>3.0.1</version>
+              <configuration>
+                <failOnError>false</failOnError>
+                <attach>true</attach>
+              </configuration>
+              <executions>
+                <execution>
+                  <id>attach-sources</id>
+                  <goals>
+                    <goal>jar-no-fork</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+          <resources>
+            <resource>
+              <directory>src/main/java</directory>
+              <includes>
+                <include>**/*.owl</include>
+                <include>**/*.jasper</include>
+                <include>**/*.jrxml</include>
+                <include>**/*.properties</include>
+                <include>**/*.xml</include>
+                <include>**/*.xslt</include>
+                <include>**/*.jpg</include>
+              </includes>
+            </resource>
+          </resources>
         </build>
         <repositories>
             <repository>
