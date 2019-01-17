@@ -12,9 +12,8 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.semanticwb.SWBException;
-import org.semanticwb.SWBPlatform;
-import org.semanticwb.SWBPortal;
+
+import org.semanticwb.*;
 import org.semanticwb.model.Resource;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.User;
@@ -33,6 +32,7 @@ import org.semanticwb.portal.db.SWBRecHits_;
  * @author carlos.ramos
  */
 public class SWBAGlobalAccessMonitor extends GenericResource {
+    private static final Logger LOG = SWBUtils.getLogger(SWBAGlobalAccessMonitor.class);
     private static final String Mode_HMONITOR = "hm";
     
     /**
@@ -483,7 +483,11 @@ System.out.println("request.getParameterValues(\"sites\")="+request.getParameter
                 }
             }
             
-            response.getResourceBase().updateAttributesToDB();
+            try {
+                response.getResourceBase().updateAttributesToDB();
+            } catch (SWBException swbe) {
+                LOG.error("Error saving attributes to resource base");
+            }
             response.setRenderParameter("msg", "msgOkUpdateResource");
             
             final String supil = request.getParameter("supil");

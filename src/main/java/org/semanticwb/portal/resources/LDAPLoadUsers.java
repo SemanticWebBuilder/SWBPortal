@@ -548,7 +548,11 @@ public class LDAPLoadUsers extends GenericResource
                 return;
             }
             paramRequest.getResourceBase().setAttribute("file", file);
-            paramRequest.getResourceBase().updateAttributesToDB();
+            try {
+                paramRequest.getResourceBase().updateAttributesToDB();
+            } catch (SWBException swbe) {
+                log.error("Error saving data to resource base", swbe);
+            }
             
             try
             {
@@ -630,7 +634,11 @@ public class LDAPLoadUsers extends GenericResource
                 else
                 {
                     paramRequest.getResourceBase().setAttribute("file", file);
-                    paramRequest.getResourceBase().updateAttributesToDB();
+                    try {
+                        paramRequest.getResourceBase().updateAttributesToDB();
+                    } catch (SWBException swbe) {
+                        log.error("Error saving data to resource base", swbe);
+                    }
                     url = paramRequest.getRenderUrl().setAction("sync").toString();
                     out.println("<script type=\"text/javascript\">");
                     

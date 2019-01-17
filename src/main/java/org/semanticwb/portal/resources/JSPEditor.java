@@ -32,10 +32,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.semanticwb.Logger;
-import org.semanticwb.SWBPlatform;
-import org.semanticwb.SWBPortal;
-import org.semanticwb.SWBUtils;
+import org.semanticwb.*;
 import org.semanticwb.model.Resource;
 import org.semanticwb.portal.api.GenericAdmResource;
 import org.semanticwb.portal.api.SWBActionResponse;
@@ -233,7 +230,11 @@ public class JSPEditor extends GenericAdmResource {
             if (fileName == null) {
                 fileName = UUID.randomUUID().toString().replaceAll("-", "") + ".jsp";
                 base.setAttribute("fileName", fileName);
-                base.updateAttributesToDB();
+                try {
+                    base.updateAttributesToDB();
+                } catch (SWBException swbe) {
+                    log.error("Error saving attributes to resource base");
+                }
             }
             //Escribe el codigo en un archivo de file system
             synchronized (code) {

@@ -1761,7 +1761,11 @@ public class BlogResource extends GenericResource
     public void asignBlog(int blogid)
     {
         this.getResourceBase().setAttribute("blogid", String.valueOf(blogid));
-        this.getResourceBase().updateAttributesToDB();
+        try {
+            this.getResourceBase().updateAttributesToDB();
+        } catch (SWBException swbe) {
+            log.error("Error setting blogid", swbe);
+        }
     }
     
     /**
@@ -1774,7 +1778,11 @@ public class BlogResource extends GenericResource
     public void asignBlog(HttpServletRequest request, SWBActionResponse response, int blogid)
     {
         this.getResourceBase().setAttribute("blogid", String.valueOf(blogid));
-        this.getResourceBase().updateAttributesToDB();
+        try {
+            this.getResourceBase().updateAttributesToDB();
+        } catch (SWBException swbe) {
+            log.error("Error assigning blog", swbe);
+        }
         response.setMode(SWBResourceURL.Mode_ADMIN);
     }
 
@@ -2165,7 +2173,7 @@ public class BlogResource extends GenericResource
                     getResourceBase().setAttribute("format_comments", format_comments);
                     getResourceBase().updateAttributesToDB();
                 }
-                catch ( IllegalArgumentException iae )
+                catch ( IllegalArgumentException | SWBException iae )
                 {
                     log.error(iae);
                     return;
@@ -2180,7 +2188,7 @@ public class BlogResource extends GenericResource
                     getResourceBase().setAttribute("format", format);
                     getResourceBase().updateAttributesToDB();
                 }
-                catch ( IllegalArgumentException iae )
+                catch ( IllegalArgumentException | SWBException iae )
                 {
                     log.error(iae);
                     return;
@@ -2196,7 +2204,11 @@ public class BlogResource extends GenericResource
             if ( numofblogs != null && !numofblogs.equals("") )
             {
                 this.getResourceBase().setAttribute("numofblogs", String.valueOf(Integer.parseInt(numofblogs)));
-                getResourceBase().updateAttributesToDB();
+                try {
+                    getResourceBase().updateAttributesToDB();
+                } catch (SWBException swbe) {
+                    log.error("Error saving data to resource base", swbe);
+                }
                 response.setMode(SWBActionResponse.Mode_ADMIN);
                 
             }
@@ -2205,14 +2217,22 @@ public class BlogResource extends GenericResource
             if ( anonimous != null && !anonimous.equals("") )
             {
                 this.getResourceBase().setAttribute("anonimous", String.valueOf(Boolean.parseBoolean(anonimous)));
-                getResourceBase().updateAttributesToDB();
+                try {
+                    getResourceBase().updateAttributesToDB();
+                } catch (SWBException swbe) {
+                    log.error("Error saving data to resource base", swbe);
+                }
                 response.setMode(SWBActionResponse.Mode_ADMIN);                
             }
             String numofcomments = request.getParameter("numofcomments");
             if ( numofcomments != null && !numofcomments.equals("") )
             {
                 this.getResourceBase().setAttribute("numofcomments", String.valueOf(Integer.parseInt(numofcomments)));
-                getResourceBase().updateAttributesToDB();
+                try {
+                    getResourceBase().updateAttributesToDB();
+                } catch (SWBException swbe) {
+                    log.error("Error saving data to resource base", swbe);
+                }
                 response.setMode(SWBActionResponse.Mode_ADMIN);
                 return;
             }
@@ -2883,7 +2903,11 @@ public class BlogResource extends GenericResource
                 createForm(out, paramRequest);
                 out.println("</td></tr>");
                 this.getResourceBase().setAttribute("blogid", null);
-                this.getResourceBase().updateAttributesToDB();
+                try {
+                    this.getResourceBase().updateAttributesToDB();
+                } catch (SWBException swbe) {
+                    log.error("Error saving data to resource base", swbe);
+                }
             }
         }
         out.println("<tr><td>&nbsp;</td></tr>");
