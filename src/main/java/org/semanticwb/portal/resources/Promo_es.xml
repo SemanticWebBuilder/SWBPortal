@@ -6,7 +6,7 @@
     <fieldset legend="Configuración de estrategia">
         <input type="text" name="title" label="Título" promptMessage="Título" />
         <input type="text" name="subtitle" label="Subtítulo" maxlength="50" promptMessage="Subtítulo" />
-        <input type="file" name="imgfile" label="Imagen (gif, jpg, jpeg, png, swf)" showfile="true" filetype="jpg|jpeg|gif|png|swf" isshowfiletype="true" isremovefile="true" removemsg="Quitar imagen" size="40"/>
+        <input type="file" name="imgfile" label="Imagen (gif, jpg, jpeg, png)" showfile="true" filetype="jpg|jpeg|gif|png|swf" isshowfiletype="true" isremovefile="true" removemsg="Quitar imagen" size="40"/>
         <input type="text" name="caption" label="Pie de foto" maxlength="50" promptMessage="Pie de foto" />
         <textarea name="text" label="Texto" rows="5" cols="50"  jsrequired="true"/>
         <input type="text" name="more" label="Texto para liga" maxlength="50" promptMessage="Texto para liga" />
