@@ -175,11 +175,8 @@ public class Login implements InternalServlet
             logbuf.append(" to site:");
             logbuf.append(request.getServerName());
         }
-        try {
-            SWBUtils.EMAIL.sendBGEmail(usr.getEmail(), request.getServerName(), logbuf.toString());
-        } catch (java.net.SocketException sex) {
-            log.error(sex);
-        }
+
+        SWBUtils.EMAIL.sendBGEmail(usr.getEmail(), request.getServerName(), logbuf.toString());
     }
 
     /* (non-Javadoc)

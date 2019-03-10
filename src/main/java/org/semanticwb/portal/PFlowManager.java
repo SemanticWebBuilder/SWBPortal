@@ -854,14 +854,8 @@ public class PFlowManager
                             msg += "\r\n" + resourceBundle.getString("section") + " " + ((WebPage) resource.getResourceable()).getTitle();
                             msg += "\r\n" + resourceBundle.getString("site") + " " + resource.getWebSite().getTitle();
                             msg += "\r\n" + resourceBundle.getString("mensaje") + " " + message;
-                            try
-                            {
-                                SWBUtils.EMAIL.sendBGEmail(to, subject, msg);
-                            }
-                            catch (SocketException se)
-                            {
-                                log.error(se);
-                            }
+
+                            SWBUtils.EMAIL.sendBGEmail(to, subject, msg);
                         }
 
                     }
