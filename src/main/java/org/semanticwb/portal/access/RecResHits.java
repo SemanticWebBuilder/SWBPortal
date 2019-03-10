@@ -22,15 +22,17 @@
  */
 package org.semanticwb.portal.access;
 
-import java.sql.*;
-
-import java.util.*;
 import org.semanticwb.Logger;
 import org.semanticwb.SWBException;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.base.SWBObserver;
-import org.semanticwb.util.ObjectDecoder;
-import org.semanticwb.util.ObjectEncoder;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 
 // TODO: Auto-generated Javadoc
@@ -98,36 +100,6 @@ public class RecResHits //implements WBDBRecord
         this.hits_objid = hits_objid;
         this.hits_type = hits_type;
         this.hits = hits;
-    }
-    
-    /**
-     * Instantiates a new rec res hits.
-     * 
-     * @param dec the dec
-     */
-    public RecResHits(ObjectDecoder dec)
-    {
-        this.hits_date = dec.getTimeStamp(0);
-        this.hits_modelid = dec.getString(1);
-        this.hits_objid = dec.getString(2);
-        this.hits_type= dec.getInt(3);
-        this.hits = dec.getLong(4);
-    }
-    
-    /**
-     * Gets the encoder.
-     * 
-     * @return the encoder
-     */
-    public ObjectEncoder getEncoder()
-    {
-        ObjectEncoder enc=new ObjectEncoder("RecResHits");
-        enc.addTimestamp(hits_date);
-        enc.addString(hits_modelid);
-        enc.addString(hits_objid);
-        enc.addInt(hits_type);
-        enc.addLong(hits);
-        return enc;
     }
     
     /**
