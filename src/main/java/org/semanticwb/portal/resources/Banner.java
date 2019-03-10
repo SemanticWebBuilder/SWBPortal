@@ -6,7 +6,7 @@
  * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
  * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
  *
- * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público ('open source'),
  * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
  * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
  * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
@@ -17,264 +17,232 @@
  * de la misma.
  *
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
- * dirección electrónica:
- *  http://www.semanticwebbuilder.org
+ * dirección electrónica: http://www.semanticwebbuilder.org.mx
  */
 package org.semanticwb.portal.resources;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.Iterator;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.semanticwb.Logger;
-import org.semanticwb.SWBPlatform;
-import org.semanticwb.SWBPortal;
-import org.semanticwb.SWBUtils;
+import org.semanticwb.*;
 import org.semanticwb.model.Resource;
+import org.semanticwb.model.ResourceType;
 import org.semanticwb.model.User;
 import org.semanticwb.model.WebPage;
-import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.GenericAdmResource;
 import org.semanticwb.portal.api.SWBActionResponse;
+import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.resources.base.BannerBase;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.Iterator;
 
-// TODO: Auto-generated Javadoc
 /**
- * Banner se encarga de desplegar y administrar un banner bajo ciertos
- * criterios(configuración de recurso).
- *
- * Banner is in charge to unfold and to administer a banner under certain
- * criteria (resource configuration).
- *
- * @author : Jorge Alberto Jiménez
- * @version 1.0
+ * Componente para administrar un banner Web.
+ * @author : Hasdai Pacheco
  */
+public class Banner extends BannerBase {
+    private static Logger LOG = SWBUtils.getLogger(Banner.class);
 
-public class Banner extends GenericAdmResource {
-    /** The log. */
-    private static Logger log = SWBUtils.getLogger(Banner.class);
-
-    /* (non-Javadoc)
-     * @see org.semanticwb.portal.api.GenericAdmResource#doView(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
-     */
-    
     @Override
-    public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+    public void init() throws SWBResourceException {
+        super.init();
+        migrate(getResource().getResourceType());
+    }
+
+    @Override
+    public void install(ResourceType recobj) throws SWBResourceException {
+        super.install(recobj);
+        copyResources(recobj);
+    }
+
+    @Override
+    public void uninstall(ResourceType recobj) throws SWBResourceException {
+        super.uninstall(recobj);
+
+        //Remove resource assets
+        File jsp = new File(getAssetsFolderPath(recobj));
+        if (jsp.exists()) {
+            SWBUtils.IO.removeDirectory(jsp.getAbsolutePath());
+            LOG.info("Resource " + recobj.getTitle() +" assets removed");
+        }
+    }
+
+    @Override
+    public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
+        //Record hit on resource
         Resource base = getResourceBase();
-        PrintWriter out = response.getWriter();
-        String lang=paramRequest.getUser().getLanguage();
-
-        try {
-//            String local = base.getAttribute("local", "0");
-            String code =base.getAttribute("code");
-//            if( local.equals("0")||code==null ) {
-            if(code==null) {
-                String img = base.getAttribute("img","");
-                String longdesc = base.getAttribute("longdesc");
-                String url = base.getAttribute("url");
-
-                String width = paramRequest.getArgument("width", base.getAttribute("width"));
-                try {
-                    Integer.parseInt( width.replaceAll("\\D", "") );
-                }catch(Exception e) {
-                    width = null;
-                }
-                String height = paramRequest.getArgument("height", base.getAttribute("height"));
-                try {
-                    Integer.parseInt( height.replaceAll("\\D", "") );
-                }catch(Exception e) {
-                    height = null;
-                }
-
-                //Para envío de parametros que traiga la página actual(07/09/2011)
-                String QueryStream="";
-                if(request.getQueryString()!=null) QueryStream="?"+SWBUtils.TEXT.encodeURLChars4CSS(request.getQueryString()); 
-               
-                String wburl = null;
-                if( url!=null && url.toLowerCase().startsWith("mailto:") )
-                    wburl = url.replaceAll("\"", "&#34;");
-                else if(url!=null)
-                    wburl = paramRequest.getActionUrl().toString();
-
-                if( img.endsWith(".swf") ) {
-                    out.print("<object ");
-                    out.print(" classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" ");
-                    out.print(" codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab\"");
-                    if(width!=null)
-                        out.print(" width=\""+width+"\"");
-                    if(height!=null)
-                        out.print(" height=\""+height+"\"");
-                    out.println(">");
-                    out.println("<param name=\"movie\" value=\""+SWBPortal.getWebWorkPath()+base.getWorkPath()+"/"+img+"\" />");
-                    if(wburl!=null)
-                        out.println("<param name=\"flashvars\" value=\"liga="+wburl+"\" />\n");
-                    out.println("<param name=\"quality\" value=\"high\"/> <param name=\"wmode\" value=\"transparent\"/> <param name=\"play\" value=\"true\"/> <param name=\"loop\" value=\"true\"/>");
-
-                    out.print("<embed pluginspage=\"http://get.adobe.com/flashplayer/\" type=\"application/x-shockwave-flash\" quality=\"high\" wmode=\"transparent\" play=\"true\" loop=\"true\" ");
-                    out.print(" src=\""+SWBPortal.getWebWorkPath()+base.getWorkPath()+"/"+img+"\"");
-                    if(wburl!=null)
-                        out.print(" flashvars=\"liga="+wburl+"\"");
-                    if(width!=null)
-                        out.print(" width=\""+width+"\"");
-                    if(height!=null)
-                        out.print(" height=\""+height+"\"");
-                    out.println(">");
-                    out.println("</embed></object>");
-                }else {
-                    if( url!=null ) {                        
-                        out.print("<a class=\"swb-banner\"");
-                        out.print(" href=\""+url+"\"");
-                        if( Boolean.parseBoolean(base.getAttribute("target")) )
-                        { 
-                            out.print(" onclick=\"window.open('"+paramRequest.getActionUrl()+QueryStream+"');return false;\" target=\"_blank\"");
-                        }else{
-                            out.print(" onclick=\"window.location.href='"+paramRequest.getActionUrl()+QueryStream+"';return false;\"");
-                        }
-                        //out.println(" title=\""+base.getAttribute("title","")+"\">");
-                        out.println(" title=\""+base.getDisplayTitle(paramRequest.getUser().getLanguage())+"\">");
-                        
-                    }
-                    out.print("<img src=\"");
-                    out.print(SWBPortal.getWebWorkPath() + base.getWorkPath() + "/" + img + "\"");
-                    out.print(" alt=\""+base.getAttribute("alt", paramRequest.getLocaleString("goto")+" "+base.getDisplayTitle(paramRequest.getUser().getLanguage()))+"\"");
-                    if(width!=null)
-                        out.print(" width=\""+width+"\"");
-                    if(height!=null)
-                        out.print(" height=\""+height+"\"");
-                    if( longdesc!=null )
-                        out.print(" longdesc=\""+paramRequest.getRenderUrl().setMode(paramRequest.Mode_HELP).toString()+"\"");
-                    String action = base.getAttribute("axn");
-                    if( action!=null ) {
-                        action = action.replaceAll("\"", "'");
-                        out.print(" onclick=\""+action+"\"");
-                    }
-                    out.println("/>");
-
-                    if( url!=null )
-                        out.print("</a>");
-                }
-
-                if( longdesc!=null )
-                    out.println("<a class=\"swb-banner-hlp\" href=\""+paramRequest.getRenderUrl().setMode(paramRequest.Mode_HELP).toString()+"\">"+paramRequest.getLocaleString("longDesc")+"</a>");
-            }else {
-                String img = base.getAttribute("img","");
-                //publicidad externa
-                code=SWBUtils.TEXT.replaceAll(code, "{title}", getResourceBase().getDisplayTitle(lang));
-                code=SWBUtils.TEXT.replaceAll(code, "{description}", getResourceBase().getDisplayDescription(lang));
-                code=SWBUtils.TEXT.replaceAll(code, "{image}", SWBPortal.getWebWorkPath()+base.getWorkPath()+"/"+img);
-                out.println(code);
-            }
-        }catch (Exception e) {
-            log.error("Error in resource Banner while bringing HTML", e);
-        }
-        out.flush();
-        out.close();
-    }
-
-    /* (non-Javadoc)
-     * @see org.semanticwb.portal.api.GenericResource#doHelp(HttpServletRequest, HttpServletResponse, SWBParamRequest)
-     */
-    @Override
-    public void doHelp(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        Resource base = getResourceBase();
-        PrintWriter out = response.getWriter();
-
-        out.println("<div class=\"swb-banner-ld\">");
-        out.println(base.getAttribute("longdesc", "Sin descripción"));
-        out.println("<hr size=\"1\" noshade=\"noshade\" />");
-        out.println("<a href=\""+paramRequest.getRenderUrl().setMode(paramRequest.Mode_VIEW).toString()+"\" rel=\""+paramRequest.getLocaleString("back")+"\" title=\""+paramRequest.getLocaleString("back")+"\">"+paramRequest.getLocaleString("back")+"</a>");
-        out.println("</div>");
-        out.flush();
-        out.close();
-    }
-
-    /**
-     * Replace tags.
-     *
-     * @param str the str
-     * @param request the request
-     * @param user the user
-     * @param webpage the webpage
-     * @return the string
-     */
-    public String replaceTags(String str, HttpServletRequest request, User user,WebPage webpage) {
-        if(str==null || str.trim().length()==0)
-            return null;
-
-        str=str.trim();
-
-        Iterator it=SWBUtils.TEXT.findInterStr(str, "{request.getParameter(\"", "\")}");
-        while(it.hasNext())
-        {
-            String s=(String)it.next();
-            str=SWBUtils.TEXT.replaceAll(str, "{request.getParameter(\""+s+"\")}", request.getParameter(replaceTags(s,request,user,webpage)));
-        }
-
-        it=SWBUtils.TEXT.findInterStr(str, "{session.getAttribute(\"", "\")}");
-        while(it.hasNext())
-        {
-            String s=(String)it.next();
-            str=SWBUtils.TEXT.replaceAll(str, "{session.getAttribute(\""+s+"\")}", (String)request.getSession().getAttribute(replaceTags(s,request,user,webpage)));
-        }
-
-        /*it=SWBUtils.TEXT.findInterStr(str, "{template.getArgument(\"", "\")}");
-        while(it.hasNext())
-        {
-            String s=(String)it.next();
-            str=SWBUtils.TEXT.replaceAll(str, "{template.getArgument(\""+s+"\")}", (String)response.getArgument(replaceTags(s,request,user,webpage)));
-        }*/
-
-        it=SWBUtils.TEXT.findInterStr(str, "{getEnv(\"", "\")}");
-        while(it.hasNext())
-        {
-            String s=(String)it.next();
-            str=SWBUtils.TEXT.replaceAll(str, "{getEnv(\""+s+"\")}", SWBPlatform.getEnv(replaceTags(s,request,user,webpage)));
-        }
-
-        str=SWBUtils.TEXT.replaceAll(str, "{user.login}", user.getLogin());
-        str=SWBUtils.TEXT.replaceAll(str, "{user.email}", user.getEmail());
-        str=SWBUtils.TEXT.replaceAll(str, "{user.language}", user.getLanguage());
-        str=SWBUtils.TEXT.replaceAll(str, "{webpath}", SWBPortal.getContextPath());
-        str=SWBUtils.TEXT.replaceAll(str, "{distpath}", SWBPortal.getDistributorPath());
-        str=SWBUtils.TEXT.replaceAll(str, "{webworkpath}", SWBPortal.getWebWorkPath());
-        str=SWBUtils.TEXT.replaceAll(str, "{workpath}", SWBPortal.getWorkPath());
-        str=SWBUtils.TEXT.replaceAll(str, "{websiteid}", webpage.getWebSiteId());
-        return str;
-    }
-
-    /**
-     * Metodo para hacer operaciones.
-     *
-     * @param request the request
-     * @param response the response
-     * @throws SWBResourceException the sWB resource exception
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    @Override
-    public void processAction(javax.servlet.http.HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
-        Resource base=getResourceBase();
         base.addHit(request, response.getUser(), response.getWebPage());
 
-        String url = base.getAttribute("url");
-        if( url!=null ) {
-            url = replaceTags(url, request, response.getUser(), response.getWebPage());
-            response.sendRedirect(url);
-        }else
-        {
-            //Para paso de parametros
-            String params="";
-            int cont=0;
-            Enumeration<String> enParams=request.getParameterNames();
-            while(enParams.hasMoreElements()){
-                String param=enParams.nextElement();
-                cont++;
-                if(cont==1) params+="?"; else params+="&";
-                params+=param+"="+request.getParameter(param);
-            }
-            response.sendRedirect(response.getWebPage().getUrl()+params);
+        //Redirect to banner URL
+        String href = replaceTags(getURL(), request, response.getUser(), response.getWebPage());
+
+        if (null != href && !href.isEmpty()) {
+            response.sendRedirect(href);
         }
+    }
+
+    @Override
+    public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+        String jsp = getViewJSP();
+        if (null == jsp || jsp.isEmpty()) {
+            jsp = SWBPortal.getWebWorkPath() + "/models/" + paramRequest.getWebPage().getWebSiteId() + "/jsp/resources/banner/view.jsp";
+        }
+
+        RequestDispatcher rd = request.getRequestDispatcher(jsp);
+        request.setAttribute("SWBParamRequest", paramRequest);
+        request.setAttribute("banner", this);
+
+        try {
+            rd.include(request, response);
+        } catch (ServletException sex) {
+            LOG.error("org.semanticwb.portal.resources.Banner: Error including view.jsp", sex);
+        }
+    }
+
+    /**
+     * Gets the full Web path of the Banner's image.
+     * @return Full Web path of image.
+     */
+    public String getImagePath() {
+        return SWBPortal.getWebWorkPath() + getSemanticObject().getWorkPath() + "/" +
+                Banner.swbres_bannerImage.getName() + "_" + getResourceBase().getId() + "_" + getImage();
+    }
+
+    /**
+     * Migrates data in resource base to SemanticProperties of resource.
+     * This method should be removed after migration to version 5.1.
+     */
+    private void migrate(ResourceType recobj) {
+        Resource base = getResourceBase();
+        String rid = base.getId();
+
+        if (!"true".equals(base.getAttribute("migrated", "false"))) {
+            LOG.info("Migrating resource " + rid + " data...");
+            String code = base.getAttribute("code");
+            String img = base.getAttribute("img", "");
+            String longdesc = base.getAttribute("longdesc");
+            String url = base.getAttribute("url");
+            String altText = base.getAttribute("alt");
+            Boolean openNewWindow = Boolean.parseBoolean(base.getAttribute("target", "true"));
+
+            if (null != code) {
+                setCode(code);
+            }
+
+            if (null != img) {
+                setImage(img);
+
+                String sourcePath = SWBPortal.getWorkPath() + base.getWorkPath() + "/";
+                String destPath = SWBPortal.getWorkPath() + getSemanticObject().getWorkPath() + "/";
+                File f = new File(destPath);
+                if (!f.exists()) {
+                    f.mkdirs();
+                }
+
+                try (FileInputStream fis = new FileInputStream(new File(sourcePath + img))) {
+                    FileOutputStream fos = new FileOutputStream(new File(destPath + Banner.swbres_bannerImage.getName() + "_" + getResourceBase().getId() + "_" + img));
+
+                    SWBUtils.IO.copyStream(fis, fos);
+                    SWBUtils.IO.removeDirectory(sourcePath);
+                } catch (IOException ioex) {
+                    LOG.info("Error migrating banner " + rid + " image", ioex);
+                }
+            }
+
+            if (null != url) {
+                setURL(url);
+            }
+
+            if (null != altText) {
+                setAltText(altText);
+            }
+
+            if (openNewWindow) {
+                setURLTarget("_blank");
+            } else {
+                setURLTarget("_self");
+            }
+
+            copyResources(recobj);
+
+            base.setAttribute("migrated", "true");
+            try {
+                base.updateAttributesToDB();
+            } catch (SWBException swbex) {
+                LOG.info("Error setting banner as migrated", swbex);
+            }
+        }
+    }
+
+    /**
+     * Copies resource assets.
+     */
+    private void copyResources(ResourceType recobj) {
+        LOG.info("Migrating resource " + recobj.getTitle() + " assets...");
+        File jsps = new File(getAssetsFolderPath(recobj));
+
+        if (jsps.exists() && jsps.isDirectory()) {
+            LOG.info("Assets already in resource path");
+        } else if (jsps.mkdirs()) {
+            URL fis = getClass().getClassLoader().getResource("swbadmin/jsp/resources/banner/view.jsp");
+            try  {
+                File destFile = new File(getAssetsFolderPath(recobj) + "/swbadmin/jsp/resources/banner/view.jsp");
+                Files.write(destFile.toPath(), SWBUtils.IO.readInputStream(fis.openStream()).getBytes(), StandardOpenOption.CREATE);
+            } catch (IOException ioex) {
+                LOG.error("Error migrating resource assets. ", ioex);
+            }
+        }
+    }
+
+    /**
+     * Gets resource assets folder path.
+     * @return Resource assets folder path.
+     */
+    private String getAssetsFolderPath(ResourceType recobj) {
+        return SWBPortal.getWorkPath() + "/models/" + recobj.getWebSite().getId()+ "/jsp/resources/banner";
+    }
+
+    public String replaceTags(String str, HttpServletRequest request, User user, WebPage webpage) {
+        if (str == null || str.trim().length() == 0) {
+            return null;
+        }
+
+        str = str.trim();
+
+        Iterator it = SWBUtils.TEXT.findInterStr(str, "{request.getParameter(\"", "\")}");
+        while (it.hasNext()) {
+            String s = (String) it.next();
+            str = SWBUtils.TEXT.replaceAll(str, "{request.getParameter(\"" + s + "\")}", request.getParameter(replaceTags(s, request, user, webpage)));
+        }
+
+        it = SWBUtils.TEXT.findInterStr(str, "{session.getAttribute(\"", "\")}");
+        while (it.hasNext()) {
+            String s = (String) it.next();
+            str = SWBUtils.TEXT.replaceAll(str, "{session.getAttribute(\"" + s + "\")}", (String) request.getSession().getAttribute(replaceTags(s, request, user, webpage)));
+        }
+
+        it = SWBUtils.TEXT.findInterStr(str, "{getEnv(\"", "\")}");
+        while (it.hasNext()) {
+            String s = (String) it.next();
+            str = SWBUtils.TEXT.replaceAll(str, "{getEnv(\"" + s + "\")}", SWBPlatform.getEnv(replaceTags(s, request, user, webpage)));
+        }
+
+        str = SWBUtils.TEXT.replaceAll(str, "{user.login}", user.getLogin());
+        str = SWBUtils.TEXT.replaceAll(str, "{user.email}", user.getEmail());
+        str = SWBUtils.TEXT.replaceAll(str, "{user.language}", user.getLanguage());
+        str = SWBUtils.TEXT.replaceAll(str, "{webpath}", SWBPortal.getContextPath());
+        str = SWBUtils.TEXT.replaceAll(str, "{distpath}", SWBPortal.getDistributorPath());
+        str = SWBUtils.TEXT.replaceAll(str, "{webworkpath}", SWBPortal.getWebWorkPath());
+        str = SWBUtils.TEXT.replaceAll(str, "{workpath}", SWBPortal.getWorkPath());
+        str = SWBUtils.TEXT.replaceAll(str, "{websiteid}", webpage.getWebSiteId());
+        return str;
     }
 }
