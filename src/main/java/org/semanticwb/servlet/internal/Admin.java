@@ -36,9 +36,9 @@ import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
+import org.semanticwb.base.util.JarFile;
 import org.semanticwb.model.SWBContext;
 import org.semanticwb.model.WebPage;
-import org.semanticwb.util.JarFile;
 
 // TODO: Auto-generated Javadoc
 /**

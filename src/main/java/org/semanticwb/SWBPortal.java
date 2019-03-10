@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.semanticwb.SWBUtils.IO;
+import org.semanticwb.base.util.JarFile;
 import org.semanticwb.css.parser.Attribute;
 import org.semanticwb.css.parser.CSSParser;
 import org.semanticwb.css.parser.Selector;
@@ -88,7 +89,6 @@ import org.semanticwb.portal.util.CaptchaUtil;
 import org.semanticwb.portal.util.ContentStyles;
 import org.semanticwb.portal.util.SWBSoundEngine;
 import org.semanticwb.repository.Workspace;
-import org.semanticwb.util.JarFile;
 import org.semanticwb.util.db.GenericDB;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
