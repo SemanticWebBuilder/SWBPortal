@@ -25,12 +25,7 @@ package org.semanticwb.portal;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -182,7 +177,7 @@ public class TemplateImp extends Template
     public StringBuilder replaceObjectsValues(String value, StringBuilder auxparts, ArrayList<Object> parts, HashMap<String, Object> objects)
     {
 
-        ArrayList<String> p = SWBUtils.TEXT.regExpSplit(value, "\\{([^\\{]+?)\\}");
+        List<String> p = SWBUtils.TEXT.regExpSplit(value, "\\{([^\\{]+?)\\}");
         Iterator<String> it = p.iterator();
         while (it.hasNext())
         {
