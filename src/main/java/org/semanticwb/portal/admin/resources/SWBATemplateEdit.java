@@ -784,18 +784,15 @@ public class SWBATemplateEdit extends GenericResource {
             response.setRenderParameter(act, "");
             response.setMode(response.Mode_VIEW);
         } else if ("resetversion".equals(act)) {
-            System.out.println("Reset - Version");
+//            System.out.println("Reset - Version");
             Template tmpl = (Template) go;
             VersionInfo va = tmpl.getActualVersion();
             VersionInfo vl = tmpl.getLastVersion();
-            
 
             VersionInfo temp = va.getPreviousVersion();
             VersionInfo temp2 = null;
 
-            
 //            System.out.println("version actual numero:"+va.getVersionNumber());
-            
             while (temp != null) {
                 temp2 = temp;
                 String rutaFS_source_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/" + temp2.getVersionNumber();
@@ -836,7 +833,7 @@ public class SWBATemplateEdit extends GenericResource {
                 String rutaWeb_source_path = SWBPortal.getWebWorkPath() + tmpl.getWorkPath() + "/" + va_num;
                 String rutaWeb_target_path = SWBPortal.getWebWorkPath() + tmpl.getWorkPath() + "/1";
 
-                if (SWBUtils.IO.copyStructure(rutaFS_source_path, rutaFS_target_path, true, rutaWeb_source_path, rutaWeb_target_path)) {
+                if (copyStructure(rutaFS_source_path, rutaFS_target_path, true, rutaWeb_source_path, rutaWeb_target_path)) {
 //                    System.out.println("Copy actual to 1 OK by Reset Version");
                 }
 
@@ -847,9 +844,8 @@ public class SWBATemplateEdit extends GenericResource {
 
                 //System.out.println("filename:"+va.getVersionFile());
             }
-            
+
             /////////////////////////////////
-            
             va.setVersionNumber(1);
             tmpl.setActualVersion(va);
             tmpl.setLastVersion(va);
@@ -858,78 +854,60 @@ public class SWBATemplateEdit extends GenericResource {
         response.setRenderParameter("suri", id);
     }
 
-//    // Se eliminan versiones previas a la actual con todo y sus archivos
-//    private boolean removesPreviousVersions(VersionInfo va, Template tmpl) {
-//        boolean ret = false;
-//        VersionInfo temp = va.getPreviousVersion();
-//        VersionInfo temp2 = null;
-//
-//        try {
-//            while (temp != null) {
-//                temp2 = temp;
-//                String rutaFS_source_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/" + temp2.getVersionNumber();
-//                if (SWBUtils.IO.removeDirectory(rutaFS_source_path)) {
-//                    System.out.println("Remove back OK by Reset Version: " + temp2.getVersionNumber());
-//                }
-//                temp2.remove();
-//                temp = temp.getPreviousVersion();
-//            }
-//        } catch (Exception e) {
-//            ret = false;
-//        }
-//
-//        return ret;
-//    }
-//
-//    // Se eliminan versiones posteriores a la actual con todo y sus archivos 
-//    private boolean removesNextVersions(VersionInfo va, Template tmpl) {
-//        boolean ret = false;
-//        VersionInfo temp = va.getNextVersion();
-//        VersionInfo temp2 = null;
-//        try {
-//            while (temp != null) {
-//                temp2 = temp;
-//                String rutaFS_source_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/" + temp2.getVersionNumber();
-//                if (SWBUtils.IO.removeDirectory(rutaFS_source_path)) {
-//                    System.out.println("Remove next OK by Reset Version: " + temp2.getVersionNumber());
-//                }
-//                temp2.remove();
-//                temp = temp.getNextVersion();
-//            }
-//            ret = true;
-//        } catch (Exception e) {
-//            ret = false;
-//        }
-//
-//        return ret;
-//    }
-//    
-//    
-//    //copia los archivos de la version actual a la versión 1 y elimina la carpeta de la version actual.
-//    
-//    private boolean copyActualVersionFiles2VersionOne(VersionInfo va, Template tmpl){
-//        boolean ret = false;
-//        int va_num = va.getVersionNumber();
-//            if (va_num != 1) {
-//                String rutaFS_source_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/" + va_num + "/";
-//                String rutaFS_target_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/1/";
-//                String rutaWeb_source_path = SWBPortal.getWebWorkPath() + tmpl.getWorkPath() + "/" + va_num;
-//                String rutaWeb_target_path = SWBPortal.getWebWorkPath() + tmpl.getWorkPath() + "/1";
-//
-//                if (SWBUtils.IO.copyStructure(rutaFS_source_path, rutaFS_target_path, true, rutaWeb_source_path, rutaWeb_target_path)) {
-//                    //System.out.println("Copied actual to 1 OK by Reset Version");
-//                }
-//
-//                // Eliminando la version actual
-//                if (SWBUtils.IO.removeDirectory(rutaFS_source_path)) {
-//                    //System.out.println("Remove OK actual");
-//                }
-//                ret = true;
-//                //System.out.println("filename:"+va.getVersionFile());
-//            }
-//            
-//            return ret;
-//        
-//    }
+    /**
+     * Copia estructura de archivos de las plantilla al reinicio de versiones.
+     * @param source ruta origen de la plantilla actual
+     * @param target ruta destino de la versión 1 de la plantilla
+     * @param changePath si se va a cambiar la ruta web de los archivos
+     * @param sourcePath ruta web origen
+     * @param targetPath ruta web destino
+     * @return 
+     */
+
+    private boolean copyStructure(String source, String target, boolean changePath, String sourcePath,
+            String targetPath) {
+        try {
+            File ftarget = new File(target);
+            if (!ftarget.exists()) {
+                ftarget.mkdirs();
+            } else {
+                SWBUtils.IO.removeDirectory(target);
+                ftarget.mkdirs();
+            }
+            File dir = new File(source);
+            if (dir != null && dir.exists() && dir.isDirectory()) {
+                File[] listado = dir.listFiles();
+                for (int i = 0; i < listado.length; i++) {
+                    try {
+                        if (listado[i].isFile()) {
+                            File targetFile = new File(target + listado[i].getName());
+                            if (targetFile.length() == 0) {
+                                SWBUtils.IO.copy(source + listado[i].getName(), target + listado[i].getName(), changePath,
+                                        sourcePath, targetPath);
+                            }
+                        }
+                        if (listado[i].isDirectory()) {
+                            String newpath = listado[i].getPath();
+                            File f = new File(target + listado[i].getName());
+                            f.mkdirs();
+                            boolean flag = copyStructure(newpath + "/", target + listado[i].getName() + "/",
+                                    changePath, sourcePath, targetPath);
+                            if (flag) {
+                                listado[i].delete();
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error(e);
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(e);
+            return false;
+        }
+        return true;
+    }
+  
 
 }
