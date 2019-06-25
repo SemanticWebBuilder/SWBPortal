@@ -24,6 +24,7 @@ package org.semanticwb.portal.resources.sem.forum;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -33,6 +34,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -755,6 +759,7 @@ public class SWBForum extends org.semanticwb.portal.resources.sem.forum.base.SWB
                 mgr.clearProperties();
                 mgr.addProperty(Thread.swb_title);
                 mgr.addProperty(Thread.frm_thBody);
+                mgr.addProperty(Thread.swb_tags);
                 //mgr.setCaptchaStatus(true);
                 if (isCaptcha() && !request.getSession(true).getAttribute("cs").equals(request.getParameter("cmnt_seccode"))) {
                     flag = "lblErrorAddTheme";
