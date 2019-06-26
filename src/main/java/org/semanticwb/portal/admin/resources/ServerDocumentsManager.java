@@ -24,10 +24,12 @@ package org.semanticwb.portal.admin.resources;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
-import org.semanticwb.SWBPortal;
+import org.semanticwb.SWBUtils;
 import org.semanticwb.model.AdminFilter;
 import org.semanticwb.model.GenericIterator;
 import org.semanticwb.model.SWBContext;
@@ -38,6 +40,8 @@ import org.semanticwb.portal.api.GenericResource;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.api.SWBResourceURL;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Presenta la interfaz del administrador de documentos del servidor, con la que los usuarios
@@ -51,6 +55,10 @@ public class ServerDocumentsManager extends GenericResource {
 
     private UserGroup superUserGroup = null;
     private UserGroup adminUserGroup = null;
+    
+    /** The log. */
+    private static Logger LOG = SWBUtils.getLogger(ServerDocumentsManager.class);
+    
 
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response,
@@ -58,11 +66,20 @@ public class ServerDocumentsManager extends GenericResource {
 
         PrintWriter out = response.getWriter();
         StringBuilder htmlCode = new StringBuilder(256);
-        String showInterfacePath = paramRequest.getRenderUrl().setMode("showInter").
-                setCallMethod(SWBResourceURL.Call_DIRECT).toString();
-
         User user = paramRequest.getUser();
-        if (this.validateUser(user, paramRequest.getAdminTopic())) {
+        String[] userValidation = this.validateUserAccess(user,
+                paramRequest.getAdminTopic(), request).split(",");
+        boolean addParamAttrib = (userValidation.length == 2 && !userValidation[1].isEmpty());
+        String sessionAttrib = addParamAttrib ? userValidation[1] : "";
+        String showInterfacePath = addParamAttrib
+                ? paramRequest.getRenderUrl().setMode("showInter")
+                        .setCallMethod(SWBResourceURL.Call_DIRECT)
+                        .setParameter("attrib", sessionAttrib).toString()
+                : paramRequest.getRenderUrl().setMode("showInter").
+                    setCallMethod(SWBResourceURL.Call_DIRECT).toString();
+        boolean isUserValid = Boolean.parseBoolean(userValidation[0]);
+        
+        if (isUserValid) {
             htmlCode.append("<iframe id=\"srvrdcmts");
             htmlCode.append(this.getResourceBase().getId());
             htmlCode.append("\" width=\"100%\" height=\"70%\" dojoType=\"dijit.layout.ContentPane\" src=\"");
@@ -93,6 +110,9 @@ public class ServerDocumentsManager extends GenericResource {
         PrintWriter out = response.getWriter();
         StringBuilder htmlCode = new StringBuilder(512);
         String jsBasePath = SWBPlatform.getContextPath() + "/swbadmin/js/elfinder/";
+        String attrib = (null != request.getParameter("attrib") && 
+                !"".equals(request.getParameter("attrib")))
+                ? request.getParameter("attrib") : null;
 
         htmlCode.append("<!DOCTYPE html>\n");
         htmlCode.append("<html>\n");
@@ -134,6 +154,13 @@ public class ServerDocumentsManager extends GenericResource {
         htmlCode.append(this.getResourceBase().getWorkPath());
         htmlCode.append("',\n");
         htmlCode.append("          customData : {\n");
+        
+        if (null != attrib) {
+            htmlCode.append("              attrib : '");
+            htmlCode.append(attrib);  //atributo de sesion con rutas de directorios permitidos
+            htmlCode.append("',\n");
+        }
+        
         htmlCode.append("              URI : '");
         htmlCode.append(paramRequest.getAdminTopic().getURI());
         htmlCode.append("'\n");
@@ -170,12 +197,16 @@ public class ServerDocumentsManager extends GenericResource {
      * a la seccion de documentos del servidor.
      * @param user el usuario a validar
      * @param webPage la seccion desde donde se esta ejecutando este recurso
-     * @return un boolean indicando si el usuario cumple con los criterios para ejecutar este recurso
+     * @param request la peticion del usuario, para agregar atributos de sesion, en su caso
+     * @return un String con dos valores separados por coma, indicando si el usuario 
+     *  cumple con los criterios para ejecutar este recurso, y si es así, el segundo valor
+     *  corresponde al nombre del atributo de sesion que contiene las rutas permitidas al usuario
      */
-    private boolean validateUser(User user, WebPage webPage) {
+    private String validateUserAccess(User user, WebPage webPage, HttpServletRequest request) {
 
         boolean userHasAccess = false;
         boolean superUserGroupKnown = false;
+        String attribName = "";
 
         if (null == this.superUserGroup) {
 
@@ -195,13 +226,35 @@ public class ServerDocumentsManager extends GenericResource {
             if (null != filterList && filterList.hasNext()) {
                 while (filterList.hasNext()) {
                     AdminFilter filter = filterList.next();
+                    //LOG.error(filter.getXml());
                     userHasAccess = filter.haveAccessToWebPage(webPage);
                     if (userHasAccess) {
+                        ArrayList<String> paths = new ArrayList();
+                        if (null != filter.getXml()) {
+                             NodeList list = SWBUtils.XML.xmlToDom(filter.getXml())
+                                    .getElementsByTagName("dirs");
+                            if (list.getLength() > 0) {
+                                Element elem = (Element) list.item(0);
+                                if (elem.getChildNodes().getLength() > 0) {
+                                    for (int i = 0; i < elem.getChildNodes().getLength(); i++) {
+                                        Element path = (Element) elem.getChildNodes().item(i);
+                                        String onePath = path.getAttribute("path");
+                                        paths.add(onePath);
+                                    }
+                                }
+                            }
+                        }
+                        if (!paths.isEmpty()) {
+                            attribName = "userPaths_" + webPage.getId() + "_" + user.getId();
+                            request.getSession(false).setAttribute(attribName, paths);
+                        } else {
+                            attribName = "";
+                        }
                         break;
                     }
                 }
             }
         }
-        return userHasAccess;
+        return userHasAccess + "," + attribName;
     }
 }
