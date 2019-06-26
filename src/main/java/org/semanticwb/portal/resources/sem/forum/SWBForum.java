@@ -24,6 +24,7 @@ package org.semanticwb.portal.resources.sem.forum;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -33,6 +34,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
@@ -84,7 +88,15 @@ public class SWBForum extends org.semanticwb.portal.resources.sem.forum.base.SWB
      * The lang.
      */
     private String lang = "es";
+    private String pathFile = null;
     public final static String ATT_THREADS = "threads";
+    public static final String MODE_RES_ADD = "addImage";
+    
+     @Override
+    public void init() throws SWBResourceException {
+        super.init();
+        pathFile = SWBPortal.getWorkPath() + getResourceBase().getWorkPath() + "/images/";    
+    }
 
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#processRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
@@ -115,9 +127,67 @@ public class SWBForum extends org.semanticwb.portal.resources.sem.forum.base.SWB
             } else {
                 doReplyPost(request, response, paramRequest);
             }
+        }else if (paramRequest.getMode().equals(MODE_RES_ADD)) {
+            redirectJsonResponse(request, response);
         } else {
             super.processRequest(request, response, paramRequest);
         }
+    }
+    
+    public void redirectJsonResponse(HttpServletRequest request, HttpServletResponse response) throws java.io.IOException {
+        String fileName = uploadFiles(request);
+        String json = "{ \"location\" : \""+pathFile.replaceFirst(SWBPortal.getWorkPath(), "/work")+fileName+"\" }";
+        response.setContentType("application/json");
+	response.setHeader("Cache-Control", "no-cache");
+	PrintWriter pw = response.getWriter();
+	pw.write(json);
+	pw.flush();
+	pw.close();
+	response.flushBuffer();
+    }
+    
+    private String uploadFiles(javax.servlet.http.HttpServletRequest request) throws IOException {
+        String fileName = "";
+	File filex = new File(pathFile);
+	try {
+            if (!filex.exists()) filex.mkdirs();
+            List<File> files = fileUpload(request, pathFile);
+            fileName = files.get(0).getName();
+	} catch (Exception e) {
+            log.error(e);
+	}
+        return fileName;
+    }
+    
+    private List<File> fileUpload(javax.servlet.http.HttpServletRequest request, String path2Save) {
+        List items = null;
+	List<File> files = new ArrayList<>();
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        ServletFileUpload fu = new ServletFileUpload(factory);
+        try {
+            items = fu.parseRequest(request);
+        } catch (FileUploadException e) {
+            log.error(e);
+        }
+        if (null != items && null == path2Save) {
+            return files;
+        }else if (null != items && null != path2Save) {
+            Iterator<FileItem> iter = items.iterator();
+            while (iter.hasNext()) {
+                FileItem item = (FileItem) iter.next();
+                if (!item.isFormField()) {
+                    File file = new File(path2Save + item.getName());
+                    try {
+                        item.write(file);
+                        files.add(file);
+                    } catch (Exception e) {
+                        log.error(e);
+                    }
+                }
+            }
+            return files;
+        }
+        return null;
     }
 
     /* (non-Javadoc)
@@ -689,6 +759,7 @@ public class SWBForum extends org.semanticwb.portal.resources.sem.forum.base.SWB
                 mgr.clearProperties();
                 mgr.addProperty(Thread.swb_title);
                 mgr.addProperty(Thread.frm_thBody);
+                mgr.addProperty(Thread.swb_tags);
                 //mgr.setCaptchaStatus(true);
                 if (isCaptcha() && !request.getSession(true).getAttribute("cs").equals(request.getParameter("cmnt_seccode"))) {
                     flag = "lblErrorAddTheme";

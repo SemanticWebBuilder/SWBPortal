@@ -67,26 +67,34 @@ import org.semanticwb.portal.api.SWBResourceURL;
 // TODO: Auto-generated Javadoc
 /**
  * The Class SWBATemplateEdit.
- * 
+ *
  * @author juan.fernandez
  */
 public class SWBATemplateEdit extends GenericResource {
 
-    /** The log. */
+    /**
+     * The log.
+     */
     private org.semanticwb.Logger log = SWBUtils.getLogger(SWBATemplateEdit.class);
-    
-    /** The webpath. */
+
+    /**
+     * The webpath.
+     */
     String webpath = SWBPlatform.getContextPath();
-    
-    /** The base. */
+
+    /**
+     * The base.
+     */
     Resource base;
-    
-    /** The ont. */
+
+    /**
+     * The ont.
+     */
     SemanticOntology ont = SWBPlatform.getSemanticMgr().getOntology();
-    
 
     /**
      * Handles HTML content parsing to replace paths on loaded templates.
+     *
      * @param request
      * @param response
      * @param paramRequest
@@ -94,20 +102,21 @@ public class SWBATemplateEdit extends GenericResource {
      * @throws IOException
      */
     public void doParseHTML(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-    	response.setContentType("text/html");
+        response.setContentType("text/html");
         response.setHeader("Cache-Control", "no-cache");
         response.setHeader("Pragma", "no-cache");
         response.setCharacterEncoding("UTF-8");
-    	
-    	PrintWriter out = response.getWriter();
-    	String in = SWBUtils.IO.readInputStream(request.getInputStream());
-    	String ret = SWBPortal.UTIL.parseHTML(in, "images/");
-    	
-    	out.print(ret);
+
+        PrintWriter out = response.getWriter();
+        String in = SWBUtils.IO.readInputStream(request.getInputStream());
+        String ret = SWBPortal.UTIL.parseHTML(in, "images/");
+
+        out.print(ret);
     }
-    
+
     /**
      * Handles fileExplorer mode for TemplateEditor
+     *
      * @param request
      * @param response
      * @param paramRequest
@@ -115,26 +124,25 @@ public class SWBATemplateEdit extends GenericResource {
      * @throws IOException
      */
     public void doFileExplorer(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-    	String id = request.getParameter("suri");
+        String id = request.getParameter("suri");
         SemanticObject obj = SemanticObject.createSemanticObject(id);
-        
+
         String jsp = "/swbadmin/jsp/SWBATemplateEdit/fileManager.jsp";
         if (obj != null) {
-        	RequestDispatcher rd = request.getRequestDispatcher(jsp);
-        	
-        	try {
-        		request.setAttribute("paramRequest", paramRequest);
-        		request.setAttribute("webSiteId", obj.getModel().getName());
-        		request.setAttribute("templateId", obj.getId());
-        		request.setAttribute("verNum", Integer.parseInt(request.getParameter("vnum")));
-        		rd.include(request, response);
-        	} catch (Exception ex) {
-        		log.error("Error iuncluding fileManager", ex);
-        	}
+            RequestDispatcher rd = request.getRequestDispatcher(jsp);
+
+            try {
+                request.setAttribute("paramRequest", paramRequest);
+                request.setAttribute("webSiteId", obj.getModel().getName());
+                request.setAttribute("templateId", obj.getId());
+                request.setAttribute("verNum", Integer.parseInt(request.getParameter("vnum")));
+                rd.include(request, response);
+            } catch (Exception ex) {
+                log.error("Error iuncluding fileManager", ex);
+            }
         }
     }
-    
-    
+
     /* (non-Javadoc)
      * @see org.semanticwb.portal.api.GenericResource#doView(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.semanticwb.portal.api.SWBParamRequest)
      */
@@ -156,7 +164,6 @@ public class SWBATemplateEdit extends GenericResource {
             return;
         }
 
-
         if (null == id) {
             out.println("<fieldset>");
             out.println("URI faltante");
@@ -171,8 +178,6 @@ public class SWBATemplateEdit extends GenericResource {
 //            System.out.println("context Path:"+SWBPlatform.getContextPath());
 //            System.out.println("Work Path:"+SWBPlatform.getWorkPath()+"/models/"+tmpl.getWebSiteId()+"/Template/");
 //            System.out.println("template work path: "+tmpl.getWorkPath());
-
-
             log.debug("doView(), suri: " + id);
             VersionInfo via = null;
             VersionInfo vio = null;
@@ -224,27 +229,27 @@ public class SWBATemplateEdit extends GenericResource {
                             urlnv.setParameter("vnum", Integer.toString(vio.getVersionNumber()));
                             urlnv.setParameter("act", "newversion");
                             urlnv.setMode(SWBResourceURL.Mode_EDIT);
-                            out.println("<a href=\"#\" onclick=\"showDialog('" + urlnv + "','Nueva versión de Plantilla');\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/nueva_version.gif\" border=\"0\" alt=\""+paramRequest.getLocaleString("msgNewVersion")+"\"></a>");
+                            out.println("<a href=\"#\" onclick=\"showDialog('" + urlnv + "','Nueva versión de Plantilla');\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/nueva_version.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("msgNewVersion") + "\"></a>");
 
                             if (!vio.equals(via)) {
                                 SWBResourceURL urlsa = paramRequest.getActionUrl();
                                 urlsa.setParameter("suri", id);
                                 urlsa.setParameter("sval", vio.getURI());
                                 urlsa.setAction("setactual");
-                                out.println("<a href=\"#\" onclick=\"submitUrl('" + urlsa + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/cambio_version.gif\" border=\"0\" alt=\""+paramRequest.getLocaleString("logTplSetActual")+"\"></a>");
+                                out.println("<a href=\"#\" onclick=\"submitUrl('" + urlsa + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/cambio_version.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("logTplSetActual") + "\"></a>");
                             } else {
-                                out.println("<img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/activa.gif\" border=\"0\" alt=\""+paramRequest.getLocaleString("msgActualVersion")+"\">");
+                                out.println("<img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/activa.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("msgActualVersion") + "\">");
                             }
 
-                            out.println("<a href=\"#\" onclick=\"window.open('" + SWBPortal.getWebWorkPath() + tmpl.getWorkPath() + "/" + vio.getVersionNumber() + "/" + tmpl.getFileName(vio.getVersionNumber()) + "','Preview','scrollbars, resizable, width=550, height=550');\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/preview.gif\" border=\"0\" alt=\""+paramRequest.getLocaleString("msgPreview")+"\"></a>"); //submitUrl('" + urlec + "',this); return false;
+                            out.println("<a href=\"#\" onclick=\"window.open('" + SWBPortal.getWebWorkPath() + tmpl.getWorkPath() + "/" + vio.getVersionNumber() + "/" + tmpl.getFileName(vio.getVersionNumber()) + "','Preview','scrollbars, resizable, width=550, height=550');\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/preview.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("msgPreview") + "\"></a>"); //submitUrl('" + urlec + "',this); return false;
 
                             SWBResourceURL urlr = paramRequest.getActionUrl();
                             urlr.setParameter("suri", id);
                             urlr.setParameter("sval", vio.getURI());
                             urlr.setAction("remove");
-                            out.println("<a href=\"#\" onclick=\"if(confirm('"+paramRequest.getLocaleString("q_removeVersion")+"')){submitUrl('" + urlr + "',this);} return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/images/delete.gif\" border=\"0\" alt=\""+paramRequest.getLocaleString("msgRemoveVersion")+"\"></a>");
+                            out.println("<a href=\"#\" onclick=\"if(confirm('" + paramRequest.getLocaleString("q_removeVersion") + "')){submitUrl('" + urlr + "',this);} return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/images/delete.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("msgRemoveVersion") + "\"></a>");
                             if (vio.equals(via)) {
-                                out.println("( "+paramRequest.getLocaleString("msgActualVersion")+" ) ");
+                                out.println("( " + paramRequest.getLocaleString("msgActualVersion") + " ) ");
                             }
                             out.println("</td>");
                             out.println("<td>");
@@ -268,7 +273,7 @@ public class SWBATemplateEdit extends GenericResource {
                     urlVR.setParameter("suri", id);
                     urlVR.setAction("resetversion");
                     urlVR.setMode(SWBResourceURL.Mode_VIEW);
-                    out.println("<button dojoType=\"dijit.form.Button\" onclick=\"if(confirm('"+paramRequest.getLocaleString("q_resetVersion")+"')){submitUrl('" + urlVR.toString() + "',this.domNode);} return false;\">" + paramRequest.getLocaleString("btn_versionreset") + "</button>");
+                    out.println("<button dojoType=\"dijit.form.Button\" onclick=\"if(confirm('" + paramRequest.getLocaleString("q_resetVersion") + "')){submitUrl('" + urlVR.toString() + "',this.domNode);} return false;\">" + paramRequest.getLocaleString("btn_versionreset") + "</button>");
                     out.println("</fieldset>");
                     out.println("</div>");
                 }
@@ -278,7 +283,7 @@ public class SWBATemplateEdit extends GenericResource {
 
     /**
      * Find first version.
-     * 
+     *
      * @param obj the obj
      * @return the version info
      */
@@ -297,24 +302,20 @@ public class SWBATemplateEdit extends GenericResource {
 
     /**
      * Find version number.
-     * 
+     *
      * @param obj the obj
      * @param vnum the vnum
      * @return the version info
      */
-    private VersionInfo findVersionNumber(GenericObject obj,int vnum) {
+    private VersionInfo findVersionNumber(GenericObject obj, int vnum) {
         VersionInfo ver = findFirstVersion(obj);
 
-        if(ver!=null)
-        {
+        if (ver != null) {
             //System.out.println("version inicial:"+ver.getVersionNumber());
-            if(ver.getVersionNumber()!=vnum)
-            {
+            if (ver.getVersionNumber() != vnum) {
                 VersionInfo vnext = ver.getNextVersion();
-                while(vnext!=null)
-                {
-                    if(vnext.getVersionNumber()==vnum)
-                    {
+                while (vnext != null) {
+                    if (vnext.getVersionNumber() == vnum) {
                         ver = vnext;
                         break;
                     }
@@ -329,111 +330,121 @@ public class SWBATemplateEdit extends GenericResource {
         }
         return ver;
     }
-    
+
     /**
      * Builds a JSON String containing resources data to build resource Tree
+     *
      * @param request
      * @param response
      * @param paramRequest
      * @throws IOException
      */
     private void getResourceList(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
-    	response.setContentType("application/json");
-    	PrintWriter out = response.getWriter();
-    	StringBuilder treeData = new StringBuilder();
-    	String templateId = (String) request.getParameter("templateId");
-    	String websiteId = (String) request.getParameter("webSiteId");
-    	int verNum = Integer.parseInt(request.getParameter("verNum"));
-    	WebSite site = SWBContext.getWebSite(websiteId);
-    	User user = paramRequest.getUser();
-    	
-    	SortedMap<String, HashMap<String, String>> elements = new TreeMap();
-    	HashMap<String, String> root = new HashMap<>();
-    	root.put("name", "Recursos");
-    	root.put("uuid", "rootNode");
-    	elements.put("rootNode", root);
-    	
-    	Iterator<ResourceType> rtypes = site.listResourceTypes();
-    	while(rtypes.hasNext()) {
-    		ResourceType rtype = rtypes.next();
-    		if (user.haveAccess(rtype) && rtype.getResourceMode() == ResourceType.MODE_STRATEGY || rtype.getResourceMode() == ResourceType.MODE_SYSTEM) {
-    			//Add parent entry
-    			String uid = UUID.randomUUID().toString();
-    			String rtypeTitle = rtype.getTitle();
-    			HashMap<String, String> entry = new HashMap<>();
-    			entry.put("uuid", uid);
-    			entry.put("name", rtypeTitle);
-    			entry.put("id", rtype.getId());
-    			entry.put("parent", "rootNode");
-    			elements.put(rtypeTitle+"-"+uid, entry);
-    			
-    			Iterator<ResourceSubType> rsubtypes = rtype.listSubTypes();
-    			if (rsubtypes.hasNext()) {
-    				//Add child entries
-    				while (rsubtypes.hasNext()) {
-        				ResourceSubType rsubtype = rsubtypes.next();
-        				
-        				if (user.haveAccess(rtype)) {
-        					String childuid = UUID.randomUUID().toString();
-        					String rsubtypeTitle = rsubtype.getTitle();
-                			HashMap<String, String> childentry = new HashMap<>();
-                			childentry.put("id", rsubtype.getId());
-                			childentry.put("uuid", childuid);
-                			childentry.put("name", rsubtypeTitle);
-                			childentry.put("parent", uid);
-                			childentry.put("parenttype", rtype.getId());
-                			elements.put(rsubtypeTitle+"-"+childuid, childentry);
-        				}
-        			}
-    			}
-    		}
-    	}
-    	
-    	treeData.append("[");
-    	Iterator<HashMap<String, String>> it = elements.values().iterator();
-    	while(it.hasNext()) {
-    		HashMap<String, String> entry = it.next();
-    		treeData.append("{");
-    		
-    		Iterator<String> objKeys = entry.keySet().iterator();
-    		while(objKeys.hasNext()) {
-    			String key = objKeys.next();
-    			String val = entry.get(key);
-    			
-    			treeData.append("\"").append(key).append("\":");
-    			if (!"subtype".equals(key)) treeData.append("\"");
-    			treeData.append(val);
-				if (!"subtype".equals(key)) treeData.append("\"");
-				
-				if (objKeys.hasNext()) treeData.append(",");
-    		}
-    		
-    		treeData.append("}");
-    		if (it.hasNext()) treeData.append(",");
-    	}
-    	treeData.append("]");
-    	
-    	out.println(treeData.toString());
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+        StringBuilder treeData = new StringBuilder();
+        String templateId = (String) request.getParameter("templateId");
+        String websiteId = (String) request.getParameter("webSiteId");
+        int verNum = Integer.parseInt(request.getParameter("verNum"));
+        WebSite site = SWBContext.getWebSite(websiteId);
+        User user = paramRequest.getUser();
+
+        SortedMap<String, HashMap<String, String>> elements = new TreeMap();
+        HashMap<String, String> root = new HashMap<>();
+        root.put("name", "Recursos");
+        root.put("uuid", "rootNode");
+        elements.put("rootNode", root);
+
+        Iterator<ResourceType> rtypes = site.listResourceTypes();
+        while (rtypes.hasNext()) {
+            ResourceType rtype = rtypes.next();
+            if (user.haveAccess(rtype) && rtype.getResourceMode() == ResourceType.MODE_STRATEGY || rtype.getResourceMode() == ResourceType.MODE_SYSTEM) {
+                //Add parent entry
+                String uid = UUID.randomUUID().toString();
+                String rtypeTitle = rtype.getTitle();
+                HashMap<String, String> entry = new HashMap<>();
+                entry.put("uuid", uid);
+                entry.put("name", rtypeTitle);
+                entry.put("id", rtype.getId());
+                entry.put("parent", "rootNode");
+                elements.put(rtypeTitle + "-" + uid, entry);
+
+                Iterator<ResourceSubType> rsubtypes = rtype.listSubTypes();
+                if (rsubtypes.hasNext()) {
+                    //Add child entries
+                    while (rsubtypes.hasNext()) {
+                        ResourceSubType rsubtype = rsubtypes.next();
+
+                        if (user.haveAccess(rtype)) {
+                            String childuid = UUID.randomUUID().toString();
+                            String rsubtypeTitle = rsubtype.getTitle();
+                            HashMap<String, String> childentry = new HashMap<>();
+                            childentry.put("id", rsubtype.getId());
+                            childentry.put("uuid", childuid);
+                            childentry.put("name", rsubtypeTitle);
+                            childentry.put("parent", uid);
+                            childentry.put("parenttype", rtype.getId());
+                            elements.put(rsubtypeTitle + "-" + childuid, childentry);
+                        }
+                    }
+                }
+            }
+        }
+
+        treeData.append("[");
+        Iterator<HashMap<String, String>> it = elements.values().iterator();
+        while (it.hasNext()) {
+            HashMap<String, String> entry = it.next();
+            treeData.append("{");
+
+            Iterator<String> objKeys = entry.keySet().iterator();
+            while (objKeys.hasNext()) {
+                String key = objKeys.next();
+                String val = entry.get(key);
+
+                treeData.append("\"").append(key).append("\":");
+                if (!"subtype".equals(key)) {
+                    treeData.append("\"");
+                }
+                treeData.append(val);
+                if (!"subtype".equals(key)) {
+                    treeData.append("\"");
+                }
+
+                if (objKeys.hasNext()) {
+                    treeData.append(",");
+                }
+            }
+
+            treeData.append("}");
+            if (it.hasNext()) {
+                treeData.append(",");
+            }
+        }
+        treeData.append("]");
+
+        out.println(treeData.toString());
     }
-    
+
     @Override
     public void processRequest(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-    	String mode = paramRequest.getMode();
-    	if ("getResourceList".equals(mode)) {
-    		getResourceList(request, response, paramRequest);
-    	} else if ("getTemplateContent".equals(mode)) {
-    		getTemplateContent(request, response, paramRequest);
-    	} else if ("fileManager".equals(mode)) {
-    		doFileExplorer(request, response, paramRequest);
-    	} else if ("parseHTML".equals(mode)) {
-    		doParseHTML(request, response, paramRequest);
-    	} else {
-    		super.processRequest(request, response, paramRequest);
-    	}
+        String mode = paramRequest.getMode();
+        if ("getResourceList".equals(mode)) {
+            getResourceList(request, response, paramRequest);
+        } else if ("getTemplateContent".equals(mode)) {
+            getTemplateContent(request, response, paramRequest);
+        } else if ("fileManager".equals(mode)) {
+            doFileExplorer(request, response, paramRequest);
+        } else if ("parseHTML".equals(mode)) {
+            doParseHTML(request, response, paramRequest);
+        } else {
+            super.processRequest(request, response, paramRequest);
+        }
     }
-    
+
     /**
      * Gets content from a template file.
+     *
      * @param request
      * @param response
      * @param paramRequest
@@ -441,24 +452,24 @@ public class SWBATemplateEdit extends GenericResource {
      * @throws IOException
      */
     private void getTemplateContent(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-    	response.setContentType("text/html");
+        response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
-    	String templateId = (String) request.getParameter("templateId");
-    	String websiteId = (String) request.getParameter("webSiteId");
-    	int verNum = Integer.parseInt(request.getParameter("verNum"));
-    	WebSite site = SWBContext.getWebSite(websiteId);
-    	User user = paramRequest.getUser();
-    	Template tpl = site.getTemplate(templateId);
-    	
-    	String templatePath = SWBPortal.getWorkPath() + tpl.getWorkPath() + "/" + verNum + "/" + URLEncoder.encode(tpl.getFileName(verNum));
-    	
-    	if (null != tpl && user.haveAccess(tpl)) {
-    		FileInputStream fis = new FileInputStream(templatePath);
-                ByteArrayOutputStream out=new ByteArrayOutputStream();
-    		SWBUtils.IO.copyStream(fis, out);
-                response.getWriter().print(out.toString());
-    		fis.close();
-    	}
+        String templateId = (String) request.getParameter("templateId");
+        String websiteId = (String) request.getParameter("webSiteId");
+        int verNum = Integer.parseInt(request.getParameter("verNum"));
+        WebSite site = SWBContext.getWebSite(websiteId);
+        User user = paramRequest.getUser();
+        Template tpl = site.getTemplate(templateId);
+
+        String templatePath = SWBPortal.getWorkPath() + tpl.getWorkPath() + "/" + verNum + "/" + URLEncoder.encode(tpl.getFileName(verNum));
+
+        if (null != tpl && user.haveAccess(tpl)) {
+            FileInputStream fis = new FileInputStream(templatePath);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            SWBUtils.IO.copyStream(fis, out);
+            response.getWriter().print(out.toString());
+            fis.close();
+        }
     }
 
     // Edición de la VersionInfo dependiendo el SemanticObject relacionado
@@ -467,26 +478,26 @@ public class SWBATemplateEdit extends GenericResource {
      */
     @Override
     public void doEdit(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-    	String action = request.getParameter("act");
-    	String id = request.getParameter("suri");
-    	
-    	if ("edit_temp".equals(action)) {
-    		//System.out.println("VNUM: " + vnum);
+        String action = request.getParameter("act");
+        String id = request.getParameter("suri");
+
+        if ("edit_temp".equals(action)) {
+            //System.out.println("VNUM: " + vnum);
             SemanticObject obj = SemanticObject.createSemanticObject(id);
             String jsp = "/swbadmin/jsp/SWBATemplateEdit/templateEdit.jsp";
             if (obj != null) {
-            	RequestDispatcher rd = request.getRequestDispatcher(jsp);
-            	
-            	try {
-            		request.setAttribute("paramRequest", paramRequest);
-            		request.setAttribute("webSiteId", obj.getModel().getName());
-            		request.setAttribute("templateId", obj.getId());
-            		request.setAttribute("verNum", Integer.parseInt(request.getParameter("vnum")));
-            		rd.include(request, response);
-            	} catch (Exception ex) {
-            		log.error("Error iuncluding templateEditor", ex);
-            	}
-            	//PrintWriter out = response.getWriter();
+                RequestDispatcher rd = request.getRequestDispatcher(jsp);
+
+                try {
+                    request.setAttribute("paramRequest", paramRequest);
+                    request.setAttribute("webSiteId", obj.getModel().getName());
+                    request.setAttribute("templateId", obj.getId());
+                    request.setAttribute("verNum", Integer.parseInt(request.getParameter("vnum")));
+                    rd.include(request, response);
+                } catch (Exception ex) {
+                    log.error("Error iuncluding templateEditor", ex);
+                }
+                //PrintWriter out = response.getWriter();
                 //User user=SWBPortal.getSessionUser();
                 //out.println("<div class=\"applet\">");
                 //SWBAEditor.getTemplateApplet(new java.io.PrintWriter(out), obj.getModel().getName(), obj.getId(), Integer.parseInt(request.getParameter("vnum")), paramRequest.getUser(), request.getSession().getId());
@@ -497,87 +508,86 @@ public class SWBATemplateEdit extends GenericResource {
                 //out.println("<button dojoType=\"dijit.form.Button\" onclick=\"submitUrl('" + urlb + "',this.domNode); return false;\">Cancelar</button>");
                 //out.println("</div>");
             }
-    	} else {
-	    	response.setContentType("text/html");
-                response.setCharacterEncoding("UTF-8");
-	        response.setHeader("Cache-Control", "no-cache");
-	        response.setHeader("Pragma", "no-cache");
-	        Resource base = getResourceBase();
-	        //log.debug("doEdit");
-	        User user = paramRequest.getUser();
-	        
-	        String idvi = request.getParameter("sobj");
-	        String vnum = request.getParameter("vnum");
-	        SemanticObject so = null;
-	        PrintWriter out = response.getWriter();
-	        SWBFormMgr fm = null;
-	
-	        if (action.equals("newversion")) {
-	
-	            SemanticObject soref = ont.getSemanticObject(id);
-	            SWBResourceURL urla = paramRequest.getActionUrl();
-	            urla.setAction("newversion");
-	
-	            //WBFormElement sfe = new SWBFormElement(so);
-	
-	            fm = new SWBFormMgr(Versionable.swb_VersionInfo, soref, null);
-	            fm.addHiddenParameter("suri", id);
-	            fm.addHiddenParameter("psuri", id);
-	            if (vnum != null) {
-	                fm.addHiddenParameter("vnum", vnum);
-	            }
-	            //fm.addHiddenParameter("sobj", so.getURI());
-	            fm.setAction(urla.toString());
-	            out.println("<div class=\"swbform\">");
-	            out.println("<form id=\"" + id + "/" + idvi + "/" + base.getId() + "/FVIComment\" action=\"" + urla + "\" method=\"post\" onsubmit=\"submitForm('" + id + "/" + idvi + "/" + base.getId() + "/FVIComment');return false;\">");
-	            out.println("<input type=\"hidden\" name=\"suri\" value=\"" + id + "\">");
-	            //System.out.println("VNUM comment: " + vnum);
-	            if (vnum != null) {
-	                out.println("<input type=\"hidden\" name=\"vnum\" value=\"" + vnum + "\">");
-	            }
-	            out.println("<fieldset>");
-	            out.println("<table>");
-	            out.println("<tbody>");
-	            out.println("<tr>");
-	            out.println("<td>");
-	            out.println(fm.renderElement(request, VersionInfo.swb_versionComment.getLabel()) != null ? fm.renderElement(request, VersionInfo.swb_versionComment.getLabel()) : "Comment");
-	            out.println("</td>");
-	            out.println("<td>");
-	            out.println(fm.renderElement(request, VersionInfo.swb_versionComment, SWBFormMgr.MODE_EDIT));
-	            out.println("</td>");
-	            out.println("</tr>");
-	            out.println("</tbody>");
-	            out.println("</table>");
-	            out.println("</filedset>");
-	            out.println("<filedset>");
-	            //out.println("<hr noshade>");
-	            out.println("<button dojoType=\"dijit.form.Button\" type=\"submit\" >Guardar</button>"); //_onclick=\"submitForm('"+id+"/"+idvi+"/"+base.getId()+"/FVIComment');return false;\"
-	            //out.println("<button dojoType=\"dijit.form.Button\">Favoritos</button>");
-	            //out.println("<button dojoType=\"dijit.form.Button\">Eliminar</button>");
-	            SWBResourceURL urlb = paramRequest.getRenderUrl();
-	            urlb.setMode(SWBResourceURL.Mode_VIEW);
-	            urlb.setParameter("act", "");
-	            urlb.setParameter("suri", id);
-	            out.println("<button dojoType=\"dijit.form.Button\" onclick=\"hideDialog(); return false;\">Cancelar</button>"); //submitUrl('" + urlb + "',this.domNode); hideDialog();
-	            out.println("</filedset>");
-	            out.println("</form>");
-	            out.println("</div>");
-	
-	        } else if (action.equals("edit")) {
-	
-	            SWBResourceURL urla = paramRequest.getActionUrl();
-	            urla.setAction("update");
-	            log.debug("VI id:" + idvi);
-	            so = ont.getSemanticObject(idvi);
-	            fm = new SWBFormMgr(so, null, SWBFormMgr.MODE_EDIT);
-	            fm.addHiddenParameter("suri", id);
-	            fm.addHiddenParameter("psuri", id);
-	            fm.addHiddenParameter("sobj", so.getURI());
-	            fm.setAction(urla.toString());
-	
-	            out.println(fm.renderForm(request));
-	        }
-    	}
+        } else {
+            response.setContentType("text/html");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Cache-Control", "no-cache");
+            response.setHeader("Pragma", "no-cache");
+            Resource base = getResourceBase();
+            //log.debug("doEdit");
+            User user = paramRequest.getUser();
+
+            String idvi = request.getParameter("sobj");
+            String vnum = request.getParameter("vnum");
+            SemanticObject so = null;
+            PrintWriter out = response.getWriter();
+            SWBFormMgr fm = null;
+
+            if (action.equals("newversion")) {
+
+                SemanticObject soref = ont.getSemanticObject(id);
+                SWBResourceURL urla = paramRequest.getActionUrl();
+                urla.setAction("newversion");
+
+                //WBFormElement sfe = new SWBFormElement(so);
+                fm = new SWBFormMgr(Versionable.swb_VersionInfo, soref, null);
+                fm.addHiddenParameter("suri", id);
+                fm.addHiddenParameter("psuri", id);
+                if (vnum != null) {
+                    fm.addHiddenParameter("vnum", vnum);
+                }
+                //fm.addHiddenParameter("sobj", so.getURI());
+                fm.setAction(urla.toString());
+                out.println("<div class=\"swbform\">");
+                out.println("<form id=\"" + id + "/" + idvi + "/" + base.getId() + "/FVIComment\" action=\"" + urla + "\" method=\"post\" onsubmit=\"submitForm('" + id + "/" + idvi + "/" + base.getId() + "/FVIComment');return false;\">");
+                out.println("<input type=\"hidden\" name=\"suri\" value=\"" + id + "\">");
+                //System.out.println("VNUM comment: " + vnum);
+                if (vnum != null) {
+                    out.println("<input type=\"hidden\" name=\"vnum\" value=\"" + vnum + "\">");
+                }
+                out.println("<fieldset>");
+                out.println("<table>");
+                out.println("<tbody>");
+                out.println("<tr>");
+                out.println("<td>");
+                out.println(fm.renderElement(request, VersionInfo.swb_versionComment.getLabel()) != null ? fm.renderElement(request, VersionInfo.swb_versionComment.getLabel()) : "Comment");
+                out.println("</td>");
+                out.println("<td>");
+                out.println(fm.renderElement(request, VersionInfo.swb_versionComment, SWBFormMgr.MODE_EDIT));
+                out.println("</td>");
+                out.println("</tr>");
+                out.println("</tbody>");
+                out.println("</table>");
+                out.println("</filedset>");
+                out.println("<filedset>");
+                //out.println("<hr noshade>");
+                out.println("<button dojoType=\"dijit.form.Button\" type=\"submit\" >Guardar</button>"); //_onclick=\"submitForm('"+id+"/"+idvi+"/"+base.getId()+"/FVIComment');return false;\"
+                //out.println("<button dojoType=\"dijit.form.Button\">Favoritos</button>");
+                //out.println("<button dojoType=\"dijit.form.Button\">Eliminar</button>");
+                SWBResourceURL urlb = paramRequest.getRenderUrl();
+                urlb.setMode(SWBResourceURL.Mode_VIEW);
+                urlb.setParameter("act", "");
+                urlb.setParameter("suri", id);
+                out.println("<button dojoType=\"dijit.form.Button\" onclick=\"hideDialog(); return false;\">Cancelar</button>"); //submitUrl('" + urlb + "',this.domNode); hideDialog();
+                out.println("</filedset>");
+                out.println("</form>");
+                out.println("</div>");
+
+            } else if (action.equals("edit")) {
+
+                SWBResourceURL urla = paramRequest.getActionUrl();
+                urla.setAction("update");
+                log.debug("VI id:" + idvi);
+                so = ont.getSemanticObject(idvi);
+                fm = new SWBFormMgr(so, null, SWBFormMgr.MODE_EDIT);
+                fm.addHiddenParameter("suri", id);
+                fm.addHiddenParameter("psuri", id);
+                fm.addHiddenParameter("sobj", so.getURI());
+                fm.setAction(urla.toString());
+
+                out.println(fm.renderForm(request));
+            }
+        }
     }
 
     /* (non-Javadoc)
@@ -625,7 +635,9 @@ public class SWBATemplateEdit extends GenericResource {
                     gov.getSemanticObject().setObjectProperty(Versionable.swb_actualVersion, nvinf);
                 }
                 nvinf.setIntProperty(VersionInfo.swb_versionNumber, vnum);
-                if(request.getParameter("vnum")==null) nvinf.setProperty(VersionInfo.swb_versionFile, "template.html");
+                if (request.getParameter("vnum") == null) {
+                    nvinf.setProperty(VersionInfo.swb_versionFile, "template.html");
+                }
                 String VersionComment = request.getParameter("versionComment");
                 log.debug(VersionComment);
                 if (VersionComment != null) {
@@ -636,15 +648,13 @@ public class SWBATemplateEdit extends GenericResource {
                 Template tmpl = (Template) go;
 
 //                System.out.println("VNUM:"+request.getParameter("vnum"));
-
                 if (request.getParameter("vnum") != null) {
                     // copiar archivos
 
-                    VersionInfo vi = findVersionNumber(go,Integer.parseInt(request.getParameter("vnum")));
+                    VersionInfo vi = findVersionNumber(go, Integer.parseInt(request.getParameter("vnum")));
 //                    System.out.println("Archivo:"+vi.getVersionFile());
 
                     //vin.setVersionFile(vi.getVersionFile());
-
                     nvinf.setProperty(VersionInfo.swb_versionFile, vi.getVersionFile());
 
                     String rutaFS_source_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/" + request.getParameter("vnum") + "/";
@@ -656,7 +666,6 @@ public class SWBATemplateEdit extends GenericResource {
 //                    System.out.println("Ruta FS Target:"+rutaFS_target_path);
 //                    System.out.println("Ruta Web Source:"+rutaWeb_source_path);
 //                    System.out.println("Ruta Web Target:"+rutaWeb_target_path);
-
                     if (SWBUtils.IO.copyStructure(rutaFS_source_path, rutaFS_target_path, true, rutaWeb_source_path, rutaWeb_target_path)) {
 //                        System.out.println("Copied OK");
                     }
@@ -765,7 +774,6 @@ public class SWBATemplateEdit extends GenericResource {
                         //System.out.println("Remove OK");
                     }
 
-
                     vio.removeNextVersion();
                     vio.removePreviousVersion();
                     vio.remove();
@@ -776,7 +784,7 @@ public class SWBATemplateEdit extends GenericResource {
             response.setRenderParameter(act, "");
             response.setMode(response.Mode_VIEW);
         } else if ("resetversion".equals(act)) {
-            //System.out.println("Reset - Version");
+//            System.out.println("Reset - Version");
             Template tmpl = (Template) go;
             VersionInfo va = tmpl.getActualVersion();
             VersionInfo vl = tmpl.getLastVersion();
@@ -784,11 +792,12 @@ public class SWBATemplateEdit extends GenericResource {
             VersionInfo temp = va.getPreviousVersion();
             VersionInfo temp2 = null;
 
+//            System.out.println("version actual numero:"+va.getVersionNumber());
             while (temp != null) {
                 temp2 = temp;
                 String rutaFS_source_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/" + temp2.getVersionNumber();
                 if (SWBUtils.IO.removeDirectory(rutaFS_source_path)) {
-                    //System.out.println("Remove back OK by Reset Version: " + temp2.getVersionNumber());
+//                    System.out.println("Remove back OK by Reset Version: " + temp2.getVersionNumber());
                 }
                 temp2.remove();
                 temp = temp.getPreviousVersion();
@@ -805,7 +814,7 @@ public class SWBATemplateEdit extends GenericResource {
                 temp = temp.getNextVersion();
                 String rutaFS_source_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/" + temp2.getVersionNumber();
                 if (SWBUtils.IO.removeDirectory(rutaFS_source_path)) {
-                    //System.out.println("Remove next OK by Reset Version: " + temp2.getVersionNumber());
+//                    System.out.println("Remove next OK by Reset Version: " + temp2.getVersionNumber());
                 }
             }
 
@@ -817,23 +826,26 @@ public class SWBATemplateEdit extends GenericResource {
             }
 
             int va_num = va.getVersionNumber();
+//            System.out.println("numero:"+va_num);
             if (va_num != 1) {
                 String rutaFS_source_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/" + va_num + "/";
                 String rutaFS_target_path = SWBPortal.getWorkPath() + tmpl.getWorkPath() + "/1/";
                 String rutaWeb_source_path = SWBPortal.getWebWorkPath() + tmpl.getWorkPath() + "/" + va_num;
                 String rutaWeb_target_path = SWBPortal.getWebWorkPath() + tmpl.getWorkPath() + "/1";
 
-                if (SWBUtils.IO.copyStructure(rutaFS_source_path, rutaFS_target_path, true, rutaWeb_source_path, rutaWeb_target_path)) {
-                    //System.out.println("Copied actual to 1 OK by Reset Version");
+                if (copyStructure(rutaFS_source_path, rutaFS_target_path, true, rutaWeb_source_path, rutaWeb_target_path)) {
+//                    System.out.println("Copy actual to 1 OK by Reset Version");
                 }
 
                 // Eliminando la version actual
                 if (SWBUtils.IO.removeDirectory(rutaFS_source_path)) {
-                    //System.out.println("Remove OK actual");
+//                    System.out.println("Remove OK actual..."+rutaFS_source_path);
                 }
-                
+
                 //System.out.println("filename:"+va.getVersionFile());
             }
+
+            /////////////////////////////////
             va.setVersionNumber(1);
             tmpl.setActualVersion(va);
             tmpl.setLastVersion(va);
@@ -841,4 +853,61 @@ public class SWBATemplateEdit extends GenericResource {
         }
         response.setRenderParameter("suri", id);
     }
+
+    /**
+     * Copia estructura de archivos de las plantilla al reinicio de versiones.
+     * @param source ruta origen de la plantilla actual
+     * @param target ruta destino de la versión 1 de la plantilla
+     * @param changePath si se va a cambiar la ruta web de los archivos
+     * @param sourcePath ruta web origen
+     * @param targetPath ruta web destino
+     * @return 
+     */
+
+    private boolean copyStructure(String source, String target, boolean changePath, String sourcePath,
+            String targetPath) {
+        try {
+            File ftarget = new File(target);
+            if (!ftarget.exists()) {
+                ftarget.mkdirs();
+            } else {
+                SWBUtils.IO.removeDirectory(target);
+                ftarget.mkdirs();
+            }
+            File dir = new File(source);
+            if (dir != null && dir.exists() && dir.isDirectory()) {
+                File[] listado = dir.listFiles();
+                for (int i = 0; i < listado.length; i++) {
+                    try {
+                        if (listado[i].isFile()) {
+                            File targetFile = new File(target + listado[i].getName());
+                            if (targetFile.length() == 0) {
+                                SWBUtils.IO.copy(source + listado[i].getName(), target + listado[i].getName(), changePath,
+                                        sourcePath, targetPath);
+                            }
+                        }
+                        if (listado[i].isDirectory()) {
+                            String newpath = listado[i].getPath();
+                            File f = new File(target + listado[i].getName());
+                            f.mkdirs();
+                            boolean flag = copyStructure(newpath + "/", target + listado[i].getName() + "/",
+                                    changePath, sourcePath, targetPath);
+                            if (flag) {
+                                listado[i].delete();
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error(e);
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(e);
+            return false;
+        }
+        return true;
+    }
+  
+
 }

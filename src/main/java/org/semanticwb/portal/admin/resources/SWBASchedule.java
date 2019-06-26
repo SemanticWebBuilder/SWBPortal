@@ -208,6 +208,8 @@ public class SWBASchedule extends GenericResource {
             }
             if (strXmlConf != null && strXmlConf.trim().length() > 0) {
                 doc = SWBUtils.XML.xmlToDom(strXmlConf);
+                
+//                System.out.println("XML:\n"+strXmlConf);
                 active = SWBUtils.XML.getAttribute(doc, "active");
                 createdate = SWBUtils.XML.getAttribute(doc, "createdate");
                 usercreate = SWBUtils.XML.getAttribute(doc, "usercreate");
@@ -882,6 +884,21 @@ public class SWBASchedule extends GenericResource {
     @Override
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
 
+        
+        
+//        System.out.println("Request:============================================="+request.toString());
+//        
+//        
+//        
+//        Enumeration<String> paramNames = request.getParameterNames();
+//        while(paramNames.hasMoreElements()){
+//            String pname = paramNames.nextElement();
+//            System.out.println(pname+"----"+request.getParameter(pname));
+//        }
+//        
+//        System.out.println("========================================================");
+            
+        
         String id = request.getParameter("suri");
         String sval = id;
         User user = response.getUser();
@@ -1073,7 +1090,7 @@ public class SWBASchedule extends GenericResource {
                                 if (request.getParameter(id_suri + "_mmday") != null) {
                                     addElem(doc, eleperiod, "day", request.getParameter(id_suri + "_mmday"));
                                 }
-                                if (request.getParameter(id_suri + "_/mmday2") != null) {
+                                if (request.getParameter(id_suri + "_mmday2") != null) {
                                     addElem(doc, eleperiod, "today", request.getParameter(id_suri + "_mmday2"));
                                 }
                                 if (request.getParameter(id_suri + "_mmonths1") != null) {
@@ -1081,7 +1098,7 @@ public class SWBASchedule extends GenericResource {
                                 }
                             } else if (smonth != null && smonth.equals("week")) {
                                 if (request.getParameter(id_suri + "_mweek") != null) {
-                                    addElem(doc, eleperiod, "week", request.getParameter(id + "_mweek"));
+                                    addElem(doc, eleperiod, "week", request.getParameter(id_suri + "_mweek"));
                                 }
                                 int x = 0;
                                 if (request.getParameter(id_suri + "_mday1") != null) {
