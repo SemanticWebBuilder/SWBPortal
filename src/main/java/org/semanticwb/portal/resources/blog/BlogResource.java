@@ -1652,7 +1652,7 @@ public class BlogResource extends GenericResource
      * @param name the name
      * @param asign the asign
      */
-    public void createBlog(String name,boolean asign)
+    public void createBlog(String name,boolean asign) throws SWBException
     {
         Connection con = SWBUtils.DB.getDefaultConnection();
         try
@@ -1704,9 +1704,9 @@ public class BlogResource extends GenericResource
      * @param request the request
      * @param response the response
      * @param name the name
-     * @param asign the asign
+     * @param asign the assign
      */
-    private synchronized void createBlog(HttpServletRequest request, SWBActionResponse response, String name, boolean asign)
+    private synchronized void createBlog(HttpServletRequest request, SWBActionResponse response, String name, boolean asign) throws SWBException
     {
         Connection con = SWBUtils.DB.getDefaultConnection();
         try
@@ -1754,24 +1754,24 @@ public class BlogResource extends GenericResource
     }
 
     /**
-     * Asign blog.
+     * Assign blog.
      * 
      * @param blogid the blogid
      */
-    public void asignBlog(int blogid)
+    public void asignBlog(int blogid) throws SWBException
     {
         this.getResourceBase().setAttribute("blogid", String.valueOf(blogid));
         this.getResourceBase().updateAttributesToDB();
     }
     
     /**
-     * Asign blog.
+     * Assign blog.
      * 
      * @param request the request
      * @param response the response
      * @param blogid the blogid
      */
-    public void asignBlog(HttpServletRequest request, SWBActionResponse response, int blogid)
+    public void asignBlog(HttpServletRequest request, SWBActionResponse response, int blogid) throws SWBException
     {
         this.getResourceBase().setAttribute("blogid", String.valueOf(blogid));
         this.getResourceBase().updateAttributesToDB();
@@ -1779,7 +1779,7 @@ public class BlogResource extends GenericResource
     }
 
     /**
-     * Asign role.
+     * Assign role.
      * 
      * @param request the request
      * @param response the response
@@ -1787,7 +1787,7 @@ public class BlogResource extends GenericResource
      * @throws SWBResourceException the sWB resource exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void asignRole(HttpServletRequest request, SWBActionResponse response, int blogid) throws SWBResourceException, IOException
+    public void asignRole(HttpServletRequest request, SWBActionResponse response, int blogid) throws SWBResourceException, SWBException, IOException
     {
         Connection con = SWBUtils.DB.getDefaultConnection();
         Enumeration names = request.getParameterNames();
@@ -2158,12 +2158,17 @@ public class BlogResource extends GenericResource
         {
 
             String format_comments = request.getParameter("format_comments");
+            boolean updateAtts2DB = false;
             if ( format_comments != null && !format_comments.equals("") )
             {
                 try
                 {
                     getResourceBase().setAttribute("format_comments", format_comments);
                     getResourceBase().updateAttributesToDB();
+                }
+                catch (SWBException swbe) {
+                    log.error(swbe);
+                    return;
                 }
                 catch ( IllegalArgumentException iae )
                 {
@@ -2179,6 +2184,10 @@ public class BlogResource extends GenericResource
                 {
                     getResourceBase().setAttribute("format", format);
                     getResourceBase().updateAttributesToDB();
+                }
+                catch (SWBException swbe) {
+                    log.error(swbe);
+                    return;
                 }
                 catch ( IllegalArgumentException iae )
                 {
@@ -2196,7 +2205,7 @@ public class BlogResource extends GenericResource
             if ( numofblogs != null && !numofblogs.equals("") )
             {
                 this.getResourceBase().setAttribute("numofblogs", String.valueOf(Integer.parseInt(numofblogs)));
-                getResourceBase().updateAttributesToDB();
+                updateAtts2DB = true;
                 response.setMode(SWBActionResponse.Mode_ADMIN);
                 
             }
@@ -2205,18 +2214,27 @@ public class BlogResource extends GenericResource
             if ( anonimous != null && !anonimous.equals("") )
             {
                 this.getResourceBase().setAttribute("anonimous", String.valueOf(Boolean.parseBoolean(anonimous)));
-                getResourceBase().updateAttributesToDB();
+                updateAtts2DB = true;
                 response.setMode(SWBActionResponse.Mode_ADMIN);                
             }
             String numofcomments = request.getParameter("numofcomments");
             if ( numofcomments != null && !numofcomments.equals("") )
             {
                 this.getResourceBase().setAttribute("numofcomments", String.valueOf(Integer.parseInt(numofcomments)));
-                getResourceBase().updateAttributesToDB();
+                updateAtts2DB = true;
                 response.setMode(SWBActionResponse.Mode_ADMIN);
                 return;
             }
 
+            if (updateAtts2DB) {
+                try {
+                    getResourceBase().updateAttributesToDB();
+                } catch (SWBException swbe) {
+                    log.error(swbe);
+                    return;
+                }
+
+            }
             Enumeration names = request.getParameterNames();
             while (names.hasMoreElements())
             {
@@ -2235,8 +2253,11 @@ public class BlogResource extends GenericResource
                 String name = ( String ) names.nextElement();
                 if ( name.startsWith("role_") )
                 {
-
-                    asignRole(request, response, Integer.parseInt(this.getResourceBase().getAttribute("blogid")));
+                    try {
+                        asignRole(request, response, Integer.parseInt(this.getResourceBase().getAttribute("blogid")));
+                    } catch (SWBException swbe) {
+                        log.error(swbe);
+                    }
                     response.setMode(SWBActionResponse.Mode_ADMIN);
                     return;
                 }
@@ -2253,7 +2274,11 @@ public class BlogResource extends GenericResource
             String blog = request.getParameter("blog");
             if ( blog != null && !blog.equals("") )
             {
-                asignBlog(request, response, Integer.parseInt(blog));
+                try {
+                    asignBlog(request, response, Integer.parseInt(blog));
+                } catch (SWBException swbe) {
+                    log.error(swbe);
+                }
                 return;
             }
 
@@ -2263,7 +2288,11 @@ public class BlogResource extends GenericResource
             String name = request.getParameter("title");
             if ( createBlog != null && name != null && !name.equals("") && createBlog.equals("true") )
             {
-                createBlog(request, response, name, Boolean.parseBoolean(asign));
+                try {
+                    createBlog(request, response, name, Boolean.parseBoolean(asign));
+                } catch (SWBException swbe) {
+                    log.error(swbe);
+                }
                 return;
             }
             String sBlogId = response.getResourceBase().getAttribute("blogid");
@@ -2883,7 +2912,11 @@ public class BlogResource extends GenericResource
                 createForm(out, paramRequest);
                 out.println("</td></tr>");
                 this.getResourceBase().setAttribute("blogid", null);
-                this.getResourceBase().updateAttributesToDB();
+                try {
+                    this.getResourceBase().updateAttributesToDB();
+                } catch (SWBException swbe) {
+                    log.event(swbe);
+                }
             }
         }
         out.println("<tr><td>&nbsp;</td></tr>");

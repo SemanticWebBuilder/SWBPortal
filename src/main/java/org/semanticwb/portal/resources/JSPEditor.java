@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.semanticwb.Logger;
+import org.semanticwb.SWBException;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;
@@ -233,7 +234,11 @@ public class JSPEditor extends GenericAdmResource {
             if (fileName == null) {
                 fileName = UUID.randomUUID().toString().replaceAll("-", "") + ".jsp";
                 base.setAttribute("fileName", fileName);
-                base.updateAttributesToDB();
+                try {
+                    base.updateAttributesToDB();
+                } catch (SWBException swbe) {
+                    throw new SWBResourceException("Updating attributes to DB", swbe);
+                }
             }
             //Escribe el codigo en un archivo de file system
             synchronized (code) {

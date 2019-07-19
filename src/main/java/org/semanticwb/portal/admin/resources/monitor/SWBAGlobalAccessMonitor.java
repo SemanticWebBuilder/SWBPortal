@@ -482,8 +482,11 @@ System.out.println("request.getParameterValues(\"sites\")="+request.getParameter
                     base.setAttribute("sites", sites);
                 }
             }
-            
-            response.getResourceBase().updateAttributesToDB();
+            try {
+                response.getResourceBase().updateAttributesToDB();
+            } catch (SWBException swbe) {
+                throw new SWBResourceException("Updating attributes to DB", swbe);
+            }
             response.setRenderParameter("msg", "msgOkUpdateResource");
             
             final String supil = request.getParameter("supil");

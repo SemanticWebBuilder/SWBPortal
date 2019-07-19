@@ -548,10 +548,10 @@ public class LDAPLoadUsers extends GenericResource
                 return;
             }
             paramRequest.getResourceBase().setAttribute("file", file);
-            paramRequest.getResourceBase().updateAttributesToDB();
             
             try
             {
+                paramRequest.getResourceBase().updateAttributesToDB();
                 InputStream inProps = this.getClass().getClassLoader().getResourceAsStream(file);
                 if (inProps == null)
                 {
@@ -582,6 +582,9 @@ public class LDAPLoadUsers extends GenericResource
                     }
                     out.println("</fieldset>");
                 }
+            }
+            catch (SWBException swbe) {
+                log.error(swbe);
             }
             catch (IOException e)
             {
@@ -704,6 +707,10 @@ public class LDAPLoadUsers extends GenericResource
                     out.println("</form>");
                     out.println("</fieldset>");
                 }
+            }
+            catch (SWBException swbe) {
+                log.error(swbe);
+                out.println("<p>Error al buscar usuarios: " + swbe.getMessage() + "</p>");
             }
             catch (ConfigurationError ioe)
             {
