@@ -83,14 +83,8 @@ public class SWBAComposer extends GenericAdmResource {
     
     @Override
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
-        String suri = request.getParameter("suri");
-        int index = suri.lastIndexOf(":");
-        String idpage = suri.substring(index + 1, suri.length());
-        index = suri.indexOf(".", 11);
-        String idsite = suri.substring(11, index);
+        WebPage wp = getHost(request);
         String idTmpl = getResourceBase().getAttribute("idTmpl","2");
-        WebSite site = WebSite.ClassMgr.getWebSite(idsite);
-        WebPage wp = site.getWebPage(idpage);
         if (ACTION_ADD_GRID.equalsIgnoreCase(response.getAction())) {
             String jsongrid = request.getParameter("jsongrid");
             if (null != wp) {
@@ -102,10 +96,11 @@ public class SWBAComposer extends GenericAdmResource {
                 temrefindex.setPriority(2);
                 wp.addTemplateRef(temrefindex);
                 String elements = resToJson(jsongrid, wp);
-                if (null != elements && elements.isEmpty())
+                if (null != elements && !elements.isEmpty())
                     wp.setProperty("_elements", elements);
             }
         }
+        response.setRenderParameter("suri", request.getParameter("suri"));
     }
     
     private String resToJson(String json, WebPage wp) {
@@ -157,5 +152,16 @@ public class SWBAComposer extends GenericAdmResource {
             LOG.error(e);
         }
         return res;
+    }
+    
+    private WebPage getHost(HttpServletRequest request) {
+        String suri = request.getParameter("suri");
+        int index = suri.lastIndexOf(":");
+        String idpage = suri.substring(index + 1, suri.length());
+        index = suri.indexOf(".", 11);
+        String idsite = suri.substring(11, index);
+        WebSite site = WebSite.ClassMgr.getWebSite(idsite);
+        WebPage wp = site.getWebPage(idpage);
+        return wp;
     }
 }
