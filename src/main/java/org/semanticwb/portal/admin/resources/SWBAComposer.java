@@ -43,6 +43,7 @@ import org.semanticwb.Logger;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.SWBException;
 import org.semanticwb.model.Resource;
+import org.semanticwb.model.ResourceSubType;
 import org.semanticwb.model.ResourceType;
 import org.semanticwb.model.WebPage;
 import org.semanticwb.model.Template;
@@ -84,9 +85,12 @@ public class SWBAComposer extends GenericAdmResource {
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
         String suri = request.getParameter("suri");
         int index = suri.lastIndexOf(":");
-        String id = suri.substring(index + 1, suri.length());
+        String idpage = suri.substring(index + 1, suri.length());
+        index = suri.indexOf(".", 11);
+        String idsite = suri.substring(11, index);
         String idTmpl = getResourceBase().getAttribute("idTmpl","2");
-        WebPage wp = response.getWebPage().getWebSite().getWebPage(id);
+        WebSite site = WebSite.ClassMgr.getWebSite(idsite);
+        WebPage wp = site.getWebPage(idpage);
         try {
             if (ACTION_ADD_GRID.equalsIgnoreCase(response.getAction())) {
                 String jsongrid = request.getParameter("jsongrid");
@@ -115,10 +119,10 @@ public class SWBAComposer extends GenericAdmResource {
     
     private String resToJson(String json, WebPage wp) {
         JSONObject resources = new JSONObject();
-        List<Map<String, String>> elements = new ArrayList<>();
+        List<Map<String, Object>> elements = new ArrayList<>();
         if (null == json || json.trim().isEmpty()) return null;
         if (!json.startsWith("{"))
-            json = "{" + " \"elements: \"" + json +  "}";
+            json = "{" + " \"elements\" : " + json +  "}";
         JSONObject obj = new JSONObject(json);
         JSONArray arr = obj.getJSONArray("elements");
         for (int i = 0; i < arr.length(); i++) {
@@ -126,12 +130,11 @@ public class SWBAComposer extends GenericAdmResource {
             Resource resource = createResource(wp, resourceType, "Grid component");
             if (null != resource) {
                 wp.addResource(resource);
-                Map<String, String> element = new LinkedHashMap<>();
-                element.put("x", arr.getJSONObject(i).getString("x"));
-                element.put("y", arr.getJSONObject(i).getString("y"));
-                element.put("width", arr.getJSONObject(i).getString("width"));
-                element.put("height", arr.getJSONObject(i).getString("height"));
-                element.put("height", arr.getJSONObject(i).getString("height"));
+                Map<String, Object> element = new LinkedHashMap<>();
+                element.put("x", arr.getJSONObject(i).getInt("x"));
+                element.put("y", arr.getJSONObject(i).getInt("y"));
+                element.put("width", arr.getJSONObject(i).getInt("width"));
+                element.put("height", arr.getJSONObject(i).getInt("height"));
                 element.put("resourceType", resourceType);
                 element.put("resourceId", resource.getId());
                 elements.add(element);
@@ -149,9 +152,14 @@ public class SWBAComposer extends GenericAdmResource {
             ResourceType resType = ResourceType.ClassMgr.getResourceType(resourceType, site);
             res = site.createResource();
             res.setIndex(2);
-            res.setResourceType(resType);
             res.setTitle(resourceTitle);
             res.setActive(Boolean.TRUE);
+            res.setResourceType(resType);
+            if ("StaticText".equalsIgnoreCase(resourceType) && !getResourceBase().getAttribute("idSubTypeST","").isEmpty()) {
+                ResourceSubType resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeST",""), site);
+                if (null != resSubType)
+                    res.setResourceSubType(resSubType);
+            }
             res.updateAttributesToDB();
         }catch (SWBException e) {
             LOG.error(e);
