@@ -5,6 +5,7 @@
         <admdbconnmgr defconn="true"/>
         <fieldset>
             <input type="TEXT" name="idTmpl" label="* Identificador de plantilla" size="50" jsrequired="true" />
+            <input type="TEXT" name="idSubTypeMN" label="* Identificador de subtipo de menu nivel" size="50" jsrequired="true" />
             <input type="TEXT" name="idSubTypeST" label="* Identificador de subtipo de texto estático" size="50" jsrequired="true" />
         </fieldset>
         <fieldset>

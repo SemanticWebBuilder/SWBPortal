@@ -91,29 +91,20 @@ public class SWBAComposer extends GenericAdmResource {
         String idTmpl = getResourceBase().getAttribute("idTmpl","2");
         WebSite site = WebSite.ClassMgr.getWebSite(idsite);
         WebPage wp = site.getWebPage(idpage);
-        try {
-            if (ACTION_ADD_GRID.equalsIgnoreCase(response.getAction())) {
-                String jsongrid = request.getParameter("jsongrid");
-                if (null != wp) {
-                    Template templateIndex = Template.ClassMgr.getTemplate(idTmpl, response.getWebPage().getWebSite());
-                    TemplateRef temrefindex = TemplateRef.ClassMgr.createTemplateRef(response.getWebPage().getWebSite());
-                    temrefindex.setActive(Boolean.TRUE);
-                    temrefindex.setTemplate(templateIndex);
-                    temrefindex.setInherit(TemplateRef.INHERIT_ACTUAL);
-                    temrefindex.setPriority(2);
-                    wp.addTemplateRef(temrefindex);
-                    String elements = resToJson(jsongrid, wp);
-                    if (null != elements && elements.isEmpty()) {
-                        Resource grid = createResource(wp, "GridContent", "Grid component");
-                        if (null != grid) {
-                            grid.setAttribute("elements", elements);
-                            grid.updateAttributesToDB();
-                        }
-                    }
-                }
+        if (ACTION_ADD_GRID.equalsIgnoreCase(response.getAction())) {
+            String jsongrid = request.getParameter("jsongrid");
+            if (null != wp) {
+                Template templateIndex = Template.ClassMgr.getTemplate(idTmpl, response.getWebPage().getWebSite());
+                TemplateRef temrefindex = TemplateRef.ClassMgr.createTemplateRef(response.getWebPage().getWebSite());
+                temrefindex.setActive(Boolean.TRUE);
+                temrefindex.setTemplate(templateIndex);
+                temrefindex.setInherit(TemplateRef.INHERIT_ACTUAL);
+                temrefindex.setPriority(2);
+                wp.addTemplateRef(temrefindex);
+                String elements = resToJson(jsongrid, wp);
+                if (null != elements && elements.isEmpty())
+                    wp.setProperty("_elements", elements);
             }
-        } catch (SWBException ex) {
-            LOG.error(ex);
         }
     }
     
@@ -146,6 +137,7 @@ public class SWBAComposer extends GenericAdmResource {
     
     private Resource createResource(WebPage wp, String resourceType, String resourceTitle) {
         Resource res = null;
+        ResourceSubType resSubType = null;
         if (null == wp) return null;
         WebSite site = wp.getWebSite();
         try {
@@ -155,11 +147,11 @@ public class SWBAComposer extends GenericAdmResource {
             res.setTitle(resourceTitle);
             res.setActive(Boolean.TRUE);
             res.setResourceType(resType);
-            if ("StaticText".equalsIgnoreCase(resourceType) && !getResourceBase().getAttribute("idSubTypeST","").isEmpty()) {
-                ResourceSubType resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeST",""), site);
-                if (null != resSubType)
-                    res.setResourceSubType(resSubType);
-            }
+            if ("StaticText".equalsIgnoreCase(resourceType) && !getResourceBase().getAttribute("idSubTypeST","").isEmpty())
+                resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeST"), site);
+            else if ("MenuNivel".equalsIgnoreCase(resourceType) && !getResourceBase().getAttribute("idSubTypeMN","").isEmpty())
+                resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeMN"), site);
+            if (null != resSubType) res.setResourceSubType(resSubType);
             res.updateAttributesToDB();
         }catch (SWBException e) {
             LOG.error(e);
