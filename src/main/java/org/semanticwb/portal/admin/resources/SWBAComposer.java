@@ -33,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import javax.servlet.ServletException;
 import javax.servlet.RequestDispatcher;
@@ -72,9 +73,11 @@ public class SWBAComposer extends GenericAdmResource {
         String path = "/swbadmin/jsp/composer/gridEditor.jsp";
         RequestDispatcher rd = request.getRequestDispatcher(path);
         try {
+            WebPage wp = getHost(request);
             request.setAttribute("paramRequest", paramRequest);
             if (null != request.getParameter("suri"))
                 request.setAttribute("suri", request.getParameter("suri"));
+            request.setAttribute("_elements", wp.getProperty("_elements", ""));
             rd.include(request, response);
         } catch (ServletException se) {
             LOG.error(se);
@@ -84,10 +87,10 @@ public class SWBAComposer extends GenericAdmResource {
     @Override
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
         WebPage wp = getHost(request);
+        String jsongrid = request.getParameter("jsongrid");
         String idTmpl = getResourceBase().getAttribute("idTmpl","2");
-        if (ACTION_ADD_GRID.equalsIgnoreCase(response.getAction())) {
-            String jsongrid = request.getParameter("jsongrid");
-            if (null != wp) {
+        if (null != wp) {
+            if (ACTION_ADD_GRID.equalsIgnoreCase(response.getAction())) {
                 Template templateIndex = Template.ClassMgr.getTemplate(idTmpl, response.getWebPage().getWebSite());
                 TemplateRef temrefindex = TemplateRef.ClassMgr.createTemplateRef(response.getWebPage().getWebSite());
                 temrefindex.setActive(Boolean.TRUE);
@@ -95,10 +98,12 @@ public class SWBAComposer extends GenericAdmResource {
                 temrefindex.setInherit(TemplateRef.INHERIT_ACTUAL);
                 temrefindex.setPriority(2);
                 wp.addTemplateRef(temrefindex);
-                String elements = resToJson(jsongrid, wp);
-                if (null != elements && !elements.isEmpty())
-                    wp.setProperty("_elements", elements);
+            }else if (ACTION_UPD_GRID.equalsIgnoreCase(response.getAction())) {
+                //ACTIONS FOR UPDATE
             }
+            String elements = resToJson(jsongrid, wp);
+            if (null != elements && !elements.isEmpty())
+                wp.setProperty("_elements", elements);
         }
         response.setRenderParameter("suri", request.getParameter("suri"));
     }
@@ -111,11 +116,18 @@ public class SWBAComposer extends GenericAdmResource {
             json = "{" + " \"elements\" : " + json +  "}";
         JSONObject obj = new JSONObject(json);
         JSONArray arr = obj.getJSONArray("elements");
+        Map<String, Resource> map = mapResources(wp);
         for (int i = 0; i < arr.length(); i++) {
+            Resource resource = null;
+            String resourceId = arr.getJSONObject(i).getString("resourceId");
             String resourceType = arr.getJSONObject(i).getString("resourceType");
-            Resource resource = createResource(wp, resourceType, "Grid component");
+            if (null != resourceId && !resourceId.isEmpty() && map.containsKey(resourceId)) {
+                resource = map.get(resourceId);
+                map.remove(resourceId);
+            }else 
+                resource = createResource(wp, resourceType, "Grid component");
+            System.out.println("resource: " + resource);
             if (null != resource) {
-                wp.addResource(resource);
                 Map<String, Object> element = new LinkedHashMap<>();
                 element.put("x", arr.getJSONObject(i).getInt("x"));
                 element.put("y", arr.getJSONObject(i).getInt("y"));
@@ -126,6 +138,7 @@ public class SWBAComposer extends GenericAdmResource {
                 elements.add(element);
             }
         }
+        if (!map.isEmpty()) removeResources(map, wp);
         if (!elements.isEmpty()) resources.put("elements", elements);
         return resources.toString(3);
     }
@@ -148,6 +161,7 @@ public class SWBAComposer extends GenericAdmResource {
                 resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeMN"), site);
             if (null != resSubType) res.setResourceSubType(resSubType);
             res.updateAttributesToDB();
+            wp.addResource(res);
         }catch (SWBException e) {
             LOG.error(e);
         }
@@ -163,5 +177,22 @@ public class SWBAComposer extends GenericAdmResource {
         WebSite site = WebSite.ClassMgr.getWebSite(idsite);
         WebPage wp = site.getWebPage(idpage);
         return wp;
+    }
+    
+    private Map<String, Resource> mapResources(WebPage wp) {
+        Map<String, Resource> map = new LinkedHashMap<>();
+        Iterator<Resource> it = wp.listResources();
+        while (it.hasNext()) {
+            Resource res = it.next();
+            map.put(res.getId(), res);
+        }
+        return map;
+    }
+    
+    private void removeResources(Map<String, Resource> map, WebPage wp) {
+        Iterator<String> it = map.keySet().iterator();
+        while (it.hasNext()) {
+            Resource.ClassMgr.removeResource(it.next(), wp.getWebSite());
+        }
     }
 }
