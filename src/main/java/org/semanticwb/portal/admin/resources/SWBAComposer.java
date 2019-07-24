@@ -43,13 +43,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.semanticwb.Logger;
 import org.semanticwb.SWBUtils;
 import org.semanticwb.SWBException;
-import org.semanticwb.model.Resource;
-import org.semanticwb.model.ResourceSubType;
-import org.semanticwb.model.ResourceType;
 import org.semanticwb.model.WebPage;
+import org.semanticwb.model.WebSite;
+import org.semanticwb.model.Resource;
+import org.semanticwb.model.ResourceType;
+import org.semanticwb.model.ResourceSubType;
+
 import org.semanticwb.model.Template;
 import org.semanticwb.model.TemplateRef;
-import org.semanticwb.model.WebSite;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.GenericAdmResource;
@@ -93,11 +94,13 @@ public class SWBAComposer extends GenericAdmResource {
             if (ACTION_ADD_GRID.equalsIgnoreCase(response.getAction())) {
                 Template templateIndex = Template.ClassMgr.getTemplate(idTmpl, response.getWebPage().getWebSite());
                 TemplateRef temrefindex = TemplateRef.ClassMgr.createTemplateRef(response.getWebPage().getWebSite());
-                temrefindex.setActive(Boolean.TRUE);
-                temrefindex.setTemplate(templateIndex);
-                temrefindex.setInherit(TemplateRef.INHERIT_ACTUAL);
-                temrefindex.setPriority(2);
-                wp.addTemplateRef(temrefindex);
+                if (!wp.hasTemplateRef(temrefindex)) {
+                    temrefindex.setActive(Boolean.TRUE);
+                    temrefindex.setTemplate(templateIndex);
+                    temrefindex.setInherit(TemplateRef.INHERIT_ACTUAL);
+                    temrefindex.setPriority(2);
+                    wp.addTemplateRef(temrefindex);
+                }
             }else if (ACTION_UPD_GRID.equalsIgnoreCase(response.getAction())) {
                 //ACTIONS FOR UPDATE
             }
@@ -126,7 +129,6 @@ public class SWBAComposer extends GenericAdmResource {
                 map.remove(resourceId);
             }else 
                 resource = createResource(wp, resourceType, "Grid component");
-            System.out.println("resource: " + resource);
             if (null != resource) {
                 Map<String, Object> element = new LinkedHashMap<>();
                 element.put("x", arr.getJSONObject(i).getInt("x"));

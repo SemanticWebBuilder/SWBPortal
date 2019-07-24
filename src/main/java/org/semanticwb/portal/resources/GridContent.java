@@ -84,9 +84,9 @@ public class GridContent extends GenericAdmResource {
     
     public static void doPreview(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest, String id) {
         try {
-            request.setAttribute("_canonical", "preview");
             SWBResource res = SWBPortal.getResourceMgr().getResource(id);
             ((SWBParamRequestImp) paramRequest).setResourceBase(res.getResourceBase());
+            ((SWBParamRequestImp) paramRequest).setWindowState(SWBParamRequest.Mode_VIEW);
             res.render(request, response, paramRequest);
         } catch (IOException | SWBResourceException e) {
             LOG.error("Error while getting content string, id:" + id, e);
