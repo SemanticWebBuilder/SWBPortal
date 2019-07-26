@@ -10,22 +10,32 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.IOException;
 
+import java.io.File;
+import java.io.Writer;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+
+import org.semanticwb.Logger;
+import org.semanticwb.SWBUtils;
+import org.semanticwb.SWBPortal;
+import org.semanticwb.model.WebSite;
+import org.semanticwb.model.WebPage;
+import org.semanticwb.model.Template;
+import org.semanticwb.model.TemplateGroup;
 
 import javax.servlet.ServletException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.semanticwb.Logger;
-import org.semanticwb.SWBUtils;
-import org.semanticwb.SWBPortal;
-import org.semanticwb.model.WebPage;
 import org.semanticwb.model.Resource;
 import org.semanticwb.model.ResourceType;
+import org.semanticwb.model.ResourceSubType;
 import org.semanticwb.portal.api.SWBResource;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.GenericAdmResource;
@@ -40,12 +50,25 @@ public class GridContent extends GenericAdmResource {
     
     /** The log. */
     private static final Logger LOG = SWBUtils.getLogger(GridContent.class);
+    public static final String DEFAUL_HTML = "<template method=\"setHeaders\" Content-Type=\"text/html\"  response=\"{response}\" />\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n<title>\n   <TOPIC METHOD=\"getDisplayName\" LANGUAGE=\"{user@getLanguage}\"/>\n</title>\n\n</head>\n <body>\n <RESOURCE TYPE=\"GridContent\" />\n </body>\n</html>";
     
-    //Retrieve from request or paramRequest the web page where resource is show
-    //If composer is on webpage retrieve grid definition resource base
-    //Deserialize json grid
-    //Set strategy resources calls by ids in grid
-    //Draw components 
+    @Override
+    public void install(ResourceType recobj) throws SWBResourceException {
+        ResourceType menuNivel = ResourceType.ClassMgr.getResourceType("MenuNivel", getResourceBase().getWebSite());
+        ResourceType staticText = ResourceType.ClassMgr.getResourceType("StaticText", getResourceBase().getWebSite());
+        if (null != menuNivel) {
+            ResourceSubType resSubType = ResourceSubType.ClassMgr.createResourceSubType("gmenu", getResourceBase().getWebSite());
+            resSubType.setType(menuNivel);
+        }
+        if (null != staticText) {
+            ResourceSubType resSubType = ResourceSubType.ClassMgr.createResourceSubType("gelements", getResourceBase().getWebSite());
+            resSubType.setType(staticText);
+        }
+        String idTplGroup = createTemplateGroup("Behaviour", getResourceBase().getWebSite()).getId();
+        Template gridTpl = createTemplate("grid", "Template for grid component", true, getResourceBase().getWebSite(), idTplGroup);
+        getResourceBase().setAttribute("idTemplate", gridTpl.getId());
+        //Create site properties for config composer
+    }
     
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
@@ -110,5 +133,39 @@ public class GridContent extends GenericAdmResource {
             elements.add(element);
         }
         return elements;
+    }
+    
+    private TemplateGroup createTemplateGroup(String title, WebSite site) {
+        TemplateGroup grp = site.createTemplateGroup();
+        grp.setTitle(title);
+        return grp;
+    }
+    
+    private Template createTemplate(String title, String description, Boolean active, WebSite site, String templateGroup) {
+        int vnum = 1;
+        Template tmp = site.createTemplate();
+        tmp.setTitle(title);
+        tmp.setActive(active);
+        tmp.setDescription(description);
+        Template tpl = SWBPortal.getTemplateMgr().getTemplateImp(tmp);
+        if (null != tpl) {
+            String defaultTPL = DEFAUL_HTML;
+            tpl.setGroup(site.getTemplateGroup(templateGroup));
+            String rutaFS_target_path = SWBPortal.getWorkPath() + tpl.getWorkPath() + "/" + vnum + "/";
+            File f = new File(rutaFS_target_path);
+            if (!f.exists()) {
+                f.mkdirs();
+            }
+            File ftmpl = new File(tpl.getWorkPath() + "/" + vnum + "/template.html");
+            try {
+                Writer output = new BufferedWriter(new FileWriter(ftmpl));
+                output.write(defaultTPL);
+                output.close();
+            } catch (IOException ex) {
+                LOG.error(ex);
+            }
+            tpl.reload();
+        }
+        return tpl;
     }
 }

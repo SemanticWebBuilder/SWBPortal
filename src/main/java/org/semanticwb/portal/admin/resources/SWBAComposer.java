@@ -27,13 +27,14 @@ package org.semanticwb.portal.admin.resources;
  */
 package org.semanticwb.portal.admin.resources;
 
-import java.util.Map;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.IOException;
-import java.util.ArrayList;
+
+import java.util.Map;
+import java.util.List;
 import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import javax.servlet.ServletException;
 import javax.servlet.RequestDispatcher;
@@ -76,9 +77,10 @@ public class SWBAComposer extends GenericAdmResource {
         try {
             WebPage wp = getHost(request);
             request.setAttribute("paramRequest", paramRequest);
-            if (null != request.getParameter("suri"))
+            if (null != request.getParameter("suri")) {
                 request.setAttribute("suri", request.getParameter("suri"));
-            request.setAttribute("_elements", wp.getProperty("_elements", ""));
+                request.setAttribute("_elements", wp.getProperty("_elements", ""));
+            }
             rd.include(request, response);
         } catch (ServletException se) {
             LOG.error(se);
@@ -89,11 +91,11 @@ public class SWBAComposer extends GenericAdmResource {
     public void processAction(HttpServletRequest request, SWBActionResponse response) throws SWBResourceException, IOException {
         WebPage wp = getHost(request);
         String jsongrid = request.getParameter("jsongrid");
-        String idTmpl = getResourceBase().getAttribute("idTmpl","2");
         if (null != wp) {
             if (ACTION_ADD_GRID.equalsIgnoreCase(response.getAction())) {
-                Template templateIndex = Template.ClassMgr.getTemplate(idTmpl, response.getWebPage().getWebSite());
-                TemplateRef temrefindex = TemplateRef.ClassMgr.createTemplateRef(response.getWebPage().getWebSite());
+                String idTmpl = null != wp.getWebSite().getModelProperty("idGridTmpl") ? wp.getWebSite().getModelProperty("idGridTmpl") : "2";
+                Template templateIndex = Template.ClassMgr.getTemplate(idTmpl, wp.getWebSite());
+                TemplateRef temrefindex = getTemplateRef(wp, templateIndex);
                 if (!wp.hasTemplateRef(temrefindex)) {
                     temrefindex.setActive(Boolean.TRUE);
                     temrefindex.setTemplate(templateIndex);
@@ -151,15 +153,17 @@ public class SWBAComposer extends GenericAdmResource {
         if (null == wp) return null;
         WebSite site = wp.getWebSite();
         try {
-            ResourceType resType = ResourceType.ClassMgr.getResourceType(resourceType, site);
+            String idResourceType = getIdResourceType(resourceType);
+            if (null == idResourceType) return null;
+            ResourceType resType = ResourceType.ClassMgr.getResourceType(idResourceType, site);
             res = site.createResource();
             res.setIndex(2);
             res.setTitle(resourceTitle);
             res.setActive(Boolean.TRUE);
             res.setResourceType(resType);
-            if ("StaticText".equalsIgnoreCase(resourceType) && !getResourceBase().getAttribute("idSubTypeST","").isEmpty())
+            if ("StaticText".equalsIgnoreCase(idResourceType) && null != site.getModelProperty("idSubTypeST"))
                 resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeST"), site);
-            else if ("MenuNivel".equalsIgnoreCase(resourceType) && !getResourceBase().getAttribute("idSubTypeMN","").isEmpty())
+            else if ("MenuNivel".equalsIgnoreCase(idResourceType) && null != site.getModelProperty("idSubTypeMN"))
                 resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeMN"), site);
             if (null != resSubType) res.setResourceSubType(resSubType);
             res.updateAttributesToDB();
@@ -170,8 +174,17 @@ public class SWBAComposer extends GenericAdmResource {
         return res;
     }
     
+    private String getIdResourceType(String resourceType) {
+        String idResourceType = null;
+        if (resourceType.equalsIgnoreCase("menu")) idResourceType = "MenuNivel";
+        else if (resourceType.equalsIgnoreCase("staticText")) idResourceType = "StaticText";
+        else if (resourceType.equalsIgnoreCase("htmlContent")) idResourceType = "HTMLContent";
+        return idResourceType;
+    }
+    
     private WebPage getHost(HttpServletRequest request) {
         String suri = request.getParameter("suri");
+        if (null == suri) return null;
         int index = suri.lastIndexOf(":");
         String idpage = suri.substring(index + 1, suri.length());
         index = suri.indexOf(".", 11);
@@ -196,5 +209,14 @@ public class SWBAComposer extends GenericAdmResource {
         while (it.hasNext()) {
             Resource.ClassMgr.removeResource(it.next(), wp.getWebSite());
         }
+    }
+    
+    private TemplateRef getTemplateRef(WebPage wp, Template templateIndex) {
+        Iterator<TemplateRef> it = wp.listTemplateRefs();
+        while (it.hasNext()) {
+            TemplateRef tmp = it.next();
+            if (tmp.getTemplate().equals(templateIndex)) return tmp;
+        }
+        return TemplateRef.ClassMgr.createTemplateRef(wp.getWebSite());
     }
 }
