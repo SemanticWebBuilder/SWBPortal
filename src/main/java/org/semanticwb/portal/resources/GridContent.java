@@ -36,6 +36,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.semanticwb.model.Resource;
 import org.semanticwb.model.ResourceType;
 import org.semanticwb.model.ResourceSubType;
+
+import org.semanticwb.model.SWBModel;
+import org.semanticwb.model.ModelProperty;
 import org.semanticwb.portal.api.SWBResource;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.GenericAdmResource;
@@ -50,6 +53,7 @@ public class GridContent extends GenericAdmResource {
     
     /** The log. */
     private static final Logger LOG = SWBUtils.getLogger(GridContent.class);
+    //Add bootstrap libs to default html
     public static final String DEFAUL_HTML = "<template method=\"setHeaders\" Content-Type=\"text/html\"  response=\"{response}\" />\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n<title>\n   <TOPIC METHOD=\"getDisplayName\" LANGUAGE=\"{user@getLanguage}\"/>\n</title>\n\n</head>\n <body>\n <RESOURCE TYPE=\"GridContent\" />\n </body>\n</html>";
     
     @Override
@@ -66,8 +70,9 @@ public class GridContent extends GenericAdmResource {
         }
         String idTplGroup = createTemplateGroup("Behaviour", getResourceBase().getWebSite()).getId();
         Template gridTpl = createTemplate("grid", "Template for grid component", true, getResourceBase().getWebSite(), idTplGroup);
-        getResourceBase().setAttribute("idTemplate", gridTpl.getId());
-        //Create site properties for config composer
+        getResourceBase().getWebSite().addModelProperty(getModelProperty("idSubTypeST", "Identificador de subtipo de menu nivel", "gmenu", getResourceBase().getWebSite()));
+        getResourceBase().getWebSite().addModelProperty(getModelProperty("idGridTmpl", "Identificador de contenedor de grid", gridTpl.getId(), getResourceBase().getWebSite()));
+        getResourceBase().getWebSite().addModelProperty(getModelProperty("idSubTypeMN", "Identificador de subtipo de texto estático", "gelements", getResourceBase().getWebSite()));
     }
     
     @Override
@@ -167,5 +172,12 @@ public class GridContent extends GenericAdmResource {
             tpl.reload();
         }
         return tpl;
+    }
+    
+    private ModelProperty getModelProperty(String id, String title, String value, SWBModel model) {
+        ModelProperty mProperty = ModelProperty.ClassMgr.createModelProperty(id, model);
+        mProperty.setTitle(title);
+        mProperty.setValue(value);
+        return mProperty;
     }
 }
