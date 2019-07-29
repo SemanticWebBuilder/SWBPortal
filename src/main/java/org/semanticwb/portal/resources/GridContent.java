@@ -58,21 +58,23 @@ public class GridContent extends GenericAdmResource {
     
     @Override
     public void install(ResourceType recobj) throws SWBResourceException {
-        ResourceType menuNivel = ResourceType.ClassMgr.getResourceType("MenuNivel", getResourceBase().getWebSite());
-        ResourceType staticText = ResourceType.ClassMgr.getResourceType("StaticText", getResourceBase().getWebSite());
+        System.out.println("ResourceBase de GridContent: " + recobj.getWebSite());
+        
+        ResourceType menuNivel = ResourceType.ClassMgr.getResourceType("MenuNivel", recobj.getWebSite());
+        ResourceType staticText = ResourceType.ClassMgr.getResourceType("StaticText", recobj.getWebSite());
         if (null != menuNivel) {
-            ResourceSubType resSubType = ResourceSubType.ClassMgr.createResourceSubType("gmenu", getResourceBase().getWebSite());
+            ResourceSubType resSubType = ResourceSubType.ClassMgr.createResourceSubType("gmenu", recobj.getWebSite());
             resSubType.setType(menuNivel);
         }
         if (null != staticText) {
-            ResourceSubType resSubType = ResourceSubType.ClassMgr.createResourceSubType("gelements", getResourceBase().getWebSite());
+            ResourceSubType resSubType = ResourceSubType.ClassMgr.createResourceSubType("gelements", recobj.getWebSite());
             resSubType.setType(staticText);
         }
-        String idTplGroup = createTemplateGroup("Behaviour", getResourceBase().getWebSite()).getId();
-        Template gridTpl = createTemplate("grid", "Template for grid component", true, getResourceBase().getWebSite(), idTplGroup);
-        getResourceBase().getWebSite().addModelProperty(getModelProperty("idSubTypeST", "Identificador de subtipo de menu nivel", "gmenu", getResourceBase().getWebSite()));
-        getResourceBase().getWebSite().addModelProperty(getModelProperty("idGridTmpl", "Identificador de contenedor de grid", gridTpl.getId(), getResourceBase().getWebSite()));
-        getResourceBase().getWebSite().addModelProperty(getModelProperty("idSubTypeMN", "Identificador de subtipo de texto estático", "gelements", getResourceBase().getWebSite()));
+        String idTplGroup = createTemplateGroup("Behaviour", recobj.getWebSite()).getId();
+        Template gridTpl = createTemplate("grid", "Template for grid component", true, recobj.getWebSite(), idTplGroup);
+        recobj.getWebSite().addModelProperty(getModelProperty("idSubTypeST", "Identificador de subtipo de menu nivel", "gmenu", recobj.getWebSite()));
+        recobj.getWebSite().addModelProperty(getModelProperty("idGridTmpl", "Identificador de contenedor de grid", gridTpl.getId(), recobj.getWebSite()));
+        recobj.getWebSite().addModelProperty(getModelProperty("idSubTypeMN", "Identificador de subtipo de texto estático", "gelements", recobj.getWebSite()));
     }
     
     @Override
