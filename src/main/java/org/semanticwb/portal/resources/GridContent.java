@@ -28,7 +28,6 @@ import org.semanticwb.model.WebPage;
 import org.semanticwb.model.Template;
 import org.semanticwb.model.TemplateGroup;
 
-import javax.servlet.ServletException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,16 +57,18 @@ public class GridContent extends GenericAdmResource {
     
     @Override
     public void install(ResourceType recobj) throws SWBResourceException {
-        System.out.println("ResourceBase de GridContent: " + recobj.getWebSite());
-        
         ResourceType menuNivel = ResourceType.ClassMgr.getResourceType("MenuNivel", recobj.getWebSite());
         ResourceType staticText = ResourceType.ClassMgr.getResourceType("StaticText", recobj.getWebSite());
         if (null != menuNivel) {
             ResourceSubType resSubType = ResourceSubType.ClassMgr.createResourceSubType("gmenu", recobj.getWebSite());
+            resSubType.setTitle("Grid Elements");
+            resSubType.setDescription("Menu nivel created by composer");
             resSubType.setType(menuNivel);
         }
         if (null != staticText) {
             ResourceSubType resSubType = ResourceSubType.ClassMgr.createResourceSubType("gelements", recobj.getWebSite());
+            resSubType.setTitle("Grid Elements");
+            resSubType.setDescription("Static text created by composer");
             resSubType.setType(staticText);
         }
         String idTplGroup = createTemplateGroup("Behaviour", recobj.getWebSite()).getId();
