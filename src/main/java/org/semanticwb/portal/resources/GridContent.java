@@ -77,42 +77,42 @@ public class GridContent extends GenericAdmResource {
     
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
-        String jsongrid = "";
         WebPage page = paramRequest.getWebPage();
-        Iterator it = page.listResources();
+        Iterator<Resource> it = page.listResources();
         Map<String, Resource> resources = new LinkedHashMap<>();
         String path = "/work/models/"+page.getWebSite().getId()+"/jsp/composer/preview.jsp";
-        ResourceType resType = ResourceType.ClassMgr.getResourceType("GridContent", page.getWebSite());
+        //ResourceType resType = ResourceType.ClassMgr.getResourceType("GridContent", page.getWebSite());
+        String jsongrid = page.getProperty("_elements");
         while (it.hasNext()) {
             Resource res = (Resource)it.next();
-            if (res.getResourceType().equals(resType)) jsongrid = res.getAttribute("elements");
-            else resources.put(res.getId(), res);
+            resources.put(res.getId(), res);
         }
         if (null != jsongrid && !jsongrid.isEmpty()) {
-            List<Map<String, String>> elements = jsonToRes(jsongrid);
-            Iterator<Map<String, String>> mresources = elements.iterator();
-            while (it.hasNext()) {
-                Map<String, String> map = mresources.next();
-                String resourceId = map.get("resourceId");
+            List<Map<String, Object>> elements = jsonToRes(jsongrid);
+            for (Map<String, Object> map : elements) {
+                String resourceId = (String)map.get("resourceId");
                 if (null != resourceId && !resourceId.isEmpty()) {
                     if (!resources.containsKey(resourceId)) {
                         resources.remove(resourceId);
+                    }else {
+                        doPreview(request, response, paramRequest, resourceId);
                     }
                 }
             }
         }
         request.setAttribute("components", resources);
         RequestDispatcher rd = request.getRequestDispatcher(path);
-        try {
+        /**try {
             rd.include(request, response);
         } catch (ServletException se) {
             LOG.error(se);
-        }
+        }**/
     }
     
     public static void doPreview(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest, String id) {
         try {
-            SWBResource res = SWBPortal.getResourceMgr().getResource(id);
+            SWBResource res = SWBPortal.getResourceMgr().getResource(paramRequest.getWebPage().getWebSiteId(), id);
+            System.out.println("res: " + res);
             ((SWBParamRequestImp) paramRequest).setResourceBase(res.getResourceBase());
             ((SWBParamRequestImp) paramRequest).setWindowState(SWBParamRequest.Mode_VIEW);
             res.render(request, response, paramRequest);
@@ -121,18 +121,17 @@ public class GridContent extends GenericAdmResource {
         }
     }
     
-    private List<Map<String, String>> jsonToRes(String jsongrid) {
-        List<Map<String, String>> elements = new ArrayList<>();
+    private List<Map<String, Object>> jsonToRes(String jsongrid) {
+        List<Map<String, Object>> elements = new ArrayList<>();
         if (null == jsongrid || jsongrid.trim().isEmpty()) return elements;
         JSONObject obj = new JSONObject(jsongrid);
         JSONArray arr = obj.getJSONArray("elements");
         for (int i = 0; i < arr.length(); i++) {
-            Map<String, String> element = new LinkedHashMap<>();
-            element.put("x", arr.getJSONObject(i).getString("x"));
-            element.put("y", arr.getJSONObject(i).getString("y"));
-            element.put("width", arr.getJSONObject(i).getString("width"));
-            element.put("height", arr.getJSONObject(i).getString("height"));
-            element.put("height", arr.getJSONObject(i).getString("height"));
+            Map<String, Object> element = new LinkedHashMap<>();
+            element.put("x", arr.getJSONObject(i).getInt("x"));
+            element.put("y", arr.getJSONObject(i).getInt("y"));
+            element.put("width", arr.getJSONObject(i).getInt("width"));
+            element.put("height", arr.getJSONObject(i).getInt("height"));
             element.put("resourceType", arr.getJSONObject(i).getString("resourceType"));
             element.put("resourceId", arr.getJSONObject(i).getString("resourceId"));
             elements.add(element);
