@@ -157,6 +157,7 @@ public class SWBAComposer extends GenericAdmResource {
             if (null == idResourceType) return null;
             ResourceType resType = ResourceType.ClassMgr.getResourceType(idResourceType, site);
             res = site.createResource();
+            res.setResourceType(site.getResourceType(idResourceType));
             res.setIndex(2);
             res.setTitle(resourceTitle);
             res.setActive(Boolean.TRUE);

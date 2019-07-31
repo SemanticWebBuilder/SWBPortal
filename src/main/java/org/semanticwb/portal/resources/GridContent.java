@@ -14,11 +14,13 @@ import java.io.File;
 import java.io.Writer;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
+import java.io.PrintWriter;
 
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.stream.Collectors;
 
 import org.semanticwb.Logger;
 import org.semanticwb.SWBUtils;
@@ -28,7 +30,6 @@ import org.semanticwb.model.WebPage;
 import org.semanticwb.model.Template;
 import org.semanticwb.model.TemplateGroup;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,11 +39,13 @@ import org.semanticwb.model.ResourceSubType;
 
 import org.semanticwb.model.SWBModel;
 import org.semanticwb.model.ModelProperty;
+import org.semanticwb.portal.util.GridUtils;
 import org.semanticwb.portal.api.SWBResource;
 import org.semanticwb.portal.api.SWBParamRequest;
 import org.semanticwb.portal.api.GenericAdmResource;
 import org.semanticwb.portal.api.SWBParamRequestImp;
 import org.semanticwb.portal.api.SWBResourceException;
+import org.semanticwb.portal.util.GridUtils.GridCell;
 
 /**
  *
@@ -83,14 +86,16 @@ public class GridContent extends GenericAdmResource {
         WebPage page = paramRequest.getWebPage();
         Iterator<Resource> it = page.listResources();
         Map<String, Resource> resources = new LinkedHashMap<>();
-        String path = "/work/models/"+page.getWebSite().getId()+"/jsp/composer/preview.jsp";
-        //ResourceType resType = ResourceType.ClassMgr.getResourceType("GridContent", page.getWebSite());
+        //String path = "/work/models/"+page.getWebSite().getId()+"/jsp/composer/preview.jsp";
         String jsongrid = page.getProperty("_elements");
         while (it.hasNext()) {
             Resource res = (Resource)it.next();
             resources.put(res.getId(), res);
         }
-        if (null != jsongrid && !jsongrid.isEmpty()) {
+        JSONObject obj = new JSONObject(jsongrid);
+        JSONArray jsonCells = obj.getJSONArray("elements");
+        render(jsonCells, (short) 50, "cellClass", request, response, paramRequest);
+        /**if (null != jsongrid && !jsongrid.isEmpty()) {
             List<Map<String, Object>> elements = jsonToRes(jsongrid);
             for (Map<String, Object> map : elements) {
                 String resourceId = (String)map.get("resourceId");
@@ -105,17 +110,69 @@ public class GridContent extends GenericAdmResource {
         }
         request.setAttribute("components", resources);
         RequestDispatcher rd = request.getRequestDispatcher(path);
-        /**try {
+        try {
             rd.include(request, response);
         } catch (ServletException se) {
             LOG.error(se);
         }**/
     }
     
-    public static void doPreview(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest, String id) {
+    private void render(JSONArray nodes, short heightUnit, String styleClass, HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
+        PrintWriter out = response.getWriter();
+        if (heightUnit < 50) heightUnit = 50;
+        short maxRow = (short) (nodes.getJSONObject(nodes.length() - 1).getInt("y"));
+        String[] rows = new String[maxRow + 1];
+        List<GridCell> cells = GridUtils.convert2Cells(nodes);
+        GridUtils.renderRow(rows, maxRow);
+        //StringBuilder bsHtml = new StringBuilder(128);
+        for (short h = 0; h <= maxRow; h++) {
+            short row = h;
+            List<GridCell> cellsInRow = cells.stream().filter(cell -> cell.getY() == row).collect(Collectors.toCollection(ArrayList::new));
+            //bsHtml.append(rows[h]);
+            out.print(rows[h]);
+            for (short k = 0; k < cellsInRow.size(); k++) {
+                short offset = 0;
+                if (k == 0) {
+                    offset = (short) (cellsInRow.get(k).getX());
+                } else {
+                    GridCell leftCell = cellsInRow.get(k - 1);
+                    offset = (short) (cellsInRow.get(k).getX() - (leftCell.getX() + leftCell.getWidth()));
+                }
+                //bsHtml.append(GridUtils.renderCell(cellsInRow.get(k), styleClass, offset, heightUnit));
+                renderCell(cellsInRow.get(k), styleClass, offset, heightUnit, request, response, paramRequest);
+            }
+            //bsHtml.append("</div>");
+            out.println("</div>");
+        }
+        //return bsHtml.toString();
+    }
+    
+    private void renderCell(GridCell cell, String styleClass, short offset, short heightUnit, HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
+        PrintWriter out = response.getWriter();
+        out.print("<div class=\"");
+        out.print(styleClass);
+        out.print(" col-md-");
+        out.print(cell.getWidth());
+        if (offset > 0) {
+            out.print(" col-md-offset-");
+            out.print(offset);
+        }
+        out.print("\"");
+        out.print(" style=\"min-height: ");
+        out.print(cell.getHeight() * heightUnit);
+        out.print("px;\"");
+        out.print(" id=\"");
+        out.print(cell.getId());
+        out.print("\">");
+        //de acuerdo al tipo de recurso, crear el tag del recurso, como si estuviera en una plantilla
+        doPreview(request, response, paramRequest, cell.getId());
+        out.println("</div>");
+        //return div.toString();
+    }
+    
+    private void doPreview(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest, String id) {
         try {
             SWBResource res = SWBPortal.getResourceMgr().getResource(paramRequest.getWebPage().getWebSiteId(), id);
-            System.out.println("res: " + res);
             ((SWBParamRequestImp) paramRequest).setResourceBase(res.getResourceBase());
             ((SWBParamRequestImp) paramRequest).setWindowState(SWBParamRequest.Mode_VIEW);
             res.render(request, response, paramRequest);
