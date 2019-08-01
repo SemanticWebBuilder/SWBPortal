@@ -30,7 +30,6 @@ package org.semanticwb.portal.admin.resources;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import java.util.Map;
 import java.util.List;
@@ -120,18 +119,10 @@ public class SWBAComposer extends GenericAdmResource {
         response.setRenderParameter("suri", request.getParameter("suri"));
     }
     
-    public void doResourceAdminCall(HttpServletRequest request, HttpServletResponse response,
-            SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        
+    public void doResourceAdminCall(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         String path = "/swbadmin/jsp/composer/resourceAdmCaller.jsp";
         RequestDispatcher rd = request.getRequestDispatcher(path);
         try {
-//            WebPage wp = getHost(request);
-//            request.setAttribute("paramRequest", paramRequest);
-//            if (null != request.getParameter("suri")) {
-//                request.setAttribute("suri", request.getParameter("suri"));
-//                request.setAttribute("_elements", wp.getProperty("_elements", ""));
-//            }
             rd.include(request, response);
         } catch (ServletException se) {
             LOG.error(se);

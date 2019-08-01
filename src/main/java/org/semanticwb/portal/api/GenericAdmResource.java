@@ -156,14 +156,18 @@ public class GenericAdmResource extends GenericResource
                         "     alert('"+msg+"');"+
                         "   }\n"+
                         "</script>\n"); 
-                    if(applet!=null && !applet.trim().equals("")) ret.append(applet);
+                    applet = "<script language=\"JavaScript\">\n"+
+                            "   location='"+url.toString()+"';\n"+
+                            "</script>\n";
+                    ret.append(applet);
+                    /**if(applet!=null && !applet.trim().equals("")) ret.append(applet);
                     else
                     {
                         ret.append(
                             "<script language=\"JavaScript\">\n"+
                             "   location='"+url.toString()+"';\n"+
                             "</script>\n");
-                    }
+                    }**/
                 }
                 catch(Exception e) { log.error(e); msg=SWBUtils.TEXT.getLocaleString("org.semanticwb.portal.api.GenericAdmResource","msgErrUpdateResource", new Locale(paramsRequest.getUser().getLanguage())) +" "+ base.getId(); }
             }
