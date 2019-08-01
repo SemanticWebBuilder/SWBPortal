@@ -130,7 +130,7 @@ public class SWBAComposer extends GenericAdmResource {
                 resource = map.get(resourceId);
                 map.remove(resourceId);
             }else 
-                resource = createResource(wp, resourceType, "Grid component");
+                resource = createResource(wp, resourceType);
             if (null != resource) {
                 Map<String, Object> element = new LinkedHashMap<>();
                 element.put("x", arr.getJSONObject(i).getInt("x"));
@@ -147,7 +147,7 @@ public class SWBAComposer extends GenericAdmResource {
         return resources.toString(3);
     }
     
-    private Resource createResource(WebPage wp, String resourceType, String resourceTitle) {
+    private Resource createResource(WebPage wp, String resourceType) {
         Resource res = null;
         ResourceSubType resSubType = null;
         if (null == wp) return null;
@@ -159,9 +159,9 @@ public class SWBAComposer extends GenericAdmResource {
             res = site.createResource();
             res.setResourceType(site.getResourceType(idResourceType));
             res.setIndex(2);
-            res.setTitle(resourceTitle);
             res.setActive(Boolean.TRUE);
             res.setResourceType(resType);
+            res.setTitle(idResourceType+"-"+res.getId());
             if ("StaticText".equalsIgnoreCase(idResourceType) && null != site.getModelProperty("idSubTypeST"))
                 resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeST"), site);
             else if ("MenuNivel".equalsIgnoreCase(idResourceType) && null != site.getModelProperty("idSubTypeMN"))
