@@ -30,6 +30,7 @@ package org.semanticwb.portal.admin.resources;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import java.util.Map;
 import java.util.List;
@@ -64,10 +65,15 @@ public class SWBAComposer extends GenericAdmResource {
     
     public static final String ACTION_ADD_GRID = "addg";
     public static final String ACTION_UPD_GRID = "updg";
+    public static final String MODE_RES_ADM_CALL = "resadmcall";
     
     @Override
     public void processRequest(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
-        super.processRequest(request, response, paramRequest);
+        if (paramRequest.getMode().equals(SWBAComposer.MODE_RES_ADM_CALL)) {
+            doResourceAdminCall(request, response, paramRequest);
+        } else {
+            super.processRequest(request, response, paramRequest);
+        }
     }
     
     @Override
@@ -80,6 +86,7 @@ public class SWBAComposer extends GenericAdmResource {
             if (null != request.getParameter("suri")) {
                 request.setAttribute("suri", request.getParameter("suri"));
                 request.setAttribute("_elements", wp.getProperty("_elements", ""));
+                request.setAttribute("webSiteId", wp.getWebSiteId());
             }
             rd.include(request, response);
         } catch (ServletException se) {
@@ -111,6 +118,24 @@ public class SWBAComposer extends GenericAdmResource {
                 wp.setProperty("_elements", elements);
         }
         response.setRenderParameter("suri", request.getParameter("suri"));
+    }
+    
+    public void doResourceAdminCall(HttpServletRequest request, HttpServletResponse response,
+            SWBParamRequest paramRequest) throws SWBResourceException, IOException {
+        
+        String path = "/swbadmin/jsp/composer/resourceAdmCaller.jsp";
+        RequestDispatcher rd = request.getRequestDispatcher(path);
+        try {
+//            WebPage wp = getHost(request);
+//            request.setAttribute("paramRequest", paramRequest);
+//            if (null != request.getParameter("suri")) {
+//                request.setAttribute("suri", request.getParameter("suri"));
+//                request.setAttribute("_elements", wp.getProperty("_elements", ""));
+//            }
+            rd.include(request, response);
+        } catch (ServletException se) {
+            LOG.error(se);
+        }
     }
     
     private String resToJson(String json, WebPage wp) {
