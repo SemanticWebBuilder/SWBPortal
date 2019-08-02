@@ -204,8 +204,9 @@ public class SWBAComposer extends GenericAdmResource {
         if (null == suri) return null;
         int index = suri.lastIndexOf(":");
         String idpage = suri.substring(index + 1, suri.length());
-        index = suri.indexOf(".", 11);
-        String idsite = suri.substring(11, index);
+        int init = suri.indexOf(".")+1;
+        index = suri.indexOf(".", init);
+        String idsite = suri.substring(init, index);
         WebSite site = WebSite.ClassMgr.getWebSite(idsite);
         WebPage wp = site.getWebPage(idpage);
         return wp;

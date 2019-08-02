@@ -55,7 +55,6 @@ public class GridContent extends GenericAdmResource {
     
     /** The log. */
     private static final Logger LOG = SWBUtils.getLogger(GridContent.class);
-    //Add bootstrap libs to default html
     public static final String DEFAUL_HTML = "<template method=\"setHeaders\" Content-Type=\"text/html\"  response=\"{response}\" />\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n<title>\n   <TOPIC METHOD=\"getDisplayName\" LANGUAGE=\"{user@getLanguage}\"/>\n</title>\n\n"+gridPathLibs()+"</head>\n <body>\n <RESOURCE TYPE=\"GridContent\" />\n </body>\n</html>";
     
     @Override
