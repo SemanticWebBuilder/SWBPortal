@@ -56,7 +56,7 @@ public class GridContent extends GenericAdmResource {
     /** The log. */
     private static final Logger LOG = SWBUtils.getLogger(GridContent.class);
     //Add bootstrap libs to default html
-    public static final String DEFAUL_HTML = "<template method=\"setHeaders\" Content-Type=\"text/html\"  response=\"{response}\" />\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n<title>\n   <TOPIC METHOD=\"getDisplayName\" LANGUAGE=\"{user@getLanguage}\"/>\n</title>\n\n</head>\n <body>\n <RESOURCE TYPE=\"GridContent\" />\n </body>\n</html>";
+    public static final String DEFAUL_HTML = "<template method=\"setHeaders\" Content-Type=\"text/html\"  response=\"{response}\" />\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"/>\n<title>\n   <TOPIC METHOD=\"getDisplayName\" LANGUAGE=\"{user@getLanguage}\"/>\n</title>\n\n"+gridPathLibs()+"</head>\n <body>\n <RESOURCE TYPE=\"GridContent\" />\n </body>\n</html>";
     
     @Override
     public void install(ResourceType recobj) throws SWBResourceException {
@@ -238,5 +238,21 @@ public class GridContent extends GenericAdmResource {
         mProperty.setTitle(title);
         mProperty.setValue(value);
         return mProperty;
+    }
+    
+    private static String gridPathLibs() {
+        StringBuilder libs = new StringBuilder();
+        libs.append("\n <link rel=\"stylesheet\" href=\"{webpath}/work/models/basico/css/bootstrap.min.css\">");
+        libs.append("\n <link rel='stylesheet' type='text/css' media='all' href='{webpath}/swbadmin/css/swb.css' />");
+        libs.append("\n <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script>");
+        libs.append("\n <script src=\"https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/jquery-ui.js\"></script>");
+        libs.append("\n <script src=\"{webpath}/work/models/basico/js/bootstrap.min.js\"></script>");
+        
+        libs.append("\n\n <link rel=\"stylesheet\" href=\"{webpath}/swbadmin/js/gridstack1.0.0/gridstack.css\" />");
+        libs.append("\n <link rel=\"stylesheet\" href=\"{webpath}/swbadmin/js/gridstack1.0.0/gridstack-extra.css\" />");
+        libs.append("\n <script src=\"https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.5.0/lodash.min.js\" ></script>");
+        libs.append("\n <script src=\"{webpath}/swbadmin/js/gridstack1.0.0/gridstack.js\" ></script>");
+        libs.append("\n <script src=\"{webpath}/swbadmin/js/gridstack1.0.0/gridstack.jQueryUI.js\" ></script>\n");
+        return libs.toString();
     }
 }
