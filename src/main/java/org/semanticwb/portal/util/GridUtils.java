@@ -28,25 +28,55 @@ public class GridUtils {
         List<GridCell> allCells = new ArrayList(nodes.length());
         for (short j = 0; j < nodes.length(); j++) {
             JSONObject node = nodes.getJSONObject(j);
-            GridCell gc = new GridCell((short) node.getInt("x"), (short) node.getInt("y"), (short) node.getInt("width"), (short) node.getInt("height"), node.getString("resourceType"), node.getString("resourceId"));
+            GridCell gc = new GridCell((short) node.getInt("x"),
+                    (short) node.getInt("y"), (short) node.getInt("width"),
+                    (short) node.getInt("height"), node.getString("resourceType"),
+                    node.getString("resourceId"), node.getString("title"),
+                    node.getString("classname"), (short) node.getInt("colXs"),
+                    (short) node.getInt("colSm"), (short) node.getInt("colLg"),
+                    (short) node.getInt("colXl"));
             allCells.add(gc);
         }
         return allCells;
     }
     
+    
+    /** Representa una celda en el grid utilizado por Bootstrap para distribuir el
+        contenido de una pagina Web */
     public static class GridCell {
         
+        /** Define la coordenada de la esquina superior izquierda de la celda en el eje X */
         private short x;
+        /** Define la coordenada de la esquina superior izquierda de la celda en el eje Y */
         private short y;
+        /** Ancho de la celda (en columnas) */
         private short width;
+        /** Alto de la celda (en filas) */
         private short height;
+        /** Tipo de recurso contenido en la celda */
         private String type;
+        /** Identificador de la instancia del recurso contenido en la celda */
         private String id;
+        /** Titulo a mostrar en el grid */
+        private String title;
+        /** Nombre de la clase de estilos a utilizar para la celda */
+        private String cssName;
+        /** Numero de columnas para una resolucion extra pequeña */
+        private short colXs;
+        /** Numero de columnas para una resolucion pequeña */
+        private short colSm;
+        /** Numero de columnas para una resolucion grande */
+        private short colLg;
+        /** Numero de columnas para una resolucion extra grande */
+        private short colXl;
+        
         
         public GridCell() {
         }
         
-        public GridCell(short x, short y, short width, short height, String type, String id) {
+        public GridCell(short x, short y, short width, short height, String type,
+                String id, String title, String cssName, short colXs, short colSm,
+                short colLg, short colXl) {
             
             this.x = x;
             this.y = y;
@@ -54,6 +84,12 @@ public class GridUtils {
             this.height = height;
             this.type = (type != null ? type : "");
             this.id = (id != null ? id : "");
+            this.title = (title != null ? title : this.type);
+            this.cssName = (cssName != null ? cssName : "");
+            this.colXs = colXs;
+            this.colSm = colSm;
+            this.colLg = colLg;
+            this.colXl = colXl;
         }
 
         /**
@@ -139,10 +175,98 @@ public class GridUtils {
         public void setId(String id) {
             this.id = id;
         }
+
+        /**
+         * @return the title
+         */
+        public String getTitle() {
+            return title;
+        }
+
+        /**
+         * @param title the title to set
+         */
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        /**
+         * @return the cssName
+         */
+        public String getCssName() {
+            return cssName;
+        }
+
+        /**
+         * @param cssName the cssName to set
+         */
+        public void setCssName(String cssName) {
+            this.cssName = cssName;
+        }
+
+        /**
+         * @return the colXs
+         */
+        public short getColXs() {
+            return colXs;
+        }
+
+        /**
+         * @param colXs the colXs to set
+         */
+        public void setColXs(short colXs) {
+            this.colXs = colXs;
+        }
+
+        /**
+         * @return the colSm
+         */
+        public short getColSm() {
+            return colSm;
+        }
+
+        /**
+         * @param colSm the colSm to set
+         */
+        public void setColSm(short colSm) {
+            this.colSm = colSm;
+        }
+
+        /**
+         * @return the colLg
+         */
+        public short getColLg() {
+            return colLg;
+        }
+
+        /**
+         * @param colLg the colLg to set
+         */
+        public void setColLg(short colLg) {
+            this.colLg = colLg;
+        }
+
+        /**
+         * @return the colXl
+         */
+        public short getColXl() {
+            return colXl;
+        }
+
+        /**
+         * @param colXl the colXl to set
+         */
+        public void setColXl(short colXl) {
+            this.colXl = colXl;
+        }
         
         @Override
         public String toString() {
-            return "x:" + this.x + ", y:" + this.y + ", width:" + this.width + ", height:" + this.height + ", type:" + this.type + ", id:" + this.id;
+            return "x:" + this.x + ", y:" + this.y + ", width:" + this.width +
+                    ", height:" + this.height + ", type:" + this.type +
+                    ", id:" + this.id + ", title:" + this.title + ", cssName:" +
+                    this.cssName + ", colXs:" + this.colXs + ", colSm:" +
+                    this.colSm + ", colLg:" + this.colLg + ", colXl:" + this.colXl;
         }
     }
 }
