@@ -155,6 +155,12 @@ public class SWBAComposer extends GenericAdmResource {
                 element.put("height", arr.getJSONObject(i).getInt("height"));
                 element.put("resourceType", resourceType);
                 element.put("resourceId", resource.getId());
+                element.put("colXs", arr.getJSONObject(i).getInt("colXs"));
+                element.put("colSm", arr.getJSONObject(i).getInt("colSm"));
+                element.put("colLg", arr.getJSONObject(i).getInt("colLg"));
+                element.put("colXl", arr.getJSONObject(i).getInt("colXl"));
+                element.put("title", arr.getJSONObject(i).getString("title"));
+                element.put("classname", arr.getJSONObject(i).getString("classname"));
                 elements.add(element);
             }
         }

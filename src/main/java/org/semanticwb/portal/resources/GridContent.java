@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.io.File;
 import java.io.Writer;
 import java.io.FileWriter;
-import java.io.BufferedWriter;
 import java.io.PrintWriter;
+import java.io.BufferedWriter;
 
 import java.util.Map;
 import java.util.List;
@@ -149,9 +149,18 @@ public class GridContent extends GenericAdmResource {
     private void renderCell(GridCell cell, String styleClass, short offset, short heightUnit, HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
         PrintWriter out = response.getWriter();
         out.print("<div class=\"");
-        out.print(styleClass);
+        String cssName = null != cell.getCssName() && !cell.getCssName().isEmpty() ? cell.getCssName() : styleClass;
+        out.print(cssName);
+        out.print(" col-xs-");
+        out.print(cell.getColXs() > 0 ? cell.getColXs() : 3);
+        out.print(" col-sm-");
+        out.print(cell.getColSm() > 0 ? cell.getColSm() : 4);
         out.print(" col-md-");
-        out.print(cell.getWidth());
+        out.print(cell.getWidth() > 0 ? cell.getWidth() : "auto");
+        out.print(" col-lg-");
+        out.print(cell.getColLg() > 0 ? cell.getColLg() : 8);
+        out.print(" col-xl-");
+        out.print(cell.getColXl() > 0 ? cell.getColXl() : 12);
         if (offset > 0) {
             out.print(" col-md-offset-");
             out.print(offset);
@@ -180,7 +189,7 @@ public class GridContent extends GenericAdmResource {
         }
     }
     
-    private List<Map<String, Object>> jsonToRes(String jsongrid) {
+    /**private List<Map<String, Object>> jsonToRes(String jsongrid) {
         List<Map<String, Object>> elements = new ArrayList<>();
         if (null == jsongrid || jsongrid.trim().isEmpty()) return elements;
         JSONObject obj = new JSONObject(jsongrid);
@@ -196,7 +205,7 @@ public class GridContent extends GenericAdmResource {
             elements.add(element);
         }
         return elements;
-    }
+    }**/
     
     private TemplateGroup createTemplateGroup(String title, WebSite site) {
         TemplateGroup grp = site.createTemplateGroup();

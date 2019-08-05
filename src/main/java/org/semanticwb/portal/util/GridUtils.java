@@ -31,10 +31,10 @@ public class GridUtils {
             GridCell gc = new GridCell((short) node.getInt("x"),
                     (short) node.getInt("y"), (short) node.getInt("width"),
                     (short) node.getInt("height"), node.getString("resourceType"),
-                    node.getString("resourceId"), node.getString("title"),
-                    node.getString("classname"), (short) node.getInt("colXs"),
-                    (short) node.getInt("colSm"), (short) node.getInt("colLg"),
-                    (short) node.getInt("colXl"));
+                    node.getString("resourceId"), node.has("title") ?  node.getString("title") : "",
+                    node.has("classname") ?  node.getString("classname") : "", node.has("colXs") ? (short) node.getInt("colXs") : 0,
+                    node.has("colSm") ? (short) node.getInt("colSm") : 0, node.has("colLg") ? (short) node.getInt("colLg") : 0,
+                    node.has("colXl") ? (short) node.getInt("colXl") : 0);
             allCells.add(gc);
         }
         return allCells;
