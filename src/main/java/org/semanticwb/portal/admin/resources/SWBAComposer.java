@@ -22,8 +22,10 @@
 package org.semanticwb.portal.admin.resources;
 
 /**
+ * SWBAComposer implements grid composer behaviour
  *
  * @author sergio.tellez
+ * @version 1.0
  */
 package org.semanticwb.portal.admin.resources;
 
@@ -57,6 +59,9 @@ import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.GenericAdmResource;
 import org.semanticwb.portal.api.SWBResourceException;
 
+ /**
+  * @see GenericAdmResource 
+  */
 public class SWBAComposer extends GenericAdmResource {
     
     /** The log. */
@@ -74,7 +79,7 @@ public class SWBAComposer extends GenericAdmResource {
             super.processRequest(request, response, paramRequest);
         }
     }
-    
+  
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         String path = "/swbadmin/jsp/composer/gridEditor.jsp";
@@ -99,10 +104,10 @@ public class SWBAComposer extends GenericAdmResource {
         String jsongrid = request.getParameter("jsongrid");
         if (null != wp) {
             if (ACTION_ADD_GRID.equalsIgnoreCase(response.getAction())) {
-                String idTmpl = null != wp.getWebSite().getModelProperty("idGridTmpl") ? wp.getWebSite().getModelProperty("idGridTmpl") : "2";
+                String idTmpl = null != wp.getWebSite().getModelProperty("idGridTmpl") ? wp.getWebSite().getModelProperty("idGridTmpl") : "2"; /* Read id grid default template from site properties*/
                 Template templateIndex = Template.ClassMgr.getTemplate(idTmpl, wp.getWebSite());
                 TemplateRef temrefindex = getTemplateRef(wp, templateIndex);
-                if (!wp.hasTemplateRef(temrefindex)) {
+                if (!wp.hasTemplateRef(temrefindex)) { /* if grid template is not previously assigned */
                     temrefindex.setActive(Boolean.TRUE);
                     temrefindex.setTemplate(templateIndex);
                     temrefindex.setInherit(TemplateRef.INHERIT_ACTUAL);
@@ -114,11 +119,19 @@ public class SWBAComposer extends GenericAdmResource {
             }
             String elements = resToJson(jsongrid, wp);
             if (null != elements && !elements.isEmpty())
-                wp.setProperty("_elements", elements);
+                wp.setProperty("_elements", elements); /* assign json grid to web page props */
         }
         response.setRenderParameter("suri", request.getParameter("suri"));
     }
     
+    /**
+     * This method is used to call admin resources.
+     * @param request
+     * @param response
+     * @param paramRequest
+     * @throws IOException 
+     * @throws SWBResourceException
+     */
     public void doResourceAdminCall(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws SWBResourceException, IOException {
         String path = "/swbadmin/jsp/composer/resourceAdmCaller.jsp";
         RequestDispatcher rd = request.getRequestDispatcher(path);
@@ -129,6 +142,12 @@ public class SWBAComposer extends GenericAdmResource {
         }
     }
     
+    /**
+     * This method is used to create new resources from grid definition
+     * @param json json grid definition
+     * @param wp   wep page that allocates composer
+     * @return String resources json mapping
+     */
     private String resToJson(String json, WebPage wp) {
         JSONObject resources = new JSONObject();
         List<Map<String, Object>> elements = new ArrayList<>();
@@ -155,10 +174,10 @@ public class SWBAComposer extends GenericAdmResource {
                 element.put("height", arr.getJSONObject(i).getInt("height"));
                 element.put("resourceType", resourceType);
                 element.put("resourceId", resource.getId());
-                element.put("colXs", arr.getJSONObject(i).getInt("colXs"));
-                element.put("colSm", arr.getJSONObject(i).getInt("colSm"));
-                element.put("colLg", arr.getJSONObject(i).getInt("colLg"));
-                element.put("colXl", arr.getJSONObject(i).getInt("colXl"));
+                element.put("colXs", !arr.getJSONObject(i).getString("colXs").isEmpty() ? arr.getJSONObject(i).getInt("colXs") : 0);
+                element.put("colSm", !arr.getJSONObject(i).getString("colSm").isEmpty() ? arr.getJSONObject(i).getInt("colSm") : 0);
+                element.put("colLg", !arr.getJSONObject(i).getString("colLg").isEmpty() ? arr.getJSONObject(i).getInt("colLg") : 0);
+                element.put("colXl", !arr.getJSONObject(i).getString("colXl").isEmpty() ? arr.getJSONObject(i).getInt("colXl") : 0);
                 element.put("title", arr.getJSONObject(i).getString("title"));
                 element.put("classname", arr.getJSONObject(i).getString("classname"));
                 elements.add(element);
@@ -169,6 +188,14 @@ public class SWBAComposer extends GenericAdmResource {
         return resources.toString(3);
     }
     
+    /**
+     * This method is used to create new resources from resourceType definition
+     * @param String resourceType id that identifies resource type
+     * @param wp wep page that allocates composer
+     * @return Resource new resource instance
+     * @see Resource
+     * 
+     */
     private Resource createResource(WebPage wp, String resourceType) {
         Resource res = null;
         ResourceSubType resSubType = null;
@@ -184,7 +211,7 @@ public class SWBAComposer extends GenericAdmResource {
             res.setActive(Boolean.TRUE);
             res.setResourceType(resType);
             res.setTitle(idResourceType+"-"+res.getId());
-            if ("StaticText".equalsIgnoreCase(idResourceType) && null != site.getModelProperty("idSubTypeST"))
+            if ("StaticText".equalsIgnoreCase(idResourceType) && null != site.getModelProperty("idSubTypeST"))/** Group resources in components sub type*/
                 resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeST"), site);
             else if ("MenuNivel".equalsIgnoreCase(idResourceType) && null != site.getModelProperty("idSubTypeMN"))
                 resSubType = ResourceSubType.ClassMgr.getResourceSubType(getResourceBase().getAttribute("idSubTypeMN"), site);
@@ -197,6 +224,12 @@ public class SWBAComposer extends GenericAdmResource {
         return res;
     }
     
+    /**
+     * This method is used to retrieve swb canonical resource id
+     * @param String resourceType id that identifies resource type
+     * @return String id resource type
+     * 
+     */
     private String getIdResourceType(String resourceType) {
         String idResourceType = null;
         if (resourceType.equalsIgnoreCase("menu")) idResourceType = "MenuNivel";
@@ -205,8 +238,14 @@ public class SWBAComposer extends GenericAdmResource {
         return idResourceType;
     }
     
+    /**
+     * This method is used to obtain web page where the composer is being used to design it.
+     * @param HttpServletRequest request
+     * @return String id resource type
+     * @see WebPage
+     */
     private WebPage getHost(HttpServletRequest request) {
-        String suri = request.getParameter("suri");
+        String suri = request.getParameter("suri");/**parameter suri is sended by swb admin tab (behaviour)*/
         if (null == suri) return null;
         int index = suri.lastIndexOf(":");
         String idpage = suri.substring(index + 1, suri.length());
@@ -218,6 +257,12 @@ public class SWBAComposer extends GenericAdmResource {
         return wp;
     }
     
+    /**
+     * This method is used to obtain list resources assigned to web page.
+     * @param WebPage selected web page 
+     * @return Map<String, Resource> map resources by identifier key
+     * @see WebPage, Resource
+     */
     private Map<String, Resource> mapResources(WebPage wp) {
         Map<String, Resource> map = new LinkedHashMap<>();
         Iterator<Resource> it = wp.listResources();
@@ -228,6 +273,14 @@ public class SWBAComposer extends GenericAdmResource {
         return map;
     }
     
+    
+    /**
+     * This method is used to remove resources previously erased from grid composer.
+     * @param Map<String, Resource> map resources by identifier key
+     * @param WebPage web page that removed resources from grid
+     * @return Map<String, Resource> map resources by identifier key
+     * @see WebPage, Resource
+     */
     private void removeResources(Map<String, Resource> map, WebPage wp) {
         Iterator<String> it = map.keySet().iterator();
         while (it.hasNext()) {
