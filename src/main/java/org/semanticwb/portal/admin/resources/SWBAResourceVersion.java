@@ -83,6 +83,9 @@ public class SWBAResourceVersion extends GenericResource {
         User user = paramRequest.getUser();
         PrintWriter out = response.getWriter();
         String id = request.getParameter("suri");
+        //Para el nuevo recurso: org.semanticwb.portal.admin.resources.SWBAComposer:
+        boolean useAlternateFnctns = !paramRequest.getWebPage().getId().startsWith("bh_");
+        String postfix = useAlternateFnctns ? "ById" : "";
 
         PFlowManager pfmgr = SWBPortal.getPFlowManager();
 
@@ -90,13 +93,23 @@ public class SWBAResourceVersion extends GenericResource {
 
         //System.out.println("URI:"+id);
         if (request.getParameter("dialog") != null && request.getParameter("dialog").equals("close")) {
+            String urlToThis = paramRequest.getRenderUrl().setParameter("suri", id).toString();
             //System.out.println("doView(dialog):"+id);
             out.println("<script type=\"javascript\">");
-            out.println(" hideDialog(); ");
+            out.print(" hideDialog");
+            out.print(postfix);
+            out.print("(");
+            out.print(useAlternateFnctns ? "'swbDialogVrsn'" : "");
+            out.println(");");
             GenericObject obj = ont.getGenericObject(id);
             SWBResource swres = (SWBResource) obj;
             if (swres != null) {
-                out.println(" reloadTab('" + swres.getResourceBase().getURI() + "');");
+                if (!useAlternateFnctns) {
+                    out.println(" reloadTab('" + swres.getResourceBase().getURI() + "');");
+                } else {
+                    //Para el nuevo recurso: org.semanticwb.portal.admin.resources.SWBAComposer
+                    out.println(" reloadFrame('" + urlToThis + "');");
+                }
             }
             out.println("</script>");
             //out.println();
@@ -153,6 +166,9 @@ public class SWBAResourceVersion extends GenericResource {
                     out.println("</tr>");
                     out.println("</thead>");
                     out.println("<tbody>");
+                    
+                    String functionName = useAlternateFnctns ? "submitUrlToFrame" : "submitUrl";
+                    
                     if (null != vio) {
                         versionExists = true;
                         Resource res = null;
@@ -195,7 +211,7 @@ public class SWBAResourceVersion extends GenericResource {
                             System.out.println("needAut:"+needAut);
                             System.out.println("vanum:"+vanum);
                             System.out.println("vlnum:"+vlnum);
-                            System.out.println("getFlowsToSendContent:"+pfmgr.getFlowsToSendContent(res).length);                                                        
+                            System.out.println("getFlowsToSendContent:"+pfmgr.getFlowsToSendContent(res).length);
                             
                             if (subject2flow){ 
                                 if(isInFlow ) //|| needAut
@@ -204,7 +220,7 @@ public class SWBAResourceVersion extends GenericResource {
                                 }
                                 else if(res.getPflowInstance()==null&&!isInFlow&&(!needAut||!res.isActive())&&!vio.isVersionAuthorized() && vlnum==vio.getVersionNumber() && vio.getVersionNumber()==vanum && vio.getVersionNumber()==1 && vlnum==vanum) // Version inicial
                                 {
-                                    out.println("<a href=\"" + urle + "\" onclick=\"submitUrl('" + urle + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/editar_1.gif\" border=\"0\" alt=\"editar version\" title=\"editar version\"></a>");
+                                    out.println("<a href=\"" + urle + "\" onclick=\"" + functionName + "('" + urle + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/editar_1.gif\" border=\"0\" alt=\"editar version\" title=\"editar version\"></a>");
                                 }
                                 else if(!vio.isVersionAuthorized() && vlnum>vio.getVersionNumber() && vio.getVersionNumber()!=vanum)
                                 {
@@ -224,18 +240,18 @@ public class SWBAResourceVersion extends GenericResource {
                                 }
                                 else if(!vio.isVersionAuthorized() && vlnum==vio.getVersionNumber() && vio.getVersionNumber()!=vanum)
                                 {
-                                    out.println("<a href=\"" + urle + "\" onclick=\"submitUrl('" + urle + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/editar_1.gif\" border=\"0\" alt=\"editar version\" title=\"editar version\"></a>");
+                                    out.println("<a href=\"" + urle + "\" onclick=\"" + functionName + "('" + urle + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/editar_1.gif\" border=\"0\" alt=\"editar version\" title=\"editar version\"></a>");
                                 }
                                 else if(vio.getVersionNumber()>vanum || vio.getVersionNumber()<vlnum || needAut )
                                 {
-                                    out.println("<a href=\"" + urle + "\" onclick=\"submitUrl('" + urle + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/editar_1.gif\" border=\"0\" alt=\"editar version\" title=\"editar version\"></a>");
+                                    out.println("<a href=\"" + urle + "\" onclick=\"" + functionName + "('" + urle + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/editar_1.gif\" border=\"0\" alt=\"editar version\" title=\"editar version\"></a>");
                                 }
                                 else
                                 {
                                     out.println("<img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/editar_1.gif\" border=\"0\" alt=\"version no autorizada, no editable.\" title=\"version no autorizada, no editable.\"></a>");
                                 }
                             } else {
-                                out.println("<a href=\"" + urle + "\" onclick=\"submitUrl('" + urle + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/editar_1.gif\" border=\"0\" alt=\"editar version\" title=\"editar version\"></a>");
+                                out.println("<a href=\"" + urle + "\" onclick=\"" + functionName + "('" + urle + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/editar_1.gif\" border=\"0\" alt=\"editar version\" title=\"editar version\"></a>");
                             }
 
                             SWBResourceURL urlnv = paramRequest.getRenderUrl();
@@ -244,7 +260,8 @@ public class SWBAResourceVersion extends GenericResource {
                             urlnv.setParameter("vnum", Integer.toString(vio.getVersionNumber()));
                             urlnv.setParameter("act", "newversion");
                             urlnv.setMode(SWBResourceURL.Mode_EDIT);
-                            out.println("<a href=\"#\" onclick=\"showDialog('" + urlnv + "','Nueva versión de Recurso'); hideDialog(); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/nueva_version.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("msgNewVersion") + "\"></a>");
+                            out.println("<a href=\"#\" onclick=\"showDialog" + postfix + "('" + urlnv + "','Nueva versión de Recurso'" + (useAlternateFnctns ? ", 'swbDialogVrsn'" : "") +
+                                    "); hideDialog" + postfix + "(" + (useAlternateFnctns ? "'swbDialogVrsn'" : "") + "); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/nueva_version.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("msgNewVersion") + "\"></a>");
 
                             if (subject2flow){
                                 if (vio.isVersionAuthorized()&&vio.getVersionNumber()!=vanum)
@@ -253,7 +270,7 @@ public class SWBAResourceVersion extends GenericResource {
                                     urlsa.setParameter("suri", id);
                                     urlsa.setParameter("sval", vio.getURI());
                                     urlsa.setAction("setactual");
-                                    out.println("<a href=\"#\" onclick=\"submitUrl('" + urlsa + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/cambio_version.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("logTplSetActual") + "\" title=\"" + paramRequest.getLocaleString("logTplSetActual") + "\"></a>");
+                                    out.println("<a href=\"#\" onclick=\"" + functionName + "('" + urlsa + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/cambio_version.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("logTplSetActual") + "\" title=\"" + paramRequest.getLocaleString("logTplSetActual") + "\"></a>");
                                 }
                                 else if (!vio.isVersionAuthorized())
                                 {
@@ -274,7 +291,7 @@ public class SWBAResourceVersion extends GenericResource {
                                 urlsa.setParameter("suri", id);
                                 urlsa.setParameter("sval", vio.getURI());
                                 urlsa.setAction("setactual");
-                                out.println("<a href=\"#\" onclick=\"submitUrl('" + urlsa + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/cambio_version.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("logTplSetActual") + "\"></a>");
+                                out.println("<a href=\"#\" onclick=\"" + functionName + "('" + urlsa + "',this); return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/icons/cambio_version.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("logTplSetActual") + "\"></a>");
                             }
 
                             // Llamado al doView del recurso.
@@ -290,7 +307,7 @@ public class SWBAResourceVersion extends GenericResource {
                             urlr.setParameter("suri", id);
                             urlr.setParameter("sval", vio.getURI());
                             urlr.setAction("remove");
-                            out.println("<a href=\"#\" onclick=\"if(confirm('" + paramRequest.getLocaleString("q_removeVersion") + "')){submitUrl('" + urlr + "',this);} return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/images/delete.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("msgRemoveVersion") + "\"></a>");
+                            out.println("<a href=\"#\" onclick=\"if(confirm('" + paramRequest.getLocaleString("q_removeVersion") + "')){" + functionName + "('" + urlr + "',this);} return false;\"><img src=\"" + SWBPlatform.getContextPath() + "/swbadmin/images/delete.gif\" border=\"0\" alt=\"" + paramRequest.getLocaleString("msgRemoveVersion") + "\"></a>");
                             if (vio.equals(via)) {
                                 out.println("( " + paramRequest.getLocaleString("msgActualVersion") + " ) ");
                             }
@@ -306,22 +323,25 @@ public class SWBAResourceVersion extends GenericResource {
                     out.println("</tbody>");
                     out.println("</table>");
                     out.println("</fieldset>");
-                    out.println("<fieldset>");
+                    //Para el nuevo recurso: org.semanticwb.portal.admin.resources.SWBAComposer:
+                    if (!useAlternateFnctns) {
+                        out.println("<fieldset>");
 
-                    if (!versionExists) {
-                        SWBResourceURL urlNew = paramRequest.getRenderUrl();
-                        urlNew.setParameter("suri", id);
-                        urlNew.setParameter("act", "newversion");
-                        urlNew.setMode(SWBResourceURL.Mode_EDIT);
-                        out.println("<button dojoType=\"dijit.form.Button\" onclick=\"showDialog('" + urlNew + "','Agregar nueva versión'); return false;\">" + paramRequest.getLocaleString("btn_addnew") + "</button>");
-                    } else {
-                        SWBResourceURL urlVR = paramRequest.getActionUrl();
-                        urlVR.setParameter("suri", id);
-                        urlVR.setAction("resetversion");
-                        urlVR.setMode(SWBResourceURL.Mode_VIEW);
-                        out.println("<button dojoType=\"dijit.form.Button\" onclick=\"if(confirm('" + paramRequest.getLocaleString("q_resetVersion") + "')){submitUrl('" + urlVR.toString() + "',this.domNode);} return false;\">" + paramRequest.getLocaleString("btn_versionreset") + "</button>");
+                        if (!versionExists) {
+                            SWBResourceURL urlNew = paramRequest.getRenderUrl();
+                            urlNew.setParameter("suri", id);
+                            urlNew.setParameter("act", "newversion");
+                            urlNew.setMode(SWBResourceURL.Mode_EDIT);
+                            out.println("<button dojoType=\"dijit.form.Button\" onclick=\"showDialog" + postfix + "('" + urlNew + "','Agregar nueva versión'" + (useAlternateFnctns ? ", 'swbDialogVrsn'" : "") + "); return false;\">" + paramRequest.getLocaleString("btn_addnew") + "</button>");
+                        } else {
+                            SWBResourceURL urlVR = paramRequest.getActionUrl();
+                            urlVR.setParameter("suri", id);
+                            urlVR.setAction("resetversion");
+                            urlVR.setMode(SWBResourceURL.Mode_VIEW);
+                            out.println("<button dojoType=\"dijit.form.Button\" onclick=\"if(confirm('" + paramRequest.getLocaleString("q_resetVersion") + "')){" + functionName + "('" + urlVR.toString() + "', " + (useAlternateFnctns ? "this" : "this.domNode") + ");} return false;\">" + paramRequest.getLocaleString("btn_versionreset") + "</button>");
+                        }
+                        out.println("</fieldset>");
                     }
-                    out.println("</fieldset>");
                     out.println("</div>");
                 }
             }
