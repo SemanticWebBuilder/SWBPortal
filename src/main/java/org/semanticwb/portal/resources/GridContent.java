@@ -151,16 +151,11 @@ public class GridContent extends GenericAdmResource {
         out.print("<div class=\"");
         String cssName = null != cell.getCssName() && !cell.getCssName().isEmpty() ? cell.getCssName() : styleClass;
         out.print(cssName);
-        out.print(" col-xs-");
-        out.print(cell.getColXs() > 0 ? cell.getColXs() : 3);
-        out.print(" col-sm-");
-        out.print(cell.getColSm() > 0 ? cell.getColSm() : 4);
-        out.print(" col-md-");
-        out.print(cell.getWidth() > 0 ? cell.getWidth() : "auto");
-        out.print(" col-lg-");
-        out.print(cell.getColLg() > 0 ? cell.getColLg() : 8);
-        out.print(" col-xl-");
-        out.print(cell.getColXl() > 0 ? cell.getColXl() : 12);
+        out.print(cell.getColXs() > 0 ? " col-" + cell.getColXs() : "");
+        out.print(cell.getColSm() > 0 ? " col-sm-" + cell.getColSm() : "");
+        out.print(cell.getWidth() > 0 ? " col-md-" + cell.getWidth() : " col-md-auto");
+        out.print(cell.getColLg() > 0 ? " col-lg-" + cell.getColLg() : "");
+        out.print(cell.getColXl() > 0 ? " col-xl-" + cell.getColXl() : "");
         if (offset > 0) {
             out.print(" col-md-offset-");
             out.print(offset);

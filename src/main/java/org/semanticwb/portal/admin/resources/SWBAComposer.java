@@ -288,6 +288,13 @@ public class SWBAComposer extends GenericAdmResource {
         }
     }
     
+    /**
+     * This method is used to find default template reference if exist. Otherwise create a new.
+     * @param WebPage selected web page 
+     * @param Template default template 
+     * @return TemplateRef default template reference
+     * @see TemplateRef, Template
+     */
     private TemplateRef getTemplateRef(WebPage wp, Template templateIndex) {
         Iterator<TemplateRef> it = wp.listTemplateRefs();
         while (it.hasNext()) {
