@@ -19,19 +19,15 @@
  * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
  * dirección electrónica:
  *  http://www.semanticwebbuilder.org.mx
-package org.semanticwb.portal.admin.resources;
-
-/**
- * SWBAComposer implements grid composer behaviour
- *
- * @author sergio.tellez
- * @version 1.0
- */
+*/
 package org.semanticwb.portal.admin.resources;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 
 import java.util.Map;
 import java.util.List;
@@ -59,9 +55,13 @@ import org.semanticwb.portal.api.SWBActionResponse;
 import org.semanticwb.portal.api.GenericAdmResource;
 import org.semanticwb.portal.api.SWBResourceException;
 
- /**
-  * @see GenericAdmResource 
-  */
+/**
+ * SWBAComposer implements grid composer behaviour
+ *
+ * @author sergio.tellez
+ * @version 1.0
+ * @see GenericAdmResource
+ */
 public class SWBAComposer extends GenericAdmResource {
     
     /** The log. */
@@ -246,6 +246,11 @@ public class SWBAComposer extends GenericAdmResource {
      */
     private WebPage getHost(HttpServletRequest request) {
         String suri = request.getParameter("suri");/**parameter suri is sended by swb admin tab (behaviour)*/
+        try {
+            suri = URLDecoder.decode(suri, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException ex) {
+            LOG.error(ex);
+        }
         if (null == suri) return null;
         int index = suri.lastIndexOf(":");
         String idpage = suri.substring(index + 1, suri.length());

@@ -1,8 +1,25 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+ * SemanticWebBuilder es una plataforma para el desarrollo de portales y aplicaciones de integración,
+ * colaboración y conocimiento, que gracias al uso de tecnología semántica puede generar contextos de
+ * información alrededor de algún tema de interés o bien integrar información y aplicaciones de diferentes
+ * fuentes, donde a la información se le asigna un significado, de forma que pueda ser interpretada y
+ * procesada por personas y/o sistemas, es una creación original del Fondo de Información y Documentación
+ * para la Industria INFOTEC, cuyo registro se encuentra actualmente en trámite.
+ *
+ * INFOTEC pone a su disposición la herramienta SemanticWebBuilder a través de su licenciamiento abierto al público (‘open source’),
+ * en virtud del cual, usted podrá usarlo en las mismas condiciones con que INFOTEC lo ha diseñado y puesto a su disposición;
+ * aprender de él; distribuirlo a terceros; acceder a su código fuente y modificarlo, y combinarlo o enlazarlo con otro software,
+ * todo ello de conformidad con los términos y condiciones de la LICENCIA ABIERTA AL PÚBLICO que otorga INFOTEC para la utilización
+ * del SemanticWebBuilder 4.0.
+ *
+ * INFOTEC no otorga garantía sobre SemanticWebBuilder, de ninguna especie y naturaleza, ni implícita ni explícita,
+ * siendo usted completamente responsable de la utilización que le dé y asumiendo la totalidad de los riesgos que puedan derivar
+ * de la misma.
+ *
+ * Si usted tiene cualquier duda o comentario sobre SemanticWebBuilder, INFOTEC pone a su disposición la siguiente
+ * dirección electrónica:
+ *  http://www.semanticwebbuilder.org.mx
+*/
 package org.semanticwb.portal.resources;
 
 import java.util.Iterator;
@@ -41,17 +58,20 @@ import org.semanticwb.model.SWBModel;
 import org.semanticwb.model.ModelProperty;
 import org.semanticwb.portal.util.GridUtils;
 import org.semanticwb.portal.api.SWBResource;
+import org.semanticwb.portal.api.GenericResource;
 import org.semanticwb.portal.api.SWBParamRequest;
-import org.semanticwb.portal.api.GenericAdmResource;
 import org.semanticwb.portal.api.SWBParamRequestImp;
 import org.semanticwb.portal.api.SWBResourceException;
 import org.semanticwb.portal.util.GridUtils.GridCell;
 
 /**
+ * GridContent implements grid composer view
  *
  * @author sergio.tellez
+ * @version 1.0
+ * @see GenericResource
  */
-public class GridContent extends GenericAdmResource {
+public class GridContent extends GenericResource {
     
     /** The log. */
     private static final Logger LOG = SWBUtils.getLogger(GridContent.class);
@@ -59,7 +79,7 @@ public class GridContent extends GenericAdmResource {
     
     @Override
     public void install(ResourceType recobj) throws SWBResourceException {
-        ResourceType menuNivel = ResourceType.ClassMgr.getResourceType("MenuNivel", recobj.getWebSite());
+        ResourceType menuNivel = ResourceType.ClassMgr.getResourceType("MenuNivel", recobj.getWebSite());/* Retrieve resources type from site for create composer sub types */
         ResourceType staticText = ResourceType.ClassMgr.getResourceType("StaticText", recobj.getWebSite());
         if (null != menuNivel) {
             ResourceSubType resSubType = ResourceSubType.ClassMgr.createResourceSubType("gmenu", recobj.getWebSite());
@@ -73,9 +93,9 @@ public class GridContent extends GenericAdmResource {
             resSubType.setDescription("Static text created by composer");
             resSubType.setType(staticText);
         }
-        String idTplGroup = createTemplateGroup("Behaviour", recobj.getWebSite()).getId();
+        String idTplGroup = createTemplateGroup("Behaviour", recobj.getWebSite()).getId(); /* create group and default template for grid viewer */
         Template gridTpl = createTemplate("grid", "Template for grid component", true, recobj.getWebSite(), idTplGroup);
-        recobj.getWebSite().addModelProperty(getModelProperty("idSubTypeST", "Identificador de subtipo de menu nivel", "gmenu", recobj.getWebSite()));
+        recobj.getWebSite().addModelProperty(getModelProperty("idSubTypeST", "Identificador de subtipo de menu nivel", "gmenu", recobj.getWebSite()));/* create site properties for default groupers and template */
         recobj.getWebSite().addModelProperty(getModelProperty("idGridTmpl", "Identificador de contenedor de grid", gridTpl.getId(), recobj.getWebSite()));
         recobj.getWebSite().addModelProperty(getModelProperty("idSubTypeMN", "Identificador de subtipo de texto estático", "gelements", recobj.getWebSite()));
     }
@@ -83,10 +103,9 @@ public class GridContent extends GenericAdmResource {
     @Override
     public void doView(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
         WebPage page = paramRequest.getWebPage();
-        Iterator<Resource> it = page.listResources();
+        Iterator<Resource> it = page.listResources();/* Get resources associated with the grid's host web page*/
         Map<String, Resource> resources = new LinkedHashMap<>();
-        //String path = "/work/models/"+page.getWebSite().getId()+"/jsp/composer/preview.jsp";
-        String jsongrid = page.getProperty("_elements");
+        String jsongrid = page.getProperty("_elements");/* Get json grid definition from page property*/
         while (it.hasNext()) {
             Resource res = (Resource)it.next();
             resources.put(res.getId(), res);
@@ -94,28 +113,16 @@ public class GridContent extends GenericAdmResource {
         JSONObject obj = new JSONObject(jsongrid);
         JSONArray jsonCells = obj.getJSONArray("elements");
         render(jsonCells, (short) 50, "cellClass", request, response, paramRequest);
-        /**if (null != jsongrid && !jsongrid.isEmpty()) {
-            List<Map<String, Object>> elements = jsonToRes(jsongrid);
-            for (Map<String, Object> map : elements) {
-                String resourceId = (String)map.get("resourceId");
-                if (null != resourceId && !resourceId.isEmpty()) {
-                    if (!resources.containsKey(resourceId)) {
-                        resources.remove(resourceId);
-                    }else {
-                        doPreview(request, response, paramRequest, resourceId);
-                    }
-                }
-            }
-        }
-        request.setAttribute("components", resources);
-        RequestDispatcher rd = request.getRequestDispatcher(path);
-        try {
-            rd.include(request, response);
-        } catch (ServletException se) {
-            LOG.error(se);
-        }**/
     }
     
+    /**
+     * This method is used to render resources view according grid definition.
+     * @param JSONArray json nodes grid definition.
+     * @param short heightUnit cell height
+     * @param String styleClass css class name
+     * @throws IOException 
+     * @see GridCell, GridUtils
+     */
     private void render(JSONArray nodes, short heightUnit, String styleClass, HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
         PrintWriter out = response.getWriter();
         if (heightUnit < 50) heightUnit = 50;
@@ -123,11 +130,9 @@ public class GridContent extends GenericAdmResource {
         String[] rows = new String[maxRow + 1];
         List<GridCell> cells = GridUtils.convert2Cells(nodes);
         GridUtils.renderRow(rows, maxRow);
-        //StringBuilder bsHtml = new StringBuilder(128);
         for (short h = 0; h <= maxRow; h++) {
             short row = h;
             List<GridCell> cellsInRow = cells.stream().filter(cell -> cell.getY() == row).collect(Collectors.toCollection(ArrayList::new));
-            //bsHtml.append(rows[h]);
             out.print(rows[h]);
             for (short k = 0; k < cellsInRow.size(); k++) {
                 short offset = 0;
@@ -137,15 +142,21 @@ public class GridContent extends GenericAdmResource {
                     GridCell leftCell = cellsInRow.get(k - 1);
                     offset = (short) (cellsInRow.get(k).getX() - (leftCell.getX() + leftCell.getWidth()));
                 }
-                //bsHtml.append(GridUtils.renderCell(cellsInRow.get(k), styleClass, offset, heightUnit));
                 renderCell(cellsInRow.get(k), styleClass, offset, heightUnit, request, response, paramRequest);
             }
-            //bsHtml.append("</div>");
             out.println("</div>");
         }
-        //return bsHtml.toString();
     }
     
+    /**
+     * This method is used to construct responsive cell according to grid definition.
+     * @param GridCell cell unit grid structure.
+     * @param String styleClass css class name.
+     * @param short offset cell compensation in grid struture.
+     * @param short heightUnit cell height
+     * @throws IOException 
+     * @see GridCell
+     */
     private void renderCell(GridCell cell, String styleClass, short offset, short heightUnit, HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest) throws IOException {
         PrintWriter out = response.getWriter();
         out.print("<div class=\"");
@@ -167,12 +178,15 @@ public class GridContent extends GenericAdmResource {
         out.print(" id=\"");
         out.print(cell.getId());
         out.print("\">");
-        //de acuerdo al tipo de recurso, crear el tag del recurso, como si estuviera en una plantilla
         doPreview(request, response, paramRequest, cell.getId());
         out.println("</div>");
-        //return div.toString();
     }
     
+    /**
+     * This method is used to render resources content.
+     * @param String id resource identifier
+     * @see SWBResource, SWBParamRequestImp
+     */
     private void doPreview(HttpServletRequest request, HttpServletResponse response, SWBParamRequest paramRequest, String id) {
         try {
             SWBResource res = SWBPortal.getResourceMgr().getResource(paramRequest.getWebPage().getWebSiteId(), id);
@@ -184,30 +198,29 @@ public class GridContent extends GenericAdmResource {
         }
     }
     
-    /**private List<Map<String, Object>> jsonToRes(String jsongrid) {
-        List<Map<String, Object>> elements = new ArrayList<>();
-        if (null == jsongrid || jsongrid.trim().isEmpty()) return elements;
-        JSONObject obj = new JSONObject(jsongrid);
-        JSONArray arr = obj.getJSONArray("elements");
-        for (int i = 0; i < arr.length(); i++) {
-            Map<String, Object> element = new LinkedHashMap<>();
-            element.put("x", arr.getJSONObject(i).getInt("x"));
-            element.put("y", arr.getJSONObject(i).getInt("y"));
-            element.put("width", arr.getJSONObject(i).getInt("width"));
-            element.put("height", arr.getJSONObject(i).getInt("height"));
-            element.put("resourceType", arr.getJSONObject(i).getString("resourceType"));
-            element.put("resourceId", arr.getJSONObject(i).getString("resourceId"));
-            elements.add(element);
-        }
-        return elements;
-    }**/
-    
+    /**
+     * This method is used to create group template.
+     * @param String title
+     * @param WebSite site 
+     * @return TemplateGroup New template group.
+     * @see TemplateGroup, WebSite
+     */
     private TemplateGroup createTemplateGroup(String title, WebSite site) {
         TemplateGroup grp = site.createTemplateGroup();
         grp.setTitle(title);
         return grp;
     }
     
+    /**
+     * Returns new template that contains default html for grid viewer.
+     * @param String title
+     * @param String description
+     * @param Boolean active 
+     * @param WebSite site 
+     * String templateGroup Identifier of group to template will belong.
+     * @return Template New web page template
+     * @see Template, WebSite
+     */
     private Template createTemplate(String title, String description, Boolean active, WebSite site, String templateGroup) {
         int vnum = 1;
         Template tmp = site.createTemplate();
@@ -236,6 +249,15 @@ public class GridContent extends GenericAdmResource {
         return tpl;
     }
     
+    /**
+     * Returns site property that can then be used by several resoures.
+     * @param String id Identifier for property.
+     * @param String title Name for property.
+     * @param String value Value for property.
+     * @param SWBModel model Site to will assign property.
+     * @return ModelProperty site property
+     * @see ModelProperty, SWBModel
+     */
     private ModelProperty getModelProperty(String id, String title, String value, SWBModel model) {
         ModelProperty mProperty = ModelProperty.ClassMgr.createModelProperty(id, model);
         mProperty.setTitle(title);
@@ -243,6 +265,10 @@ public class GridContent extends GenericAdmResource {
         return mProperty;
     }
     
+    /**
+     * Returns path libraries used in default html definition.
+     * @return String path libraries
+     */
     private static String gridPathLibs() {
         StringBuilder libs = new StringBuilder();
         libs.append("\n <link rel=\"stylesheet\" href=\"{webpath}/work/models/basico/css/bootstrap.min.css\">");
