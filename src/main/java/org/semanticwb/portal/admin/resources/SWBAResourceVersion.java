@@ -424,6 +424,8 @@ public class SWBAResourceVersion extends GenericResource {
         SWBResource swres = null;
         PrintWriter out = response.getWriter();
         SWBFormMgr fm = null;
+        //Para el nuevo recurso: org.semanticwb.portal.admin.resources.SWBAComposer:
+        boolean useAlternateFnctns = !paramRequest.getWebPage().getId().startsWith("bh_");
 
         if (action.equals("newversion")) {
 
@@ -467,7 +469,7 @@ public class SWBAResourceVersion extends GenericResource {
             urlb.setMode(SWBResourceURL.Mode_VIEW);
             urlb.setParameter("act", "");
             urlb.setParameter("suri", id);
-            out.println("<button dojoType=\"dijit.form.Button\" onclick=\"hideDialog(); return false;\">Cancelar</button>"); //submitUrl('" + urlb + "',this.domNode); hideDialog();
+            out.println("<button dojoType=\"dijit.form.Button\" onclick=\"hideDialog" + (useAlternateFnctns ? "ById('swbDialogVrsn')" : "()") + "; return false;\">Cancelar</button>"); //submitUrl('" + urlb + "',this.domNode); hideDialog();
             out.println("</filedset>");
             out.println("</form>");
             out.println("</div>");
