@@ -162,11 +162,11 @@ public class GridContent extends GenericResource {
         out.print("<div class=\"");
         String cssName = null != cell.getCssName() && !cell.getCssName().isEmpty() ? cell.getCssName() : styleClass;
         out.print(cssName);
-        out.print(cell.getColXs() > 0 ? " col-" + cell.getColXs() : "");
+        out.print(cell.getColXs() > 0 ? " col-xs-" + cell.getColXs() : "");
         out.print(cell.getColSm() > 0 ? " col-sm-" + cell.getColSm() : "");
         out.print(cell.getWidth() > 0 ? " col-md-" + cell.getWidth() : " col-md-auto");
         out.print(cell.getColLg() > 0 ? " col-lg-" + cell.getColLg() : "");
-        out.print(cell.getColXl() > 0 ? " col-xl-" + cell.getColXl() : "");
+        //out.print(cell.getColXl() > 0 ? " col-xl-" + cell.getColXl() : "");
         if (offset > 0) {
             out.print(" col-md-offset-");
             out.print(offset);
@@ -271,11 +271,11 @@ public class GridContent extends GenericResource {
      */
     private static String gridPathLibs() {
         StringBuilder libs = new StringBuilder();
-        libs.append("\n <link rel=\"stylesheet\" href=\"{webpath}/work/models/basico/css/bootstrap.min.css\">");
+        libs.append("\n <link rel=\"stylesheet\" href=\"{webpath}/swbadmin/css/bootstrap_3.3.7.min.css\">");
         libs.append("\n <link rel='stylesheet' type='text/css' media='all' href='{webpath}/swbadmin/css/swb.css' />");
         libs.append("\n <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script>");
         libs.append("\n <script src=\"https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/jquery-ui.js\"></script>");
-        libs.append("\n <script src=\"{webpath}/work/models/basico/js/bootstrap.min.js\"></script>");
+        libs.append("\n <script src=\"{webpath}/swbadmin/js/bootstrap_3.3.7.min.js\"></script>");
         
         libs.append("\n\n <link rel=\"stylesheet\" href=\"{webpath}/swbadmin/js/gridstack1.0.0/gridstack.css\" />");
         libs.append("\n <link rel=\"stylesheet\" href=\"{webpath}/swbadmin/js/gridstack1.0.0/gridstack-extra.css\" />");

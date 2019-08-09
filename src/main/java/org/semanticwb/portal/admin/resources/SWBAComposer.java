@@ -177,7 +177,7 @@ public class SWBAComposer extends GenericAdmResource {
                 element.put("colXs", !arr.getJSONObject(i).getString("colXs").isEmpty() ? arr.getJSONObject(i).getInt("colXs") : 0);
                 element.put("colSm", !arr.getJSONObject(i).getString("colSm").isEmpty() ? arr.getJSONObject(i).getInt("colSm") : 0);
                 element.put("colLg", !arr.getJSONObject(i).getString("colLg").isEmpty() ? arr.getJSONObject(i).getInt("colLg") : 0);
-                element.put("colXl", !arr.getJSONObject(i).getString("colXl").isEmpty() ? arr.getJSONObject(i).getInt("colXl") : 0);
+                //element.put("colXl", !arr.getJSONObject(i).getString("colXl").isEmpty() ? arr.getJSONObject(i).getInt("colXl") : 0);
                 element.put("title", arr.getJSONObject(i).getString("title"));
                 element.put("classname", arr.getJSONObject(i).getString("classname"));
                 elements.add(element);
