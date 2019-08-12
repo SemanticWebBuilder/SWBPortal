@@ -174,11 +174,11 @@ public class SWBAComposer extends GenericAdmResource {
                 element.put("height", arr.getJSONObject(i).getInt("height"));
                 element.put("resourceType", resourceType);
                 element.put("resourceId", resource.getId());
-                element.put("colXs", !arr.getJSONObject(i).getString("colXs").isEmpty() ? arr.getJSONObject(i).getInt("colXs") : 0);
-                element.put("colSm", !arr.getJSONObject(i).getString("colSm").isEmpty() ? arr.getJSONObject(i).getInt("colSm") : 0);
-                element.put("colLg", !arr.getJSONObject(i).getString("colLg").isEmpty() ? arr.getJSONObject(i).getInt("colLg") : 0);
+                element.put("colXs", arr.getJSONObject(i).has("colXs") && !arr.getJSONObject(i).getString("colXs").isEmpty() ? arr.getJSONObject(i).getInt("colXs") : 0);
+                element.put("colSm", arr.getJSONObject(i).has("colSm") && !arr.getJSONObject(i).getString("colSm").isEmpty() ? arr.getJSONObject(i).getInt("colSm") : 0);
+                element.put("colLg", arr.getJSONObject(i).has("colLg") && !arr.getJSONObject(i).getString("colLg").isEmpty() ? arr.getJSONObject(i).getInt("colLg") : 0);
                 //element.put("colXl", !arr.getJSONObject(i).getString("colXl").isEmpty() ? arr.getJSONObject(i).getInt("colXl") : 0);
-                element.put("title", arr.getJSONObject(i).getString("title"));
+                element.put("title", !arr.getJSONObject(i).getString("title").isEmpty() ? arr.getJSONObject(i).getString("title") : resource.getTitle());
                 element.put("classname", arr.getJSONObject(i).getString("classname"));
                 elements.add(element);
             }
@@ -246,6 +246,7 @@ public class SWBAComposer extends GenericAdmResource {
      */
     private WebPage getHost(HttpServletRequest request) {
         String suri = request.getParameter("suri");/**parameter suri is sended by swb admin tab (behaviour)*/
+        System.out.println("suri: " + suri);
         try {
             suri = URLDecoder.decode(suri, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException ex) {
