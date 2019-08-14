@@ -49,13 +49,14 @@ import org.semanticwb.model.TemplateGroup;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.semanticwb.SWBException;
 
 import org.semanticwb.model.Resource;
 import org.semanticwb.model.ResourceType;
-import org.semanticwb.model.ResourceSubType;
 
 import org.semanticwb.model.SWBModel;
 import org.semanticwb.model.ModelProperty;
+import org.semanticwb.model.ResourceSubType;
 import org.semanticwb.portal.util.GridUtils;
 import org.semanticwb.portal.api.SWBResource;
 import org.semanticwb.portal.api.GenericResource;
@@ -98,6 +99,17 @@ public class GridContent extends GenericResource {
         recobj.getWebSite().addModelProperty(getModelProperty("idSubTypeST", "Identificador de subtipo de menu nivel", "gmenu", recobj.getWebSite()));/* create site properties for default groupers and template */
         recobj.getWebSite().addModelProperty(getModelProperty("idGridTmpl", "Identificador de contenedor de grid", gridTpl.getId(), recobj.getWebSite()));
         recobj.getWebSite().addModelProperty(getModelProperty("idSubTypeMN", "Identificador de subtipo de texto estático", "gelements", recobj.getWebSite()));
+        Resource res = recobj.getWebSite().createResource();
+        res.setResourceType(recobj);/* create resource instance for grid viewer */
+        res.setIndex(2);
+        res.setTitle("composer");
+        res.setActive(Boolean.TRUE);
+        res.setDescription("Grid reader");
+        try {
+            res.updateAttributesToDB();
+        } catch (SWBException ex) {
+            LOG.error(ex);
+        }
     }
     
     @Override
@@ -271,11 +283,11 @@ public class GridContent extends GenericResource {
      */
     private static String gridPathLibs() {
         StringBuilder libs = new StringBuilder();
-        libs.append("\n <link rel=\"stylesheet\" href=\"{webpath}/swbadmin/css/bootstrap_3.3.7.min.css\">");
+        libs.append("\n <link rel=\"stylesheet\" href=\"{webpath}/swbadmin/css/bootstrap/bootstrap_3.3.7.min.css\">");
         libs.append("\n <link rel='stylesheet' type='text/css' media='all' href='{webpath}/swbadmin/css/swb.css' />");
         libs.append("\n <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\"></script>");
         libs.append("\n <script src=\"https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/jquery-ui.js\"></script>");
-        libs.append("\n <script src=\"{webpath}/swbadmin/js/bootstrap_3.3.7.min.js\"></script>");
+        libs.append("\n <script src=\"{webpath}/swbadmin/js/bootstrap/bootstrap_3.3.7.min.js\"></script>");
         
         libs.append("\n\n <link rel=\"stylesheet\" href=\"{webpath}/swbadmin/js/gridstack1.0.0/gridstack.css\" />");
         libs.append("\n <link rel=\"stylesheet\" href=\"{webpath}/swbadmin/js/gridstack1.0.0/gridstack-extra.css\" />");
