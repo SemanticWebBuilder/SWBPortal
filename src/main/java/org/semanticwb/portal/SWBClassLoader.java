@@ -26,11 +26,12 @@ package org.semanticwb.portal;
 import java.io.File;
 
 import java.net.URL;
+import java.security.AccessController;
+import jdk.internal.loader.Resource;
+import jdk.internal.loader.URLClassPath;
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPlatform;
 import org.semanticwb.SWBUtils;
-import sun.misc.Resource;
-import sun.misc.URLClassPath;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -104,7 +105,7 @@ public class SWBClassLoader extends ClassLoader
             File dir = new File(SWBUtils.getApplicationPath() + path);
             URL url = dir.toURL();
             URL urls[] = new URL[]{url};
-            ucp = new URLClassPath(urls);
+            ucp = new URLClassPath(urls, AccessController.getContext());
             //System.out.println(url);
         } catch (Exception e)
         {

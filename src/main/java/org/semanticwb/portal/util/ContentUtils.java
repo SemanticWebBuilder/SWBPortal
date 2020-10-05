@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
-import org.omg.PortableServer.REQUEST_PROCESSING_POLICY_ID;
 import org.semanticwb.Logger;
 import org.semanticwb.SWBPortal;
 import org.semanticwb.SWBUtils;

@@ -108,7 +108,7 @@ public class DocumentExtractorSrv implements HSSFListener {
      *
      * @param record The record that was found while reading.
      */
-    public void processRecord(Record record) {
+    public void processRecord(org.apache.poi.hssf.record.Record record) {
         switch (record.getSid()) {
             // the BOFRecord can represent either the beginning of a sheet or the workbook
             case BOFRecord.sid:
